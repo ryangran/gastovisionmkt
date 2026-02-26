@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { Calculator, ShoppingBag, Save, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Calculator, ShoppingBag, Save, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 // Tabela de comissões Shopee (baseada na imagem enviada)
@@ -1625,21 +1626,72 @@ const PlaceholderPlatform = ({ nome }: { nome: string }) => (
 
 // ─── Página Principal ──────────────────────────────────────────────────────────
 const Calculadora = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      const { data: purchases } = await supabase
+        .from("purchases")
+        .select("id")
+        .eq("status", "approved")
+        .limit(1);
+
+      if (!purchases || purchases.length === 0) {
+        toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
+        await supabase.auth.signOut();
+        navigate("/");
+        return;
+      }
+
+      setAuthorized(true);
+      setLoading(false);
+    };
+
+    checkAccess();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  if (loading && !authorized) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10">
-              <Calculator className="w-6 h-6 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10">
+                <Calculator className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Calculadora de Preços
+                </h1>
+                <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Calculadora de Preços
-              </h1>
-              <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
-            </div>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+              <LogOut className="w-4 h-4" />
+              Sair
+            </Button>
           </div>
         </div>
       </header>
