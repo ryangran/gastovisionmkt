@@ -15,7 +15,6 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
 
-    // Cakto envia dados do comprador no webhook
     const email = body?.customer?.email || body?.buyer?.email || body?.email;
     const transactionId = body?.transaction?.id || body?.transaction_id || body?.id || "unknown";
     const status = body?.transaction?.status || body?.status || "approved";
@@ -28,7 +27,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Only process approved transactions
     if (status !== "approved" && status !== "completed" && status !== "paid") {
       console.log(`Transaction ${transactionId} status: ${status} - skipping`);
       return new Response(
@@ -39,11 +37,43 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const defaultPassword = "Gasto123";
+
+    // Check if user already exists
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const userExists = existingUsers?.users?.find(
+      (u) => u.email?.toLowerCase() === normalizedEmail
+    );
+
+    if (!userExists) {
+      // Create auth user with default password
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: normalizedEmail,
+        password: defaultPassword,
+        email_confirm: true,
+      });
+
+      if (createError) {
+        console.error("Error creating user:", createError);
+        return new Response(
+          JSON.stringify({ error: "Failed to create user" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log(`User created for ${normalizedEmail}`);
+    } else {
+      console.log(`User already exists for ${normalizedEmail}`);
+    }
 
     // Insert purchase record
     const { error } = await supabase.from("purchases").insert({
-      user_email: email.toLowerCase().trim(),
+      user_email: normalizedEmail,
       transaction_id: transactionId,
       status: "approved",
     });
@@ -56,7 +86,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Purchase recorded for ${email}, transaction: ${transactionId}`);
+    console.log(`Purchase recorded for ${normalizedEmail}, transaction: ${transactionId}`);
 
     return new Response(
       JSON.stringify({ success: true }),
