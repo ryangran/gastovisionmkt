@@ -60,17 +60,8 @@ const LandingPage = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
         <div className="container mx-auto px-4 pt-16 pb-20 relative">
           {/* Nav */}
-          <nav className="flex flex-col items-center gap-4 mb-20 backdrop-blur-md bg-card/60 border border-border/50 rounded-2xl px-6 py-6 shadow-lg shadow-primary/5 sticky top-4 z-50">
+          <nav className="flex justify-center mb-20">
             <img src={logo} alt="Gasto Vision MKT" className="h-36" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-xl border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-semibold px-5"
-              onClick={() => navigate("/auth")}
-            >
-              Já sou aluno
-              <ArrowRight className="w-4 h-4" />
-            </Button>
           </nav>
 
           <div className="max-w-3xl mx-auto text-center">
