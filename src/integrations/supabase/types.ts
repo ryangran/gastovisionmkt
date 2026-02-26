@@ -427,7 +427,9 @@ export type Database = {
       purchases: {
         Row: {
           created_at: string
+          expires_at: string | null
           id: string
+          plan_type: string
           product_name: string | null
           purchased_at: string
           status: string
@@ -436,7 +438,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          expires_at?: string | null
           id?: string
+          plan_type?: string
           product_name?: string | null
           purchased_at?: string
           status?: string
@@ -445,7 +449,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          expires_at?: string | null
           id?: string
+          plan_type?: string
           product_name?: string | null
           purchased_at?: string
           status?: string

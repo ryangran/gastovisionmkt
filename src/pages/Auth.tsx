@@ -46,15 +46,43 @@ const Auth = () => {
 
       const { data: purchases } = await supabase
         .from("purchases")
-        .select("id")
+        .select("id, plan_type, expires_at")
         .eq("status", "approved")
-        .limit(1);
+        .order("created_at", { ascending: false });
 
       if (!purchases || purchases.length === 0) {
         await supabase.auth.signOut();
         toast.error("Você não possui acesso. Adquira o Gasto Vision primeiro.");
         navigate("/");
         return;
+      }
+
+      // Check if any purchase grants active access
+      const now = new Date();
+      const hasActiveAccess = purchases.some((p: any) => {
+        if (p.plan_type === "lifetime") return true;
+        if (p.expires_at && new Date(p.expires_at) > now) return true;
+        return false;
+      });
+
+      if (!hasActiveAccess) {
+        await supabase.auth.signOut();
+        toast.error("Seu plano expirou. Renove para continuar usando o Gasto Vision.");
+        navigate("/");
+        return;
+      }
+
+      // Check if monthly plan is expiring within 7 days
+      const expiringPurchase = purchases.find((p: any) => {
+        if (p.plan_type !== "monthly" || !p.expires_at) return false;
+        const expiresAt = new Date(p.expires_at);
+        const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return daysLeft > 0 && daysLeft <= 7;
+      });
+
+      if (expiringPurchase) {
+        const daysLeft = Math.ceil((new Date(expiringPurchase.expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        toast.warning(`Seu plano mensal expira em ${daysLeft} dia${daysLeft > 1 ? 's' : ''}. Renove para não perder o acesso!`, { duration: 8000 });
       }
 
       toast.success("Bem-vindo de volta!");
