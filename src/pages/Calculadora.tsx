@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, LogOut } from "lucide-react";
+import { Calculator, ShoppingBag, LogOut, Plus, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1010,7 +1011,7 @@ type MLProduto = {
   premiumPerc: number;
 };
 
-const ML_PRODUTOS: MLProduto[] = [
+const ML_PRODUTOS_DEFAULT: MLProduto[] = [
   { nome: "Brinquedos",            classicoPerc: 0.115, premiumPerc: 0.13 },
   { nome: "Protetores Eletrônicos", classicoPerc: 0.13,  premiumPerc: 0.18 },
   { nome: "Terra Lux",             classicoPerc: 0.115, premiumPerc: 0.165 },
@@ -1100,8 +1101,9 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
+  const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
   const [nomeProduto, setNomeProduto] = usePersistedState("calc_ml_nome", "");
-  const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", ML_PRODUTOS[0].nome);
+  const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", mlCategorias[0]?.nome || "");
   const [tipoAnuncio, setTipoAnuncio] = usePersistedState<"classico" | "premium">("calc_ml_tipo", "premium");
   const [precoVenda, setPrecoVenda]   = usePersistedState("calc_ml_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_ml_custo", "");
@@ -1111,14 +1113,20 @@ const MercadoLivreCalculadora = () => {
   const [usarFrete, setUsarFrete]     = usePersistedState("calc_ml_usarFrete", false);
   const [peso, setPeso]               = usePersistedState("calc_ml_peso", "");
 
-  const produto      = ML_PRODUTOS.find((p) => p.nome === produtoNome)!;
+  // Dialog para adicionar categoria
+  const [showAddCategoria, setShowAddCategoria] = useState(false);
+  const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
+  const [novaCategoriaClassico, setNovaCategoriaClassico] = useState("");
+  const [novaCategoriaPremium, setNovaCategoriaPremium] = useState("");
+
+  const produto      = mlCategorias.find((p) => p.nome === produtoNome) || mlCategorias[0];
   const preco        = parseNum(precoVenda);
   const custo        = parseNum(custoProduto);
   const impostoPerc  = parseNum(imposto);
   const marketingPerc = parseNum(marketing);
   const pesoNum      = parseNum(peso);
 
-  const comissaoPerc   = tipoAnuncio === "classico" ? produto.classicoPerc : produto.premiumPerc;
+  const comissaoPerc   = tipoAnuncio === "classico" ? produto?.classicoPerc || 0 : produto?.premiumPerc || 0;
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
@@ -1130,8 +1138,82 @@ const MercadoLivreCalculadora = () => {
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
 
+  const handleAddCategoria = () => {
+    const nome = novaCategoriaNome.trim();
+    const classico = parseNum(novaCategoriaClassico) / 100;
+    const premium = parseNum(novaCategoriaPremium) / 100;
+    if (!nome || classico <= 0 || premium <= 0) {
+      toast.error("Preencha todos os campos corretamente");
+      return;
+    }
+    if (mlCategorias.some(c => c.nome.toLowerCase() === nome.toLowerCase())) {
+      toast.error("Categoria já existe");
+      return;
+    }
+    const nova: MLProduto = { nome, classicoPerc: classico, premiumPerc: premium };
+    setMlCategorias([...mlCategorias, nova]);
+    setProdutoNome(nome);
+    setNovaCategoriaNome("");
+    setNovaCategoriaClassico("");
+    setNovaCategoriaPremium("");
+    setShowAddCategoria(false);
+    toast.success("Categoria adicionada!");
+  };
+
+  const handleDeleteCategoria = (nome: string) => {
+    if (mlCategorias.length <= 1) {
+      toast.error("Deve haver pelo menos uma categoria");
+      return;
+    }
+    const novas = mlCategorias.filter(c => c.nome !== nome);
+    setMlCategorias(novas);
+    if (produtoNome === nome) setProdutoNome(novas[0].nome);
+    toast.success("Categoria removida");
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Dialog adicionar categoria */}
+      <Dialog open={showAddCategoria} onOpenChange={setShowAddCategoria}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Adicionar Categoria</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Nome da Categoria</Label>
+              <Input
+                placeholder="Ex: Eletrônicos"
+                value={novaCategoriaNome}
+                onChange={(e) => setNovaCategoriaNome(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Comissão Clássico (%)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 11.5"
+                value={novaCategoriaClassico}
+                onChange={(e) => setNovaCategoriaClassico(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Comissão Premium (%)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 16.5"
+                value={novaCategoriaPremium}
+                onChange={(e) => setNovaCategoriaPremium(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCategoria(false)}>Cancelar</Button>
+            <Button onClick={handleAddCategoria}>Adicionar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Entradas */}
       <Card className="border-border bg-card">
         <CardHeader>
@@ -1154,13 +1236,24 @@ const MercadoLivreCalculadora = () => {
 
           {/* Categoria ML */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">Produto</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-foreground font-medium">Categoria</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => setShowAddCategoria(true)}
+              >
+                <Plus className="w-3 h-3" />
+                Adicionar Categoria
+              </Button>
+            </div>
             <select
               value={produtoNome}
               onChange={(e) => setProdutoNome(e.target.value)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              {ML_PRODUTOS.map((p) => (
+              {mlCategorias.map((p) => (
                 <option key={p.nome} value={p.nome}>{p.nome}</option>
               ))}
             </select>
@@ -1413,20 +1506,21 @@ const MercadoLivreCalculadora = () => {
         <Card className="border-border bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Comissões por Produto
+              Comissões por Categoria
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-2 text-muted-foreground font-medium">Produto</th>
+                  <th className="text-left px-4 py-2 text-muted-foreground font-medium">Categoria</th>
                   <th className="text-center px-4 py-2 text-muted-foreground font-medium">Clássico</th>
                   <th className="text-center px-4 py-2 text-muted-foreground font-medium">Premium</th>
+                  <th className="text-center px-4 py-2 text-muted-foreground font-medium w-10"></th>
                 </tr>
               </thead>
               <tbody>
-                {ML_PRODUTOS.map((p) => {
+                {mlCategorias.map((p) => {
                   const ativa = p.nome === produtoNome;
                   return (
                     <tr
@@ -1442,6 +1536,15 @@ const MercadoLivreCalculadora = () => {
                       </td>
                       <td className={`px-4 py-2.5 text-center font-mono ${ativa && tipoAnuncio === "premium" ? "text-primary font-semibold" : "text-foreground"}`}>
                         {(p.premiumPerc * 100).toFixed(1)}%
+                      </td>
+                      <td className="px-2 py-2.5 text-center">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteCategoria(p.nome); }}
+                          className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                          title="Remover categoria"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   );
