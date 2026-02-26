@@ -62,7 +62,7 @@ const LandingPage = () => {
           {/* Nav */}
           <nav className="flex items-center justify-between mb-20">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Gasto Vision MKT" className="h-16" />
+              <img src={logo} alt="Gasto Vision MKT" className="h-24" />
             </div>
             <Button
               variant="outline"
