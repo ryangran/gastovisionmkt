@@ -15,7 +15,8 @@ import {
   Star,
 } from "lucide-react";
 
-const CHECKOUT_URL = "https://pay.cakto.com.br/SEU_PRODUTO"; // Substituir pela URL real do Cakto
+const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/SEU_PRODUTO_MENSAL"; // Substituir pela URL real
+const CHECKOUT_URL_LIFETIME = "https://pay.cakto.com.br/SEU_PRODUTO_VITALICIO"; // Substituir pela URL real
 
 const features = [
   {
@@ -103,7 +104,11 @@ const LandingPage = () => {
                 <Button
                   size="lg"
                   className="text-lg px-8 py-6 gap-2 shadow-lg shadow-primary/20"
-                  onClick={() => window.open(CHECKOUT_URL, "_blank")}
+                  onClick={() =>
+                    document
+                      .getElementById("pricing")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
                 >
                   Quero Acessar Agora
                   <ArrowRight className="w-5 h-5" />
@@ -235,46 +240,79 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20">
+      {/* Pricing */}
+      <section id="pricing" className="py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto text-center p-10 rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 border border-primary/20">
-            <BarChart3 className="w-12 h-12 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Comece a precificar com inteligência
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Escolha seu plano
             </h2>
-            <p className="text-muted-foreground mb-8">
-              Acesso vitalício a todas as calculadoras. Atualizações incluídas.
-            </p>
-
-            <div className="mb-8">
-              <div className="text-sm text-muted-foreground line-through">
-                De R$197,00
-              </div>
-              <div className="text-5xl font-extrabold text-foreground">
-                R$<span className="text-primary">97</span>
-                <span className="text-lg font-normal text-muted-foreground">
-                  ,00
-                </span>
-              </div>
-              <div className="text-sm text-primary font-medium mt-1">
-                Pagamento único • Acesso vitalício
-              </div>
-            </div>
-
-            <Button
-              size="lg"
-              className="text-lg px-10 py-6 gap-2 shadow-lg shadow-primary/20"
-              onClick={() => window.open(CHECKOUT_URL, "_blank")}
-            >
-              Garantir Meu Acesso
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-
-            <p className="text-xs text-muted-foreground mt-4">
-              Pagamento seguro via Cakto • Acesso imediato após confirmação
+            <p className="text-muted-foreground">
+              Comece a precificar com inteligência hoje mesmo
             </p>
           </div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Mensal */}
+            <div className="p-8 rounded-3xl border bg-card text-center">
+              <h3 className="text-lg font-semibold text-foreground mb-1">Mensal</h3>
+              <p className="text-sm text-muted-foreground mb-6">Cancele quando quiser</p>
+              <div className="mb-6">
+                <div className="text-4xl font-extrabold text-foreground">
+                  R$<span className="text-primary">19</span>
+                  <span className="text-lg font-normal text-muted-foreground">,90/mês</span>
+                </div>
+              </div>
+              <ul className="text-sm text-muted-foreground space-y-3 mb-8 text-left">
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Todas as calculadoras</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Atualizações inclusas</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Suporte por email</li>
+              </ul>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full text-base py-6"
+                onClick={() => window.open(CHECKOUT_URL_MONTHLY, "_blank")}
+              >
+                Assinar Mensal
+              </Button>
+            </div>
+
+            {/* Vitalício - Destaque */}
+            <div className="relative p-8 rounded-3xl border-2 border-primary bg-gradient-to-br from-primary/5 via-card to-accent/5 text-center shadow-lg shadow-primary/10">
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground border-0 px-4 py-1">
+                ⭐ Mais Popular
+              </Badge>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Vitalício</h3>
+              <p className="text-sm text-muted-foreground mb-6">Pague uma vez, use para sempre</p>
+              <div className="mb-6">
+                <div className="text-sm text-muted-foreground line-through">De R$197,00</div>
+                <div className="text-5xl font-extrabold text-foreground">
+                  R$<span className="text-primary">97</span>
+                  <span className="text-lg font-normal text-muted-foreground">,00</span>
+                </div>
+                <div className="text-sm text-primary font-medium mt-1">Pagamento único</div>
+              </div>
+              <ul className="text-sm text-muted-foreground space-y-3 mb-8 text-left">
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Todas as calculadoras</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Atualizações vitalícias</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Suporte prioritário</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Economia de R$141/ano</li>
+              </ul>
+              <Button
+                size="lg"
+                className="w-full text-base py-6 gap-2 shadow-lg shadow-primary/20"
+                onClick={() => window.open(CHECKOUT_URL_LIFETIME, "_blank")}
+              >
+                Garantir Acesso Vitalício
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center mt-6">
+            Pagamento seguro via Cakto • Acesso imediato após confirmação
+          </p>
         </div>
       </section>
 
