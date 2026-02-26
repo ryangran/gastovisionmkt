@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import {
-  Eye,
   ShoppingCart,
   TrendingUp,
   DollarSign,
@@ -62,10 +62,7 @@ const LandingPage = () => {
           {/* Nav */}
           <nav className="flex items-center justify-between mb-20">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-primary/10">
-                <Eye className="w-6 h-6 text-primary" />
-              </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Gasto Vision</span>
+              <img src={logo} alt="Gasto Vision MKT" className="h-10" />
             </div>
             <Button
               variant="outline"
