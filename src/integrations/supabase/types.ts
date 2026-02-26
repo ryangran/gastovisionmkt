@@ -424,6 +424,36 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          created_at: string
+          id: string
+          product_name: string | null
+          purchased_at: string
+          status: string
+          transaction_id: string | null
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_name?: string | null
+          purchased_at?: string
+          status?: string
+          transaction_id?: string | null
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_name?: string | null
+          purchased_at?: string
+          status?: string
+          transaction_id?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
