@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Calculator, ShoppingBag, Save, Loader2 } from "lucide-react";
+import { Calculator, ShoppingBag, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1626,30 +1625,20 @@ const PlaceholderPlatform = ({ nome }: { nome: string }) => (
 
 // ─── Página Principal ──────────────────────────────────────────────────────────
 const Calculadora = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Calculator className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Calculadora de Preços</h1>
-                <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
-              </div>
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <Calculator className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Calculadora de Preços
+              </h1>
+              <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
             </div>
           </div>
         </div>
