@@ -1506,20 +1506,21 @@ const MercadoLivreCalculadora = () => {
         <Card className="border-border bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Comissões por Produto
+              Comissões por Categoria
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-2 text-muted-foreground font-medium">Produto</th>
+                  <th className="text-left px-4 py-2 text-muted-foreground font-medium">Categoria</th>
                   <th className="text-center px-4 py-2 text-muted-foreground font-medium">Clássico</th>
                   <th className="text-center px-4 py-2 text-muted-foreground font-medium">Premium</th>
+                  <th className="text-center px-4 py-2 text-muted-foreground font-medium w-10"></th>
                 </tr>
               </thead>
               <tbody>
-                {ML_PRODUTOS.map((p) => {
+                {mlCategorias.map((p) => {
                   const ativa = p.nome === produtoNome;
                   return (
                     <tr
@@ -1535,6 +1536,15 @@ const MercadoLivreCalculadora = () => {
                       </td>
                       <td className={`px-4 py-2.5 text-center font-mono ${ativa && tipoAnuncio === "premium" ? "text-primary font-semibold" : "text-foreground"}`}>
                         {(p.premiumPerc * 100).toFixed(1)}%
+                      </td>
+                      <td className="px-2 py-2.5 text-center">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteCategoria(p.nome); }}
+                          className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                          title="Remover categoria"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   );
