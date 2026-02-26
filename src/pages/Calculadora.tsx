@@ -1577,10 +1577,13 @@ const Calculadora = () => {
                 <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <UserProfileDialog />
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
