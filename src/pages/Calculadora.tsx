@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, Save, Loader2, LogOut } from "lucide-react";
+import { Calculator, ShoppingBag, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,80 +44,6 @@ function formatPercent(value: number): string {
 function parseNum(val: string): number {
   return parseFloat(val.replace(",", ".")) || 0;
 }
-
-// Componente de seleção de loja (BMS/MS) + salvar
-const SaveButton = ({ 
-  nomeProduto, preco, custo, margemLucro, lucro, platform, needsLoja = false 
-}: { 
-  nomeProduto: string; preco: number; custo: number; margemLucro: number; lucro: number; platform: string; needsLoja?: boolean;
-}) => {
-  const [saving, setSaving] = useState(false);
-  const [loja, setLoja] = useState<"BMS" | "MS">("BMS");
-
-  const canSave = nomeProduto.trim() && preco > 0 && custo > 0;
-
-  const handleSave = async () => {
-    if (!canSave) return;
-    setSaving(true);
-    try {
-      const platformName = needsLoja ? `${platform} ${loja}` : platform;
-      const { error } = await (supabase as any).from("platform_costs").insert({
-        product_name: nomeProduto.trim(),
-        platform: platformName,
-        cost: custo,
-        sale_price: preco,
-        profit_margin_percent: parseFloat(margemLucro.toFixed(2)),
-        current_margin_value: parseFloat(lucro.toFixed(2)),
-      });
-      if (error) throw error;
-      toast.success(`Produto salvo em Custos (${needsLoja ? platformName : platform})!`);
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
-      toast.error("Erro ao salvar nos custos");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (!canSave) return null;
-
-  return (
-    <Card className="border-border bg-card">
-      <CardContent className="pt-6">
-        <div className="flex items-center gap-3">
-          {needsLoja && (
-            <div className="flex gap-1">
-              <button
-                onClick={() => setLoja("BMS")}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  loja === "BMS"
-                    ? "bg-primary/10 border border-primary text-primary"
-                    : "bg-muted/30 border border-input text-muted-foreground hover:bg-muted/50"
-                }`}
-              >
-                BMS
-              </button>
-              <button
-                onClick={() => setLoja("MS")}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  loja === "MS"
-                    ? "bg-primary/10 border border-primary text-primary"
-                    : "bg-muted/30 border border-input text-muted-foreground hover:bg-muted/50"
-                }`}
-              >
-                MS
-              </button>
-            </div>
-          )}
-          <Button onClick={handleSave} disabled={saving} className="flex-1 gap-2">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Salvar nos Custos
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
 
 // ─── Calculadora Shopee ────────────────────────────────────────────────────────
 const ShopeeCalculadora = () => {
@@ -378,16 +304,6 @@ const ShopeeCalculadora = () => {
             </CardContent>
           </Card>
         )}
-
-        <SaveButton
-          nomeProduto={nomeProduto}
-          preco={preco}
-          custo={custo}
-          margemLucro={margemLucro}
-          lucro={lucro}
-          platform="Shopee"
-          needsLoja
-        />
 
         {preco === 0 && (
           <Card className="border-dashed border-border bg-card/50">
@@ -766,15 +682,6 @@ const AmazonCalculadora = () => {
           </Card>
         )}
 
-        <SaveButton
-          nomeProduto={nomeProduto}
-          preco={preco}
-          custo={custo}
-          margemLucro={margemLucro}
-          lucro={lucro}
-          platform="Amazon BMS"
-        />
-
         {preco === 0 && (
           <Card className="border-dashed border-border bg-card/50">
             <CardContent className="text-center py-16">
@@ -1058,15 +965,6 @@ const MagaluCalculadora = () => {
             </CardContent>
           </Card>
         )}
-
-        <SaveButton
-          nomeProduto={nomeProduto}
-          preco={preco}
-          custo={custo}
-          margemLucro={margemLucro}
-          lucro={lucro}
-          platform="Magalu BMS"
-        />
 
         {preco === 0 && (
           <Card className="border-dashed border-border bg-card/50">
@@ -1500,16 +1398,6 @@ const MercadoLivreCalculadora = () => {
             </CardContent>
           </Card>
         )}
-
-        <SaveButton
-          nomeProduto={nomeProduto}
-          preco={preco}
-          custo={custo}
-          margemLucro={margemLucro}
-          lucro={lucro}
-          platform="Mercado Livre"
-          needsLoja
-        />
 
         {preco === 0 && (
           <Card className="border-dashed border-border bg-card/50">
