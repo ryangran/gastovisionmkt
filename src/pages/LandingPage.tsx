@@ -47,7 +47,7 @@ const benefits = [
   "Inclua impostos e custos de marketing",
   "Tabelas completas de comissão",
   "Frete e taxas fixas inclusos",
-  "Salve produtos para análise futura",
+  "Compare preços entre plataformas",
 ];
 
 const LandingPage = () => {
