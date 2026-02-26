@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
 import { Calculator, ShoppingBag, LogOut } from "lucide-react";
+import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1528,12 +1529,26 @@ const Calculadora = () => {
 
       const { data: purchases } = await supabase
         .from("purchases")
-        .select("id")
+        .select("id, plan_type, expires_at")
         .eq("status", "approved")
-        .limit(1);
+        .order("created_at", { ascending: false });
 
       if (!purchases || purchases.length === 0) {
         toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
+        await supabase.auth.signOut();
+        navigate("/");
+        return;
+      }
+
+      const now = new Date();
+      const hasActive = purchases.some((p: any) => {
+        if (p.plan_type === "lifetime") return true;
+        if (p.expires_at && new Date(p.expires_at) > now) return true;
+        return false;
+      });
+
+      if (!hasActive) {
+        toast.error("Seu plano expirou. Renove para continuar usando.");
         await supabase.auth.signOut();
         navigate("/");
         return;
@@ -1576,10 +1591,13 @@ const Calculadora = () => {
                 <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <UserProfileDialog />
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
