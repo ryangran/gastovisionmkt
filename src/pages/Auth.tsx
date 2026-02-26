@@ -12,6 +12,7 @@ import {
   Mail,
   Lock,
   Eye,
+  EyeOff,
   CheckCircle2,
 } from "lucide-react";
 
