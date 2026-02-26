@@ -7,6 +7,31 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Cakto checkout URLs to identify plan type
+const MONTHLY_CHECKOUT_IDENTIFIERS = ["32i2hyh"];
+const LIFETIME_CHECKOUT_IDENTIFIERS = ["6m7kaiz"];
+
+function identifyPlanType(body: any): "monthly" | "lifetime" {
+  // Check product/offer info from Cakto payload
+  const checkoutUrl = body?.checkout_url || body?.checkout?.url || body?.product?.checkout_url || "";
+  const productName = (body?.product?.name || body?.product_name || "").toLowerCase();
+  const offerId = body?.offer?.id || body?.offer_id || "";
+  const transactionId = body?.transaction?.id || body?.transaction_id || body?.id || "";
+
+  // Check if any lifetime identifier matches
+  const allText = `${checkoutUrl} ${productName} ${offerId} ${transactionId}`.toLowerCase();
+  
+  if (LIFETIME_CHECKOUT_IDENTIFIERS.some(id => allText.includes(id))) {
+    return "lifetime";
+  }
+  
+  if (productName.includes("vitalício") || productName.includes("vitalicio") || productName.includes("lifetime")) {
+    return "lifetime";
+  }
+
+  return "monthly";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,6 +39,8 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
+
+    console.log("Webhook payload:", JSON.stringify(body));
 
     const email = body?.customer?.email || body?.buyer?.email || body?.email;
     const transactionId = body?.transaction?.id || body?.transaction_id || body?.id || "unknown";
@@ -35,6 +62,9 @@ Deno.serve(async (req) => {
       );
     }
 
+    const planType = identifyPlanType(body);
+    console.log(`Identified plan type: ${planType}`);
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -51,7 +81,6 @@ Deno.serve(async (req) => {
     );
 
     if (!userExists) {
-      // Create auth user with default password
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: normalizedEmail,
         password: defaultPassword,
@@ -71,11 +100,18 @@ Deno.serve(async (req) => {
       console.log(`User already exists for ${normalizedEmail}`);
     }
 
+    // Calculate expires_at for monthly plans (30 days from now)
+    const expiresAt = planType === "monthly" 
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      : null;
+
     // Insert purchase record
     const { error } = await supabase.from("purchases").insert({
       user_email: normalizedEmail,
       transaction_id: transactionId,
       status: "approved",
+      plan_type: planType,
+      expires_at: expiresAt,
     });
 
     if (error) {
@@ -86,10 +122,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Purchase recorded for ${normalizedEmail}, transaction: ${transactionId}`);
+    console.log(`Purchase recorded for ${normalizedEmail}, plan: ${planType}, transaction: ${transactionId}, expires: ${expiresAt || 'never'}`);
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, plan_type: planType }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
