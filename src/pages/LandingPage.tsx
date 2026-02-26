@@ -13,6 +13,9 @@ import {
   Shield,
   BarChart3,
   Star,
+  Quote,
+  Users,
+  Clock,
 } from "lucide-react";
 
 const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/SEU_PRODUTO_MENSAL"; // Substituir pela URL real
@@ -39,6 +42,40 @@ const features = [
     title: "Sempre Atualizado",
     desc: "Tabelas de comissão atualizadas conforme as plataformas",
   },
+];
+
+const testimonials = [
+  {
+    name: "Carlos M.",
+    role: "Seller Shopee & ML",
+    text: "Antes eu precificava no achismo e perdia dinheiro sem saber. Com o Gasto Vision descobri que 3 dos meus produtos estavam dando prejuízo. Ajustei e meu lucro subiu 40%.",
+    rating: 5,
+  },
+  {
+    name: "Ana Paula S.",
+    role: "Lojista Amazon",
+    text: "Ferramenta indispensável! Economizei horas de planilha por semana. Agora sei exatamente minha margem antes de anunciar qualquer produto.",
+    rating: 5,
+  },
+  {
+    name: "Roberto F.",
+    role: "Vendedor Multi-plataforma",
+    text: "Testei várias calculadoras e essa é disparada a melhor. Atualiza as comissões automaticamente e cobre todas as plataformas que eu uso.",
+    rating: 5,
+  },
+  {
+    name: "Juliana C.",
+    role: "Seller Magalu & Shopee",
+    text: "Comecei a usar e no primeiro mês já recuperei o investimento. Descobri que estava cobrando muito barato na Shopee. Recomendo demais!",
+    rating: 5,
+  },
+];
+
+const stats = [
+  { value: "500+", label: "Sellers ativos", icon: Users },
+  { value: "R$2M+", label: "Em vendas calculadas", icon: DollarSign },
+  { value: "4.9/5", label: "Avaliação média", icon: Star },
+  { value: "2min", label: "Para precificar", icon: Clock },
 ];
 
 const benefits = [
@@ -115,27 +152,24 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Social proof */}
-      <section className="border-y bg-card/50 py-8">
+      {/* Stats */}
+      <section className="border-y bg-card/50 py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-4 h-4 text-primary fill-primary"
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-medium">4.9/5 avaliação</span>
-            </div>
-            <div className="text-sm">
-              <span className="font-bold text-foreground">500+</span> sellers usando
-            </div>
-            <div className="text-sm">
-              <span className="font-bold text-foreground">R$2M+</span> em vendas calculadas
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="flex flex-col items-center gap-2 p-6 rounded-2xl bg-card border"
+              >
+                <stat.icon className="w-6 h-6 text-primary mb-1" />
+                <span className="text-3xl md:text-4xl font-extrabold text-foreground">{stat.value}</span>
+                <span className="text-sm text-muted-foreground font-medium">{stat.label}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -196,6 +230,50 @@ const LandingPage = () => {
                 </div>
               )
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              O que nossos <span className="text-primary">sellers dizem</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Veja como o Gasto Vision está transformando o negócio de centenas de vendedores
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {testimonials.map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="relative p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow"
+              >
+                <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
+                <div className="flex gap-1 mb-3">
+                  {[...Array(t.rating)].map((_, j) => (
+                    <Star key={j} className="w-4 h-4 text-primary fill-primary" />
+                  ))}
+                </div>
+                <p className="text-foreground mb-4 text-sm leading-relaxed">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary font-bold text-sm">{t.name.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <p className="text-foreground font-semibold text-sm">{t.name}</p>
+                    <p className="text-muted-foreground text-xs">{t.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
