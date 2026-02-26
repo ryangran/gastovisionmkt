@@ -1529,12 +1529,26 @@ const Calculadora = () => {
 
       const { data: purchases } = await supabase
         .from("purchases")
-        .select("id")
+        .select("id, plan_type, expires_at")
         .eq("status", "approved")
-        .limit(1);
+        .order("created_at", { ascending: false });
 
       if (!purchases || purchases.length === 0) {
         toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
+        await supabase.auth.signOut();
+        navigate("/");
+        return;
+      }
+
+      const now = new Date();
+      const hasActive = purchases.some((p: any) => {
+        if (p.plan_type === "lifetime") return true;
+        if (p.expires_at && new Date(p.expires_at) > now) return true;
+        return false;
+      });
+
+      if (!hasActive) {
+        toast.error("Seu plano expirou. Renove para continuar usando.");
         await supabase.auth.signOut();
         navigate("/");
         return;
