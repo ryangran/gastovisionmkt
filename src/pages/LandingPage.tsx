@@ -105,13 +105,9 @@ const LandingPage = () => {
                   variant="outline"
                   size="lg"
                   className="text-lg px-8 py-6"
-                  onClick={() =>
-                    document
-                      .getElementById("features")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
+                  onClick={() => navigate("/auth")}
                 >
-                  Saiba Mais
+                  Já sou aluno
                 </Button>
               </div>
             </motion.div>
