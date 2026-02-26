@@ -1571,7 +1571,7 @@ const Calculadora = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Calculadora de Preços
+                  Gasto Vision
                 </h1>
                 <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
               </div>

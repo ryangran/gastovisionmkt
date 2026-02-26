@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import {
-  Calculator,
+  Eye,
   ShoppingCart,
   TrendingUp,
   DollarSign,
@@ -63,9 +63,9 @@ const LandingPage = () => {
           <nav className="flex items-center justify-between mb-20">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-primary/10">
-                <Calculator className="w-6 h-6 text-primary" />
+                <Eye className="w-6 h-6 text-primary" />
               </div>
-              <span className="text-lg font-bold text-foreground">CalcPreço</span>
+              <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Gasto Vision</span>
             </div>
             <Button
               variant="outline"
@@ -319,7 +319,7 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} CalcPreço. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Gasto Vision. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>
