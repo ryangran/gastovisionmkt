@@ -18,8 +18,8 @@ import {
   Clock,
 } from "lucide-react";
 
-const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/SEU_PRODUTO_MENSAL"; // Substituir pela URL real
-const CHECKOUT_URL_LIFETIME = "https://pay.cakto.com.br/SEU_PRODUTO_VITALICIO"; // Substituir pela URL real
+const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/jjr5vqg";
+const CHECKOUT_URL_LIFETIME = "https://pay.cakto.com.br/6m7kaiz_785267";
 
 const features = [
   {
