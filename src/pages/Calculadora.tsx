@@ -1101,8 +1101,9 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
+  const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
   const [nomeProduto, setNomeProduto] = usePersistedState("calc_ml_nome", "");
-  const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", ML_PRODUTOS[0].nome);
+  const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", mlCategorias[0]?.nome || "");
   const [tipoAnuncio, setTipoAnuncio] = usePersistedState<"classico" | "premium">("calc_ml_tipo", "premium");
   const [precoVenda, setPrecoVenda]   = usePersistedState("calc_ml_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_ml_custo", "");
@@ -1112,14 +1113,20 @@ const MercadoLivreCalculadora = () => {
   const [usarFrete, setUsarFrete]     = usePersistedState("calc_ml_usarFrete", false);
   const [peso, setPeso]               = usePersistedState("calc_ml_peso", "");
 
-  const produto      = ML_PRODUTOS.find((p) => p.nome === produtoNome)!;
+  // Dialog para adicionar categoria
+  const [showAddCategoria, setShowAddCategoria] = useState(false);
+  const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
+  const [novaCategoriaClassico, setNovaCategoriaClassico] = useState("");
+  const [novaCategoriaPremium, setNovaCategoriaPremium] = useState("");
+
+  const produto      = mlCategorias.find((p) => p.nome === produtoNome) || mlCategorias[0];
   const preco        = parseNum(precoVenda);
   const custo        = parseNum(custoProduto);
   const impostoPerc  = parseNum(imposto);
   const marketingPerc = parseNum(marketing);
   const pesoNum      = parseNum(peso);
 
-  const comissaoPerc   = tipoAnuncio === "classico" ? produto.classicoPerc : produto.premiumPerc;
+  const comissaoPerc   = tipoAnuncio === "classico" ? produto?.classicoPerc || 0 : produto?.premiumPerc || 0;
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
@@ -1131,8 +1138,82 @@ const MercadoLivreCalculadora = () => {
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
 
+  const handleAddCategoria = () => {
+    const nome = novaCategoriaNome.trim();
+    const classico = parseNum(novaCategoriaClassico) / 100;
+    const premium = parseNum(novaCategoriaPremium) / 100;
+    if (!nome || classico <= 0 || premium <= 0) {
+      toast.error("Preencha todos os campos corretamente");
+      return;
+    }
+    if (mlCategorias.some(c => c.nome.toLowerCase() === nome.toLowerCase())) {
+      toast.error("Categoria já existe");
+      return;
+    }
+    const nova: MLProduto = { nome, classicoPerc: classico, premiumPerc: premium };
+    setMlCategorias([...mlCategorias, nova]);
+    setProdutoNome(nome);
+    setNovaCategoriaNome("");
+    setNovaCategoriaClassico("");
+    setNovaCategoriaPremium("");
+    setShowAddCategoria(false);
+    toast.success("Categoria adicionada!");
+  };
+
+  const handleDeleteCategoria = (nome: string) => {
+    if (mlCategorias.length <= 1) {
+      toast.error("Deve haver pelo menos uma categoria");
+      return;
+    }
+    const novas = mlCategorias.filter(c => c.nome !== nome);
+    setMlCategorias(novas);
+    if (produtoNome === nome) setProdutoNome(novas[0].nome);
+    toast.success("Categoria removida");
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Dialog adicionar categoria */}
+      <Dialog open={showAddCategoria} onOpenChange={setShowAddCategoria}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Adicionar Categoria</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Nome da Categoria</Label>
+              <Input
+                placeholder="Ex: Eletrônicos"
+                value={novaCategoriaNome}
+                onChange={(e) => setNovaCategoriaNome(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Comissão Clássico (%)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 11.5"
+                value={novaCategoriaClassico}
+                onChange={(e) => setNovaCategoriaClassico(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Comissão Premium (%)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 16.5"
+                value={novaCategoriaPremium}
+                onChange={(e) => setNovaCategoriaPremium(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCategoria(false)}>Cancelar</Button>
+            <Button onClick={handleAddCategoria}>Adicionar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Entradas */}
       <Card className="border-border bg-card">
         <CardHeader>
@@ -1155,13 +1236,24 @@ const MercadoLivreCalculadora = () => {
 
           {/* Categoria ML */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">Produto</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-foreground font-medium">Categoria</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => setShowAddCategoria(true)}
+              >
+                <Plus className="w-3 h-3" />
+                Adicionar Categoria
+              </Button>
+            </div>
             <select
               value={produtoNome}
               onChange={(e) => setProdutoNome(e.target.value)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              {ML_PRODUTOS.map((p) => (
+              {mlCategorias.map((p) => (
                 <option key={p.nome} value={p.nome}>{p.nome}</option>
               ))}
             </select>
