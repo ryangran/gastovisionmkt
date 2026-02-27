@@ -423,6 +423,54 @@ const AMAZON_CATEGORIAS: AmazonCategoria[] = [
   { nome: "Outros",                                    percentual: 0.15, taxaFixa: 1 },
 ];
 
+// Tabela de frete FBA Amazon (Preço Certo)
+type AmazonFBAFaixa = {
+  label: string;
+  maxKg: number;
+  ate50: number;
+  acima50: number;
+};
+
+const AMAZON_FBA_TABELA: AmazonFBAFaixa[] = [
+  { label: "0 a 100g",       maxKg: 0.1,  ate50: 14.05, acima50: 15.55 },
+  { label: "100 a 200g",     maxKg: 0.2,  ate50: 14.55, acima50: 16.05 },
+  { label: "200 a 300g",     maxKg: 0.3,  ate50: 15.05, acima50: 16.55 },
+  { label: "300 a 400g",     maxKg: 0.4,  ate50: 15.65, acima50: 17.15 },
+  { label: "400 a 500g",     maxKg: 0.5,  ate50: 16.25, acima50: 17.85 },
+  { label: "500 a 750g",     maxKg: 0.75, ate50: 16.85, acima50: 18.55 },
+  { label: "750g a 1kg",     maxKg: 1,    ate50: 17.45, acima50: 19.25 },
+  { label: "1 a 1,5kg",      maxKg: 1.5,  ate50: 18.45, acima50: 20.35 },
+  { label: "1,5 a 2kg",      maxKg: 2,    ate50: 19.45, acima50: 21.35 },
+  { label: "2 a 3kg",        maxKg: 3,    ate50: 20.45, acima50: 22.35 },
+  { label: "3 a 4kg",        maxKg: 4,    ate50: 21.45, acima50: 23.35 },
+  { label: "4 a 5kg",        maxKg: 5,    ate50: 22.45, acima50: 24.35 },
+  { label: "5 a 6kg",        maxKg: 6,    ate50: 27.45, acima50: 30.35 },
+  { label: "6 a 7kg",        maxKg: 7,    ate50: 29.45, acima50: 33.35 },
+  { label: "7 a 8kg",        maxKg: 8,    ate50: 31.45, acima50: 35.35 },
+  { label: "8 a 9kg",        maxKg: 9,    ate50: 33.45, acima50: 37.35 },
+  { label: "9 a 10kg",       maxKg: 10,   ate50: 47.45, acima50: 51.35 },
+];
+
+const AMAZON_FBA_QUILO_ADICIONAL = { ate50: 3.25, acima50: 3.50 };
+
+type AmazonModelo = "dba" | "fba";
+
+function calcularFreteFBA(pesoKg: number, precoVenda: number): { faixa: AmazonFBAFaixa | null; valor: number } {
+  const coluna: "ate50" | "acima50" = precoVenda <= 50 ? "ate50" : "acima50";
+  if (pesoKg <= 10) {
+    const faixa = AMAZON_FBA_TABELA.find(f => pesoKg <= f.maxKg) ?? AMAZON_FBA_TABELA[AMAZON_FBA_TABELA.length - 1];
+    return { faixa, valor: faixa[coluna] };
+  }
+  const faixaBase = AMAZON_FBA_TABELA[AMAZON_FBA_TABELA.length - 1];
+  const quilosExtra = Math.ceil(pesoKg - 10);
+  const adicional = AMAZON_FBA_QUILO_ADICIONAL[coluna];
+  return { faixa: faixaBase, valor: faixaBase[coluna] + quilosExtra * adicional };
+}
+
+function calcularPesoCubadoFBA(alturaCm: number, larguraCm: number, comprimentoCm: number): number {
+  return (comprimentoCm * larguraCm * alturaCm) / 6000;
+}
+
 function calcularComissaoAmazon(preco: number, categoria: AmazonCategoria): number {
   let comissaoPercentual = 0;
   if (categoria.tiered) {
@@ -435,7 +483,6 @@ function calcularComissaoAmazon(preco: number, categoria: AmazonCategoria): numb
   } else if (categoria.percentual) {
     comissaoPercentual = preco * categoria.percentual;
   }
-  // Comissão total = percentual + taxa fixa adicional
   return comissaoPercentual + categoria.taxaFixa;
 }
 
@@ -454,18 +501,32 @@ const AmazonCalculadora = () => {
   const [imposto, setImposto]               = usePersistedState("calc_amazon_imposto", "");
   const [marketing, setMarketing]           = usePersistedState("calc_amazon_marketing", "");
   const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_amazon_usarMkt", false);
+  const [modelo, setModelo]                 = usePersistedState<AmazonModelo>("calc_amazon_modelo", "dba");
+  const [pesoFBA, setPesoFBA]               = usePersistedState("calc_amazon_peso_fba", "");
+  const [alturaFBA, setAlturaFBA]           = usePersistedState("calc_amazon_altura_fba", "");
+  const [larguraFBA, setLarguraFBA]         = usePersistedState("calc_amazon_largura_fba", "");
+  const [comprimentoFBA, setComprimentoFBA] = usePersistedState("calc_amazon_comprimento_fba", "");
 
   const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome)!;
   const preco          = parseNum(precoVenda);
   const custo          = parseNum(custoProduto);
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
+  const pesoRealFBA    = parseNum(pesoFBA);
+  const altCm          = parseNum(alturaFBA);
+  const largCm         = parseNum(larguraFBA);
+  const compCm         = parseNum(comprimentoFBA);
+
+  const pesoCubadoFBA  = (altCm > 0 && largCm > 0 && compCm > 0) ? calcularPesoCubadoFBA(altCm, largCm, compCm) : 0;
+  const pesoFinalFBA   = Math.max(pesoRealFBA, pesoCubadoFBA);
+  const fbaFreteInfo   = modelo === "fba" && pesoFinalFBA > 0 && preco > 0 ? calcularFreteFBA(pesoFinalFBA, preco) : null;
+  const valorFreteFBA  = fbaFreteInfo ? fbaFreteInfo.valor : 0;
 
   const valorComissao  = preco > 0 ? calcularComissaoAmazon(preco, categoria) : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
-  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing;
+  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFreteFBA;
   const lucro          = receitaLiquida - custo;
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
@@ -509,6 +570,57 @@ const AmazonCalculadora = () => {
               {" "}· Taxa fixa: <span className="font-medium">+ {formatCurrency(categoria.taxaFixa)}</span>
             </p>
           </div>
+
+          {/* Modelo DBA / FBA */}
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Modelo de Envio</Label>
+            <select
+              value={modelo}
+              onChange={(e) => setModelo(e.target.value as AmazonModelo)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="dba">DBA (Entrega pelo vendedor)</option>
+              <option value="fba">FBA (Fulfillment by Amazon)</option>
+            </select>
+          </div>
+
+          {modelo === "fba" && (
+            <div className="space-y-4 p-3 rounded-lg bg-muted/20 border border-border">
+              <p className="text-xs font-semibold text-foreground">📦 Dados para cálculo de frete FBA</p>
+              <div className="space-y-2">
+                <Label className="text-foreground text-xs font-medium">Peso Real (kg)</Label>
+                <Input type="number" placeholder="0" value={pesoFBA} onChange={(e) => setPesoFBA(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Altura (cm)</Label>
+                  <Input type="number" placeholder="0" value={alturaFBA} onChange={(e) => setAlturaFBA(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Largura (cm)</Label>
+                  <Input type="number" placeholder="0" value={larguraFBA} onChange={(e) => setLarguraFBA(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Compr. (cm)</Label>
+                  <Input type="number" placeholder="0" value={comprimentoFBA} onChange={(e) => setComprimentoFBA(e.target.value)} />
+                </div>
+              </div>
+              {pesoCubadoFBA > 0 && (
+                <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2 space-y-1">
+                  <p>Peso cubado (C×L×A÷6000): <span className="font-semibold text-foreground">{pesoCubadoFBA.toFixed(2)} kg</span></p>
+                  <p>Peso real: <span className="font-semibold text-foreground">{pesoRealFBA.toFixed(2)} kg</span></p>
+                  <p>Peso considerado: <span className="font-semibold text-primary">{pesoFinalFBA.toFixed(2)} kg</span></p>
+                </div>
+              )}
+              {fbaFreteInfo && (
+                <div className="text-xs bg-muted/30 rounded p-2">
+                  <p>Faixa: <span className="font-semibold text-foreground">{fbaFreteInfo.faixa?.label ?? "Acima de 10kg"}</span></p>
+                  <p>Coluna: <span className="font-semibold text-foreground">{preco <= 50 ? "Até R$50" : "Acima de R$50"}</span></p>
+                  <p>Frete FBA: <span className="font-semibold text-primary">{formatCurrency(fbaFreteInfo.valor)}</span></p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Preço de Venda (R$)</Label>
@@ -629,6 +741,12 @@ const AmazonCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão Amazon</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
+              {valorFreteFBA > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Frete FBA</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorFreteFBA)}</span>
+                </div>
+              )}
               {valorImposto > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Imposto ({impostoPerc}%)</span>
@@ -736,6 +854,50 @@ const AmazonCalculadora = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Tabela FBA */}
+        {modelo === "fba" && (
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Tabela de Frete FBA - Preço Certo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-64 overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-card">
+                    <tr className="border-b border-border">
+                      <th className="text-left px-3 py-2 text-muted-foreground font-medium">Faixa</th>
+                      <th className="text-center px-2 py-2 text-muted-foreground font-medium">Até R$50</th>
+                      <th className="text-center px-2 py-2 text-muted-foreground font-medium">{">"} R$50</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {AMAZON_FBA_TABELA.map((faixa) => {
+                      const ativa = fbaFreteInfo?.faixa === faixa;
+                      return (
+                        <tr key={faixa.label} className={`border-b border-border last:border-0 transition-colors ${ativa ? "bg-primary/10" : "hover:bg-muted/30"}`}>
+                          <td className={`px-3 py-1.5 ${ativa ? "text-primary font-semibold" : "text-foreground"}`}>{faixa.label}</td>
+                          <td className={`px-2 py-1.5 text-center font-mono ${ativa && preco <= 50 ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.ate50)}</td>
+                          <td className={`px-2 py-1.5 text-center font-mono ${ativa && preco > 50 ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.acima50)}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t-2 border-border bg-muted/20">
+                      <td className="px-3 py-1.5 font-semibold text-foreground">Quilo adicional</td>
+                      <td className="px-2 py-1.5 text-center font-mono text-foreground">{formatCurrency(AMAZON_FBA_QUILO_ADICIONAL.ate50)}</td>
+                      <td className="px-2 py-1.5 text-center font-mono text-foreground">{formatCurrency(AMAZON_FBA_QUILO_ADICIONAL.acima50)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="p-3 text-xs text-muted-foreground border-t border-border">
+                <p>Cubagem FBA: Comprimento × Largura × Altura (cm) ÷ <span className="font-mono text-primary">6000</span></p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
