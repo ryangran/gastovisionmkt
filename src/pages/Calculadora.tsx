@@ -741,7 +741,12 @@ const AmazonCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão Amazon</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
-              {valorImposto > 0 && (
+              {valorFreteFBA > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Frete FBA</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorFreteFBA)}</span>
+                </div>
+              )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Imposto ({impostoPerc}%)</span>
                   <span className="text-destructive font-medium">−{formatCurrency(valorImposto)}</span>
