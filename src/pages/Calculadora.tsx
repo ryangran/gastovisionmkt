@@ -2630,7 +2630,7 @@ const Calculadora = () => {
             <TabsTrigger value="amazon"><img src={amazonLogo} alt="Amazon" className="h-4 inline-block mr-1 object-contain" /> Amazon</TabsTrigger>
             <TabsTrigger value="magalu">🏪 Magalu</TabsTrigger>
             <TabsTrigger value="tiktok"><img src={tiktokLogo} alt="TikTok" className="h-4 inline-block mr-1 object-contain" /> TikTok</TabsTrigger>
-            <TabsTrigger value="shein">👗 Shein</TabsTrigger>
+            <TabsTrigger value="shein"><img src={sheinLogo} alt="Shein" className="h-4 inline-block mr-1 object-contain" /> Shein</TabsTrigger>
           </TabsList>
 
           <TabsContent value="shopee">
