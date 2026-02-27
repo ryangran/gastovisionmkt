@@ -2643,6 +2643,9 @@ const Calculadora = () => {
           <TabsContent value="tiktok">
             <TikTokCalculadora />
           </TabsContent>
+          <TabsContent value="shein">
+            <SheinCalculadora />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
