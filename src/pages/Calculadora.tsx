@@ -2009,8 +2009,228 @@ const MercadoLivreCalculadora = () => {
     </div>
   );
 };
+// ─── Calculadora TikTok Shop ──────────────────────────────────────────────────
+const TIKTOK_COMISSAO = 0.06; // 6%
+const TIKTOK_TAXA_FIXA = 4.00; // R$4 por item
 
-// Placeholder para plataformas futuras
+const TikTokCalculadora = () => {
+  const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
+  const [precoVenda, setPrecoVenda]         = usePersistedState("calc_tiktok_preco", "");
+  const [custoProduto, setCustoProduto]     = usePersistedState("calc_tiktok_custo", "");
+  const [imposto, setImposto]               = usePersistedState("calc_tiktok_imposto", "");
+  const [marketing, setMarketing]           = usePersistedState("calc_tiktok_marketing", "");
+  const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_tiktok_usarMkt", false);
+  const [incentivoComissao, setIncentivoComissao] = usePersistedState("calc_tiktok_incentivo", false);
+
+  const preco          = parseNum(precoVenda);
+  const custo          = parseNum(custoProduto);
+  const impostoPerc    = parseNum(imposto);
+  const marketingPerc  = parseNum(marketing);
+
+  const comissaoPerc   = incentivoComissao ? 0 : TIKTOK_COMISSAO;
+  const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
+  const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
+  const valorImposto   = preco * (impostoPerc / 100);
+  const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
+
+  const receitaLiquida = preco - valorComissao - valorTaxaFixa - valorImposto - valorMarketing;
+  const lucro          = receitaLiquida - custo;
+  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
+  const isLucrativo    = lucro > 0;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="border-border bg-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <ShoppingBag className="w-5 h-5 text-primary" />
+            Dados do Produto
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Nome do Produto</Label>
+            <Input type="text" placeholder="Ex: Protetor de tomada" value={nomeProduto} onChange={(e) => setNomeProduto(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Preço de Venda (R$)</Label>
+            <Input type="number" placeholder="0,00" value={precoVenda} onChange={(e) => setPrecoVenda(e.target.value)} className="text-lg font-semibold" />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
+            <Input type="number" placeholder="0,00" value={custoProduto} onChange={(e) => setCustoProduto(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Imposto (%)</Label>
+            <Input type="number" placeholder="0" value={imposto} onChange={(e) => setImposto(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Ex: Simples Nacional, MEI, etc.</p>
+          </div>
+
+          <Separator />
+
+          {/* Incentivo de Comissão */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-foreground font-medium">Incentivo de Comissão</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {incentivoComissao ? "Comissão zerada (0%)" : "Comissão padrão de 6%"}
+              </p>
+            </div>
+            <Switch checked={incentivoComissao} onCheckedChange={setIncentivoComissao} />
+          </div>
+
+          {/* Marketing */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-foreground font-medium">Marketing (opcional)</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Inclui custo de anúncios</p>
+            </div>
+            <Switch checked={usarMarketing} onCheckedChange={setUsarMarketing} />
+          </div>
+
+          {usarMarketing && (
+            <div className="space-y-2">
+              <Label className="text-foreground">Taxa de Marketing (%)</Label>
+              <Input type="number" placeholder="0" value={marketing} onChange={(e) => setMarketing(e.target.value)} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Comissão TikTok Shop
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-foreground text-sm">Comissão</span>
+                <Badge variant="secondary" className="font-mono">
+                  {incentivoComissao ? "0% (incentivo)" : "6%"}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-foreground text-sm">Taxa fixa por item</span>
+                <Badge variant="secondary" className="font-mono">R$4,00</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Detalhamento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Preço de Venda</span>
+                <span className="text-foreground font-medium">{formatCurrency(preco)}</span>
+              </div>
+              {valorComissao > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Comissão (6%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
+                </div>
+              )}
+              {incentivoComissao && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Comissão (incentivo)</span>
+                  <span className="text-success font-medium">R$0,00</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">− Taxa fixa por item</span>
+                <span className="text-destructive font-medium">−{formatCurrency(valorTaxaFixa)}</span>
+              </div>
+              {valorImposto > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Imposto ({impostoPerc}%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorImposto)}</span>
+                </div>
+              )}
+              {usarMarketing && valorMarketing > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Marketing ({marketingPerc}%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorMarketing)}</span>
+                </div>
+              )}
+              <Separator />
+              <div className="flex items-center justify-between text-sm font-semibold">
+                <span className="text-foreground">= Receita Líquida</span>
+                <span className="text-foreground">{formatCurrency(receitaLiquida)}</span>
+              </div>
+              {custo > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Custo do Produto</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(custo)}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className={`border-2 ${isLucrativo ? "border-success bg-success/5" : "border-destructive bg-destructive/5"}`}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Lucro Estimado</p>
+                  <p className={`text-3xl font-bold ${isLucrativo ? "text-success" : "text-destructive"}`}>{formatCurrency(lucro)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground mb-1">Margem</p>
+                  <p className={`text-2xl font-bold ${isLucrativo ? "text-success" : "text-destructive"}`}>{margemLucro.toFixed(1)}%</p>
+                </div>
+              </div>
+              {!isLucrativo && <p className="text-sm text-destructive mt-3 font-medium">⚠️ Este preço não cobre os custos. Revise o valor de venda.</p>}
+              {isLucrativo && <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>}
+            </CardContent>
+          </Card>
+        )}
+
+        {preco === 0 && (
+          <Card className="border-dashed border-border bg-card/50">
+            <CardContent className="text-center py-16">
+              <Calculator className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Insira o preço de venda para calcular</p>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="border-border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              Sobre as Taxas TikTok Shop
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-xs text-muted-foreground">
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground">💰 Comissão</p>
+              <p>A tarifa de comissão atual é de <span className="font-semibold text-foreground">6%</span>, incluindo impostos aplicáveis (IVA).</p>
+              <p>Com o <span className="font-semibold text-primary">incentivo de comissão</span> ativo, a comissão é <span className="font-semibold text-success">0%</span>.</p>
+            </div>
+            <Separator />
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground">🏷️ Taxa fixa</p>
+              <p>A taxa por item vendido é fixada em <span className="font-semibold text-foreground">R$4,00</span> por item, incluindo impostos aplicáveis (IVA).</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+
 const PlaceholderPlatform = ({ nome }: { nome: string }) => (
   <div className="flex flex-col items-center justify-center py-24 text-center">
     <Calculator className="w-16 h-16 text-muted-foreground/40 mb-4" />
@@ -2135,7 +2355,7 @@ const Calculadora = () => {
             <MagaluCalculadora />
           </TabsContent>
           <TabsContent value="tiktok">
-            <PlaceholderPlatform nome="TikTok" />
+            <TikTokCalculadora />
           </TabsContent>
         </Tabs>
       </main>
