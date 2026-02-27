@@ -616,12 +616,13 @@ const AmazonCalculadora = () => {
             >
               <option value="dba">DBA (Entrega pelo vendedor)</option>
               <option value="fba">FBA (Fulfillment by Amazon)</option>
+              <option value="fba_onsite">FBA Onsite</option>
             </select>
           </div>
 
-          {modelo === "fba" && (
+          {(modelo === "fba" || modelo === "fba_onsite") && (
             <div className="space-y-4 p-3 rounded-lg bg-muted/20 border border-border">
-              <p className="text-xs font-semibold text-foreground">📦 Dados para cálculo de frete FBA</p>
+              <p className="text-xs font-semibold text-foreground">📦 Dados para cálculo de frete {modelo === "fba" ? "FBA" : "FBA Onsite"}</p>
               <div className="space-y-2">
                 <Label className="text-foreground text-xs font-medium">Peso Real (kg)</Label>
                 <Input type="number" placeholder="0" value={pesoFBA} onChange={(e) => setPesoFBA(e.target.value)} />
@@ -652,6 +653,12 @@ const AmazonCalculadora = () => {
                   <p>Faixa: <span className="font-semibold text-foreground">{fbaFreteInfo.faixa?.label ?? "Acima de 10kg"}</span></p>
                   <p>Coluna: <span className="font-semibold text-foreground">{preco <= 50 ? "Até R$50" : "Acima de R$50"}</span></p>
                   <p>Frete FBA: <span className="font-semibold text-primary">{formatCurrency(fbaFreteInfo.valor)}</span></p>
+                </div>
+              )}
+              {fbaOnsiteInfo && (
+                <div className="text-xs bg-muted/30 rounded p-2">
+                  <p>Faixa: <span className="font-semibold text-foreground">{fbaOnsiteInfo.faixa?.label ?? "Acima de 10kg"}</span></p>
+                  <p>Frete FBA Onsite: <span className="font-semibold text-primary">{formatCurrency(fbaOnsiteInfo.valor)}</span></p>
                 </div>
               )}
             </div>
