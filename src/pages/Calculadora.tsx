@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import shopeeLogo from "@/assets/shopee-logo.png";
+import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
@@ -2622,7 +2623,7 @@ const Calculadora = () => {
         <Tabs defaultValue="shopee">
           <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
             <TabsTrigger value="shopee"><img src={shopeeLogo} alt="Shopee" className="h-4 inline-block mr-1 object-contain" /> Shopee</TabsTrigger>
-            <TabsTrigger value="mercadolivre">🛍️ Mercado Livre</TabsTrigger>
+            <TabsTrigger value="mercadolivre"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 inline-block mr-1 object-contain" /> Mercado Livre</TabsTrigger>
             <TabsTrigger value="amazon">📦 Amazon</TabsTrigger>
             <TabsTrigger value="magalu">🏪 Magalu</TabsTrigger>
             <TabsTrigger value="tiktok">🎵 TikTok</TabsTrigger>
