@@ -890,22 +890,83 @@ const MagaluCalculadora = () => {
 
           <Separator />
 
-          {/* Magalu Entregas */}
+          {/* Cálculo de Frete */}
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-foreground font-medium">Magalu Entregas</Label>
+              <Label className="text-foreground font-medium">Calcular Frete (Preço Certo)</Label>
               <p className="text-xs text-muted-foreground mt-0.5">
-                +R$5,00 fixo para pedidos ≥ R$10,00
+                Inclui cubagem e tabela de frete Magalu
               </p>
             </div>
             <Switch
-              checked={usarMagaluEntregas}
-              onCheckedChange={setUsarMagaluEntregas}
+              checked={usarFrete}
+              onCheckedChange={setUsarFrete}
             />
           </div>
 
-          {usarMagaluEntregas && preco > 0 && preco < 10 && (
-            <p className="text-xs text-destructive">⚠️ Taxa de entrega não se aplica a pedidos abaixo de R$10,00</p>
+          {usarFrete && (
+            <div className="space-y-4 p-3 rounded-lg bg-muted/20 border border-border">
+              <div className="space-y-2">
+                <Label className="text-foreground font-medium text-xs">Tipo de Produto</Label>
+                <select
+                  value={tipoProduto}
+                  onChange={(e) => setTipoProduto(e.target.value as MagaluTipoProduto)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="leves">Leves (fator cubagem: 167)</option>
+                  <option value="pesados">Pesados (fator cubagem: 300)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-foreground font-medium text-xs">Peso Real (kg)</Label>
+                <Input type="number" placeholder="0" value={pesoReal} onChange={(e) => setPesoReal(e.target.value)} />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Altura (m)</Label>
+                  <Input type="number" placeholder="0" value={altura} onChange={(e) => setAltura(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Largura (m)</Label>
+                  <Input type="number" placeholder="0" value={largura} onChange={(e) => setLargura(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Compr. (m)</Label>
+                  <Input type="number" placeholder="0" value={comprimento} onChange={(e) => setComprimento(e.target.value)} />
+                </div>
+              </div>
+
+              {pesoCubado > 0 && (
+                <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2 space-y-1">
+                  <p>Peso cubado: <span className="font-semibold text-foreground">{pesoCubado.toFixed(2)} kg</span></p>
+                  <p>Peso real: <span className="font-semibold text-foreground">{pesoRealKg.toFixed(2)} kg</span></p>
+                  <p>Peso considerado (maior): <span className="font-semibold text-primary">{pesoFinal.toFixed(2)} kg</span></p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-foreground font-medium text-xs">Faixa de Desconto</Label>
+                <select
+                  value={descontoFrete}
+                  onChange={(e) => setDescontoFrete(e.target.value as MagaluDescontoFrete)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="sem_desconto">{"< 87% (Sem desconto)"}</option>
+                  <option value="desconto_25">Entre 87% e 97% (Desconto 25%)</option>
+                  <option value="desconto_50">{"> 97% (Desconto 50%)"}</option>
+                </select>
+                <p className="text-xs text-muted-foreground">Baseado na reputação do vendedor</p>
+              </div>
+
+              {freteInfo && (
+                <div className="text-xs bg-muted/30 rounded p-2">
+                  <p>Faixa: <span className="font-semibold text-foreground">{freteInfo.faixa.label}</span></p>
+                  <p>Valor do frete: <span className="font-semibold text-primary">{formatCurrency(freteInfo.valor)}</span></p>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Marketing (opcional) */}
@@ -948,8 +1009,8 @@ const MagaluCalculadora = () => {
               </div>
               <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2 space-y-1">
                 <p>{formatCurrency(preco)} × 18% = <span className="font-semibold text-foreground">{formatCurrency(valorComissao)}</span></p>
-                {usarMagaluEntregas && preco >= 10 && (
-                  <p>+ Taxa Magalu Entregas = <span className="font-semibold text-foreground">{formatCurrency(MAGALU_ENTREGA_FIXA)}</span></p>
+                {valorFrete > 0 && (
+                  <p>+ Frete Preço Certo = <span className="font-semibold text-foreground">{formatCurrency(valorFrete)}</span></p>
                 )}
               </div>
             </CardContent>
@@ -973,10 +1034,10 @@ const MagaluCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão Magalu (18%)</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
-              {valorEntrega > 0 && (
+              {valorFrete > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">− Magalu Entregas</span>
-                  <span className="text-destructive font-medium">−{formatCurrency(valorEntrega)}</span>
+                  <span className="text-muted-foreground">− Frete Preço Certo</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorFrete)}</span>
                 </div>
               )}
               {valorImposto > 0 && (
@@ -1043,24 +1104,58 @@ const MagaluCalculadora = () => {
           </Card>
         )}
 
-        {/* Info Magalu Entregas */}
+        {/* Tabela de Frete Magalu */}
         <Card className="border-border bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Sobre a Comissão Magalu
+              Tabela de Frete Preço Certo - Magalu
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground">Comissão base</span>
-              <Badge variant="secondary" className="font-mono">18% sobre o preço</Badge>
+          <CardContent className="p-0">
+            <div className="max-h-72 overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-card">
+                  <tr className="border-b border-border">
+                    <th className="text-left px-3 py-2 text-muted-foreground font-medium">Faixa</th>
+                    <th className="text-center px-2 py-2 text-muted-foreground font-medium">Sem desc.</th>
+                    <th className="text-center px-2 py-2 text-muted-foreground font-medium">25%</th>
+                    <th className="text-center px-2 py-2 text-muted-foreground font-medium">50%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MAGALU_FRETE_TABELA.map((faixa) => {
+                    const ativa = freteInfo?.faixa === faixa;
+                    return (
+                      <tr key={faixa.label} className={`border-b border-border last:border-0 transition-colors ${ativa ? "bg-primary/10" : "hover:bg-muted/30"}`}>
+                        <td className={`px-3 py-1.5 ${ativa ? "text-primary font-semibold" : "text-foreground"}`}>{faixa.label}</td>
+                        <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "sem_desconto" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.semDesconto)}</td>
+                        <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "desconto_25" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.desconto25)}</td>
+                        <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "desconto_50" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.desconto50)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            <Separator />
+          </CardContent>
+        </Card>
+
+        {/* Regra de cubagem */}
+        <Card className="border-border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              Regra de Cubagem Magalu
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-xs text-muted-foreground">
+            <p>A Magalu considera o <span className="font-semibold text-foreground">maior peso</span> entre o peso real e o peso cubado.</p>
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-foreground">🚚 Magalu Entregas</p>
-              <p className="text-xs text-muted-foreground">
-                Lojistas que utilizam Magalu Entregas: para pedidos vendidos com valores a partir de R$10,00 será cobrado um custo fixo de <span className="font-semibold text-foreground">R$5,00</span>, além da remuneração percentual da categoria.
-              </p>
+              <p className="font-semibold text-foreground">Leves:</p>
+              <p>Altura × Largura × Comprimento × <span className="font-mono text-primary">167</span> = Peso cubado</p>
+            </div>
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground">Pesados:</p>
+              <p>Altura × Largura × Comprimento × <span className="font-mono text-primary">300</span> = Peso cubado</p>
             </div>
           </CardContent>
         </Card>
