@@ -854,6 +854,50 @@ const AmazonCalculadora = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Tabela FBA */}
+        {modelo === "fba" && (
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Tabela de Frete FBA - Preço Certo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-64 overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-card">
+                    <tr className="border-b border-border">
+                      <th className="text-left px-3 py-2 text-muted-foreground font-medium">Faixa</th>
+                      <th className="text-center px-2 py-2 text-muted-foreground font-medium">Até R$50</th>
+                      <th className="text-center px-2 py-2 text-muted-foreground font-medium">{">"} R$50</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {AMAZON_FBA_TABELA.map((faixa) => {
+                      const ativa = fbaFreteInfo?.faixa === faixa;
+                      return (
+                        <tr key={faixa.label} className={`border-b border-border last:border-0 transition-colors ${ativa ? "bg-primary/10" : "hover:bg-muted/30"}`}>
+                          <td className={`px-3 py-1.5 ${ativa ? "text-primary font-semibold" : "text-foreground"}`}>{faixa.label}</td>
+                          <td className={`px-2 py-1.5 text-center font-mono ${ativa && preco <= 50 ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.ate50)}</td>
+                          <td className={`px-2 py-1.5 text-center font-mono ${ativa && preco > 50 ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.acima50)}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t-2 border-border bg-muted/20">
+                      <td className="px-3 py-1.5 font-semibold text-foreground">Quilo adicional</td>
+                      <td className="px-2 py-1.5 text-center font-mono text-foreground">{formatCurrency(AMAZON_FBA_QUILO_ADICIONAL.ate50)}</td>
+                      <td className="px-2 py-1.5 text-center font-mono text-foreground">{formatCurrency(AMAZON_FBA_QUILO_ADICIONAL.acima50)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="p-3 text-xs text-muted-foreground border-t border-border">
+                <p>Cubagem FBA: Comprimento × Largura × Altura (cm) ÷ <span className="font-mono text-primary">6000</span></p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
