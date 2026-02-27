@@ -482,6 +482,68 @@ const AMAZON_FBA_ONSITE_TABELA: AmazonFBAOnsiteFaixa[] = [
 
 const AMAZON_FBA_ONSITE_QUILO_ADICIONAL = 4.00;
 
+// Tabela de frete DBA Amazon (Novas tarifas a partir de 01/09/2024)
+// Produtos até R$30: tarifa fixa R$4,50
+// Produtos até R$79: tarifa fixa R$8,00
+// Produtos a partir de R$79: tabela por peso e zona
+
+type AmazonDBAZona = "sp" | "zona1" | "zona2" | "centro_norte";
+
+const AMAZON_DBA_ZONAS: { value: AmazonDBAZona; label: string }[] = [
+  { value: "sp", label: "SP - Zona 1" },
+  { value: "zona1", label: "Zona 1 (outros Sul e Sudeste)" },
+  { value: "zona2", label: "Zona 2 (do Sul e Sudeste)" },
+  { value: "centro_norte", label: "Centro-Oeste, Norte e Nordeste" },
+];
+
+type AmazonDBAFaixa = {
+  label: string;
+  maxKg: number;
+  sp: number;
+  zona1: number;
+  zona2: number;
+  centro_norte: number;
+};
+
+const AMAZON_DBA_TABELA: AmazonDBAFaixa[] = [
+  { label: "0 a 250g",     maxKg: 0.25, sp: 19.95, zona1: 19.95, zona2: 20.45, centro_norte: 29.45 },
+  { label: "250 a 500g",   maxKg: 0.5,  sp: 20.45, zona1: 20.45, zona2: 20.95, centro_norte: 30.45 },
+  { label: "500g a 1kg",   maxKg: 1,    sp: 21.45, zona1: 21.45, zona2: 21.95, centro_norte: 33.45 },
+  { label: "1 a 2kg",      maxKg: 2,    sp: 22.95, zona1: 22.95, zona2: 23.45, centro_norte: 37.95 },
+  { label: "2 a 3kg",      maxKg: 3,    sp: 23.95, zona1: 23.95, zona2: 24.45, centro_norte: 44.45 },
+  { label: "3 a 4kg",      maxKg: 4,    sp: 25.95, zona1: 25.95, zona2: 25.95, centro_norte: 46.95 },
+  { label: "4 a 5kg",      maxKg: 5,    sp: 27.95, zona1: 27.95, zona2: 27.95, centro_norte: 48.95 },
+  { label: "5 a 6kg",      maxKg: 6,    sp: 36.95, zona1: 36.95, zona2: 36.95, centro_norte: 58.45 },
+  { label: "6 a 7kg",      maxKg: 7,    sp: 39.45, zona1: 39.45, zona2: 39.45, centro_norte: 59.95 },
+  { label: "7 a 8kg",      maxKg: 8,    sp: 40.45, zona1: 40.45, zona2: 40.45, centro_norte: 61.45 },
+  { label: "8 a 9kg",      maxKg: 9,    sp: 45.45, zona1: 46.95, zona2: 46.95, centro_norte: 62.95 },
+  { label: "9 a 10kg",     maxKg: 10,   sp: 59.95, zona1: 61.45, zona2: 65.95, centro_norte: 87.45 },
+];
+
+const AMAZON_DBA_QUILO_ADICIONAL = 4.00; // todas as zonas
+
+function calcularFreteDBA(pesoKg: number, precoVenda: number, zona: AmazonDBAZona): { valor: number; tipo: string; faixa?: AmazonDBAFaixa } {
+  // Produtos até R$30: tarifa fixa
+  if (precoVenda <= 30) {
+    return { valor: 4.50, tipo: "Tarifa fixa (produto até R$30)" };
+  }
+  // Produtos até R$79: tarifa fixa
+  if (precoVenda < 79) {
+    return { valor: 8.00, tipo: "Tarifa fixa (produto até R$79)" };
+  }
+  // Produtos a partir de R$79: tabela por peso e zona
+  if (pesoKg <= 0) {
+    return { valor: 0, tipo: "Informe o peso para calcular" };
+  }
+  if (pesoKg <= 10) {
+    const faixa = AMAZON_DBA_TABELA.find(f => pesoKg <= f.maxKg) ?? AMAZON_DBA_TABELA[AMAZON_DBA_TABELA.length - 1];
+    return { valor: faixa[zona], tipo: `Tabela por peso (${faixa.label})`, faixa };
+  }
+  const faixaBase = AMAZON_DBA_TABELA[AMAZON_DBA_TABELA.length - 1];
+  const quilosExtra = Math.ceil(pesoKg - 10);
+  return { valor: faixaBase[zona] + quilosExtra * AMAZON_DBA_QUILO_ADICIONAL, tipo: `Acima de 10kg (+${quilosExtra}kg extra)`, faixa: faixaBase };
+}
+
 type AmazonModelo = "dba" | "fba" | "fba_onsite";
 
 function calcularFreteFBA(pesoKg: number, precoVenda: number): { faixa: AmazonFBAFaixa | null; valor: number } {
