@@ -2625,6 +2625,7 @@ const Calculadora = () => {
             <TabsTrigger value="amazon">📦 Amazon</TabsTrigger>
             <TabsTrigger value="magalu">🏪 Magalu</TabsTrigger>
             <TabsTrigger value="tiktok">🎵 TikTok</TabsTrigger>
+            <TabsTrigger value="shein">👗 Shein</TabsTrigger>
           </TabsList>
 
           <TabsContent value="shopee">
