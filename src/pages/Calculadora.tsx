@@ -2231,6 +2231,291 @@ const TikTokCalculadora = () => {
 };
 
 
+// ─── Calculadora Shein ─────────────────────────────────────────────────────────
+const SHEIN_COMISSAO = 0.16;
+
+type SheinFreteFaixa = { label: string; maxKg: number; valor: number };
+
+const SHEIN_FRETE_TABELA: SheinFreteFaixa[] = [
+  { label: "Até 600g",        maxKg: 0.6, valor: 4 },
+  { label: "600g a 900g",     maxKg: 0.9, valor: 6 },
+  { label: "900g a 1,2kg",    maxKg: 1.2, valor: 8 },
+  { label: "1,2kg a 1,5kg",   maxKg: 1.5, valor: 10 },
+];
+
+function calcularFreteShein(pesoRealKg: number, comprimento: number, largura: number, altura: number): { faixa: SheinFreteFaixa | null; valor: number; pesoCubico: number; pesoUsado: number } {
+  const pesoCubico = (comprimento * largura * altura) / 6000;
+  const pesoUsado = Math.max(pesoRealKg, pesoCubico);
+  const faixa = SHEIN_FRETE_TABELA.find(f => pesoUsado <= f.maxKg) || null;
+  const valor = faixa ? faixa.valor : SHEIN_FRETE_TABELA[SHEIN_FRETE_TABELA.length - 1].valor;
+  return { faixa, valor, pesoCubico, pesoUsado };
+}
+
+const SheinCalculadora = () => {
+  const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
+  const [precoVenda, setPrecoVenda]         = usePersistedState("calc_shein_preco", "");
+  const [custoProduto, setCustoProduto]     = usePersistedState("calc_shein_custo", "");
+  const [imposto, setImposto]               = usePersistedState("calc_shein_imposto", "");
+  const [marketing, setMarketing]           = usePersistedState("calc_shein_marketing", "");
+  const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_shein_usarMkt", false);
+  const [pesoGramas, setPesoGramas]         = usePersistedState("calc_shein_peso", "");
+  const [comprimento, setComprimento]       = usePersistedState("calc_shein_comp", "");
+  const [largura, setLargura]               = usePersistedState("calc_shein_larg", "");
+  const [altura, setAltura]                 = usePersistedState("calc_shein_alt", "");
+
+  const preco          = parseNum(precoVenda);
+  const custo          = parseNum(custoProduto);
+  const impostoPerc    = parseNum(imposto);
+  const marketingPerc  = parseNum(marketing);
+  const pesoKg         = parseNum(pesoGramas) / 1000;
+  const comp           = parseNum(comprimento);
+  const larg           = parseNum(largura);
+  const alt            = parseNum(altura);
+
+  const freteInfo      = calcularFreteShein(pesoKg, comp, larg, alt);
+  const valorFrete     = (pesoKg > 0 || (comp > 0 && larg > 0 && alt > 0)) ? freteInfo.valor : 0;
+
+  const valorComissao  = preco > 0 ? preco * SHEIN_COMISSAO : 0;
+  const valorImposto   = preco * (impostoPerc / 100);
+  const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
+
+  const receitaLiquida = preco - valorComissao - valorFrete - valorImposto - valorMarketing;
+  const lucro          = receitaLiquida - custo;
+  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
+  const isLucrativo    = lucro > 0;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="border-border bg-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <ShoppingBag className="w-5 h-5 text-primary" />
+            Dados do Produto
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Nome do Produto</Label>
+            <Input type="text" placeholder="Ex: Camiseta básica" value={nomeProduto} onChange={(e) => setNomeProduto(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Preço de Venda (R$)</Label>
+            <Input type="number" placeholder="0,00" value={precoVenda} onChange={(e) => setPrecoVenda(e.target.value)} className="text-lg font-semibold" />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
+            <Input type="number" placeholder="0,00" value={custoProduto} onChange={(e) => setCustoProduto(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Imposto (%)</Label>
+            <Input type="number" placeholder="0" value={imposto} onChange={(e) => setImposto(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Ex: Simples Nacional, MEI, etc.</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Peso (gramas)</Label>
+            <Input type="number" placeholder="Ex: 500" value={pesoGramas} onChange={(e) => setPesoGramas(e.target.value)} />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-2">
+              <Label className="text-foreground text-xs">Comprimento (cm)</Label>
+              <Input type="number" placeholder="0" value={comprimento} onChange={(e) => setComprimento(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground text-xs">Largura (cm)</Label>
+              <Input type="number" placeholder="0" value={largura} onChange={(e) => setLargura(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground text-xs">Altura (cm)</Label>
+              <Input type="number" placeholder="0" value={altura} onChange={(e) => setAltura(e.target.value)} />
+            </div>
+          </div>
+
+          {valorFrete > 0 && (
+            <div className="p-3 rounded-lg bg-muted/50 space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Peso real</span>
+                <span className="text-foreground font-mono">{(pesoKg * 1000).toFixed(0)}g ({pesoKg.toFixed(3)}kg)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Peso cúbico</span>
+                <span className="text-foreground font-mono">{(freteInfo.pesoCubico * 1000).toFixed(0)}g ({freteInfo.pesoCubico.toFixed(3)}kg)</span>
+              </div>
+              <div className="flex justify-between font-semibold">
+                <span className="text-foreground">Peso considerado</span>
+                <span className="text-primary font-mono">{(freteInfo.pesoUsado * 1000).toFixed(0)}g</span>
+              </div>
+              <Separator className="my-1" />
+              <div className="flex justify-between font-semibold">
+                <span className="text-foreground">Frete Shein</span>
+                <span className="text-primary font-mono">{formatCurrency(valorFrete)}</span>
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-foreground font-medium">Marketing (opcional)</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Inclui custo de anúncios</p>
+            </div>
+            <Switch checked={usarMarketing} onCheckedChange={setUsarMarketing} />
+          </div>
+
+          {usarMarketing && (
+            <div className="space-y-2">
+              <Label className="text-foreground">Taxa de Marketing (%)</Label>
+              <Input type="number" placeholder="0" value={marketing} onChange={(e) => setMarketing(e.target.value)} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Taxas Shein
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-foreground text-sm">Comissão</span>
+                <Badge variant="secondary" className="font-mono">16%</Badge>
+              </div>
+              {valorFrete > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-foreground text-sm">Frete</span>
+                  <Badge variant="secondary" className="font-mono">{formatCurrency(valorFrete)}</Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Detalhamento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Preço de Venda</span>
+                <span className="text-foreground font-medium">{formatCurrency(preco)}</span>
+              </div>
+              {valorComissao > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Comissão (16%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
+                </div>
+              )}
+              {valorFrete > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Frete Shein</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorFrete)}</span>
+                </div>
+              )}
+              {valorImposto > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Imposto ({impostoPerc}%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorImposto)}</span>
+                </div>
+              )}
+              {usarMarketing && valorMarketing > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Marketing ({marketingPerc}%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorMarketing)}</span>
+                </div>
+              )}
+              <Separator />
+              <div className="flex items-center justify-between text-sm font-semibold">
+                <span className="text-foreground">= Receita Líquida</span>
+                <span className="text-foreground">{formatCurrency(receitaLiquida)}</span>
+              </div>
+              {custo > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Custo do Produto</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(custo)}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className={`border-2 ${isLucrativo ? "border-success bg-success/5" : "border-destructive bg-destructive/5"}`}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Lucro Estimado</p>
+                  <p className={`text-3xl font-bold ${isLucrativo ? "text-success" : "text-destructive"}`}>{formatCurrency(lucro)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground mb-1">Margem</p>
+                  <p className={`text-2xl font-bold ${isLucrativo ? "text-success" : "text-destructive"}`}>{margemLucro.toFixed(1)}%</p>
+                </div>
+              </div>
+              {!isLucrativo && <p className="text-sm text-destructive mt-3 font-medium">⚠️ Este preço não cobre os custos. Revise o valor de venda.</p>}
+              {isLucrativo && <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>}
+            </CardContent>
+          </Card>
+        )}
+
+        {preco === 0 && (
+          <Card className="border-dashed border-border bg-card/50">
+            <CardContent className="text-center py-16">
+              <Calculator className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Insira o preço de venda para calcular</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Tabela de frete */}
+        <Card className="border-border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              Tabela de Frete Shein
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-4 py-2 text-muted-foreground font-medium">Faixa de Peso</th>
+                  <th className="text-center px-4 py-2 text-muted-foreground font-medium">Frete</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SHEIN_FRETE_TABELA.map((f, idx) => {
+                  const ativa = freteInfo.faixa === f && valorFrete > 0;
+                  return (
+                    <tr key={idx} className={`border-b border-border last:border-0 transition-colors ${ativa ? "bg-primary/10" : "hover:bg-muted/30"}`}>
+                      <td className={`px-4 py-2.5 ${ativa ? "text-primary font-semibold" : "text-foreground"}`}>{f.label}</td>
+                      <td className={`px-4 py-2.5 text-center font-mono ${ativa ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(f.valor)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="text-xs text-muted-foreground px-4 py-2">Peso cúbico: (C × L × A) / 6000. Considera-se o maior entre peso real e cúbico.</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+
 const PlaceholderPlatform = ({ nome }: { nome: string }) => (
   <div className="flex flex-col items-center justify-center py-24 text-center">
     <Calculator className="w-16 h-16 text-muted-foreground/40 mb-4" />
