@@ -747,6 +747,7 @@ const AmazonCalculadora = () => {
                   <span className="text-destructive font-medium">−{formatCurrency(valorFreteFBA)}</span>
                 </div>
               )}
+              {valorImposto > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Imposto ({impostoPerc}%)</span>
                   <span className="text-destructive font-medium">−{formatCurrency(valorImposto)}</span>
