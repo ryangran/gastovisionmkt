@@ -482,6 +482,68 @@ const AMAZON_FBA_ONSITE_TABELA: AmazonFBAOnsiteFaixa[] = [
 
 const AMAZON_FBA_ONSITE_QUILO_ADICIONAL = 4.00;
 
+// Tabela de frete DBA Amazon (Novas tarifas a partir de 01/09/2024)
+// Produtos até R$30: tarifa fixa R$4,50
+// Produtos até R$79: tarifa fixa R$8,00
+// Produtos a partir de R$79: tabela por peso e zona
+
+type AmazonDBAZona = "sp" | "zona1" | "zona2" | "centro_norte";
+
+const AMAZON_DBA_ZONAS: { value: AmazonDBAZona; label: string }[] = [
+  { value: "sp", label: "SP - Zona 1" },
+  { value: "zona1", label: "Zona 1 (outros Sul e Sudeste)" },
+  { value: "zona2", label: "Zona 2 (do Sul e Sudeste)" },
+  { value: "centro_norte", label: "Centro-Oeste, Norte e Nordeste" },
+];
+
+type AmazonDBAFaixa = {
+  label: string;
+  maxKg: number;
+  sp: number;
+  zona1: number;
+  zona2: number;
+  centro_norte: number;
+};
+
+const AMAZON_DBA_TABELA: AmazonDBAFaixa[] = [
+  { label: "0 a 250g",     maxKg: 0.25, sp: 19.95, zona1: 19.95, zona2: 20.45, centro_norte: 29.45 },
+  { label: "250 a 500g",   maxKg: 0.5,  sp: 20.45, zona1: 20.45, zona2: 20.95, centro_norte: 30.45 },
+  { label: "500g a 1kg",   maxKg: 1,    sp: 21.45, zona1: 21.45, zona2: 21.95, centro_norte: 33.45 },
+  { label: "1 a 2kg",      maxKg: 2,    sp: 22.95, zona1: 22.95, zona2: 23.45, centro_norte: 37.95 },
+  { label: "2 a 3kg",      maxKg: 3,    sp: 23.95, zona1: 23.95, zona2: 24.45, centro_norte: 44.45 },
+  { label: "3 a 4kg",      maxKg: 4,    sp: 25.95, zona1: 25.95, zona2: 25.95, centro_norte: 46.95 },
+  { label: "4 a 5kg",      maxKg: 5,    sp: 27.95, zona1: 27.95, zona2: 27.95, centro_norte: 48.95 },
+  { label: "5 a 6kg",      maxKg: 6,    sp: 36.95, zona1: 36.95, zona2: 36.95, centro_norte: 58.45 },
+  { label: "6 a 7kg",      maxKg: 7,    sp: 39.45, zona1: 39.45, zona2: 39.45, centro_norte: 59.95 },
+  { label: "7 a 8kg",      maxKg: 8,    sp: 40.45, zona1: 40.45, zona2: 40.45, centro_norte: 61.45 },
+  { label: "8 a 9kg",      maxKg: 9,    sp: 45.45, zona1: 46.95, zona2: 46.95, centro_norte: 62.95 },
+  { label: "9 a 10kg",     maxKg: 10,   sp: 59.95, zona1: 61.45, zona2: 65.95, centro_norte: 87.45 },
+];
+
+const AMAZON_DBA_QUILO_ADICIONAL = 4.00; // todas as zonas
+
+function calcularFreteDBA(pesoKg: number, precoVenda: number, zona: AmazonDBAZona): { valor: number; tipo: string; faixa?: AmazonDBAFaixa } {
+  // Produtos até R$30: tarifa fixa
+  if (precoVenda <= 30) {
+    return { valor: 4.50, tipo: "Tarifa fixa (produto até R$30)" };
+  }
+  // Produtos até R$79: tarifa fixa
+  if (precoVenda < 79) {
+    return { valor: 8.00, tipo: "Tarifa fixa (produto até R$79)" };
+  }
+  // Produtos a partir de R$79: tabela por peso e zona
+  if (pesoKg <= 0) {
+    return { valor: 0, tipo: "Informe o peso para calcular" };
+  }
+  if (pesoKg <= 10) {
+    const faixa = AMAZON_DBA_TABELA.find(f => pesoKg <= f.maxKg) ?? AMAZON_DBA_TABELA[AMAZON_DBA_TABELA.length - 1];
+    return { valor: faixa[zona], tipo: `Tabela por peso (${faixa.label})`, faixa };
+  }
+  const faixaBase = AMAZON_DBA_TABELA[AMAZON_DBA_TABELA.length - 1];
+  const quilosExtra = Math.ceil(pesoKg - 10);
+  return { valor: faixaBase[zona] + quilosExtra * AMAZON_DBA_QUILO_ADICIONAL, tipo: `Acima de 10kg (+${quilosExtra}kg extra)`, faixa: faixaBase };
+}
+
 type AmazonModelo = "dba" | "fba" | "fba_onsite";
 
 function calcularFreteFBA(pesoKg: number, precoVenda: number): { faixa: AmazonFBAFaixa | null; valor: number } {
@@ -545,6 +607,7 @@ const AmazonCalculadora = () => {
   const [alturaFBA, setAlturaFBA]           = usePersistedState("calc_amazon_altura_fba", "");
   const [larguraFBA, setLarguraFBA]         = usePersistedState("calc_amazon_largura_fba", "");
   const [comprimentoFBA, setComprimentoFBA] = usePersistedState("calc_amazon_comprimento_fba", "");
+  const [dbaZona, setDbaZona]               = usePersistedState<AmazonDBAZona>("calc_amazon_dba_zona", "sp");
 
   const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome)!;
   const preco          = parseNum(precoVenda);
@@ -560,13 +623,14 @@ const AmazonCalculadora = () => {
   const pesoFinalFBA   = Math.max(pesoRealFBA, pesoCubadoFBA);
   const fbaFreteInfo      = modelo === "fba" && pesoFinalFBA > 0 && preco > 0 ? calcularFreteFBA(pesoFinalFBA, preco) : null;
   const fbaOnsiteInfo     = modelo === "fba_onsite" && pesoFinalFBA > 0 ? calcularFreteFBAOnsite(pesoFinalFBA) : null;
-  const valorFreteFBA     = fbaFreteInfo ? fbaFreteInfo.valor : fbaOnsiteInfo ? fbaOnsiteInfo.valor : 0;
+  const dbaFreteInfo      = modelo === "dba" && preco > 0 ? calcularFreteDBA(pesoFinalFBA, preco, dbaZona) : null;
+  const valorFrete        = fbaFreteInfo ? fbaFreteInfo.valor : fbaOnsiteInfo ? fbaOnsiteInfo.valor : dbaFreteInfo ? dbaFreteInfo.valor : 0;
 
   const valorComissao  = preco > 0 ? calcularComissaoAmazon(preco, categoria) : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
-  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFreteFBA;
+  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete;
   const lucro          = receitaLiquida - custo;
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
@@ -624,6 +688,66 @@ const AmazonCalculadora = () => {
               <option value="fba_onsite">FBA Onsite</option>
             </select>
           </div>
+
+          {/* DBA freight section */}
+          {modelo === "dba" && (
+            <div className="space-y-4 p-3 rounded-lg bg-muted/20 border border-border">
+              <p className="text-xs font-semibold text-foreground">🚚 Frete DBA (Preço Certo)</p>
+              {preco > 0 && preco < 79 && (
+                <div className="text-xs bg-muted/30 rounded p-2">
+                  <p>Tarifa fixa: <span className="font-semibold text-primary">{formatCurrency(dbaFreteInfo?.valor ?? 0)}</span></p>
+                  <p className="text-muted-foreground">{dbaFreteInfo?.tipo}</p>
+                </div>
+              )}
+              {preco >= 79 && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-foreground text-xs font-medium">Zona de Entrega</Label>
+                    <select
+                      value={dbaZona}
+                      onChange={(e) => setDbaZona(e.target.value as AmazonDBAZona)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      {AMAZON_DBA_ZONAS.map((z) => (
+                        <option key={z.value} value={z.value}>{z.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-foreground text-xs font-medium">Peso Real (kg)</Label>
+                    <Input type="number" placeholder="0" value={pesoFBA} onChange={(e) => setPesoFBA(e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-foreground text-xs">Altura (cm)</Label>
+                      <Input type="number" placeholder="0" value={alturaFBA} onChange={(e) => setAlturaFBA(e.target.value)} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-foreground text-xs">Largura (cm)</Label>
+                      <Input type="number" placeholder="0" value={larguraFBA} onChange={(e) => setLarguraFBA(e.target.value)} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-foreground text-xs">Compr. (cm)</Label>
+                      <Input type="number" placeholder="0" value={comprimentoFBA} onChange={(e) => setComprimentoFBA(e.target.value)} />
+                    </div>
+                  </div>
+                  {pesoCubadoFBA > 0 && (
+                    <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2 space-y-1">
+                      <p>Peso cubado (C×L×A÷6000): <span className="font-semibold text-foreground">{pesoCubadoFBA.toFixed(2)} kg</span></p>
+                      <p>Peso real: <span className="font-semibold text-foreground">{pesoRealFBA.toFixed(2)} kg</span></p>
+                      <p>Peso considerado: <span className="font-semibold text-primary">{pesoFinalFBA.toFixed(2)} kg</span></p>
+                    </div>
+                  )}
+                  {dbaFreteInfo && dbaFreteInfo.valor > 0 && (
+                    <div className="text-xs bg-muted/30 rounded p-2">
+                      <p>{dbaFreteInfo.tipo}</p>
+                      <p>Frete DBA: <span className="font-semibold text-primary">{formatCurrency(dbaFreteInfo.valor)}</span></p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {(modelo === "fba" || modelo === "fba_onsite") && (
             <div className="space-y-4 p-3 rounded-lg bg-muted/20 border border-border">
@@ -788,10 +912,10 @@ const AmazonCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão Amazon</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
-              {valorFreteFBA > 0 && (
+              {valorFrete > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">− Frete FBA</span>
-                  <span className="text-destructive font-medium">−{formatCurrency(valorFreteFBA)}</span>
+                  <span className="text-muted-foreground">− Frete {modelo === "dba" ? "DBA" : modelo === "fba" ? "FBA" : "FBA Onsite"}</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorFrete)}</span>
                 </div>
               )}
               {valorImposto > 0 && (
