@@ -2076,7 +2076,7 @@ const TikTokCalculadora = () => {
             <div>
               <Label className="text-foreground font-medium">Incentivo de Comissão</Label>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {incentivoComissao ? "Comissão zerada (0%)" : "Comissão padrão de 6%"}
+                {incentivoComissao ? "Comissão zerada (0%)" : "Ative se estiver no Programa de Incentivo"}
               </p>
             </div>
             <Switch checked={incentivoComissao} onCheckedChange={setIncentivoComissao} />
