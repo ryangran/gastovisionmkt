@@ -2135,7 +2135,7 @@ const Calculadora = () => {
             <MagaluCalculadora />
           </TabsContent>
           <TabsContent value="tiktok">
-            <PlaceholderPlatform nome="TikTok" />
+            <TikTokCalculadora />
           </TabsContent>
         </Tabs>
       </main>
