@@ -621,6 +621,9 @@ const AmazonCalculadora = () => {
               )}
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Preço de Venda (R$)</Label>
             <input
               type="number"
               placeholder="0,00"
