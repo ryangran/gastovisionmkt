@@ -3,6 +3,7 @@ import shopeeLogo from "@/assets/shopee-logo.png";
 import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
 import amazonLogo from "@/assets/amazon-logo.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
+import sheinLogo from "@/assets/shein-logo.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
