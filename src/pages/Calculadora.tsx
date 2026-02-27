@@ -571,8 +571,56 @@ const AmazonCalculadora = () => {
             </p>
           </div>
 
+          {/* Modelo DBA / FBA */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">Preço de Venda (R$)</Label>
+            <Label className="text-foreground font-medium">Modelo de Envio</Label>
+            <select
+              value={modelo}
+              onChange={(e) => setModelo(e.target.value as AmazonModelo)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="dba">DBA (Entrega pelo vendedor)</option>
+              <option value="fba">FBA (Fulfillment by Amazon)</option>
+            </select>
+          </div>
+
+          {modelo === "fba" && (
+            <div className="space-y-4 p-3 rounded-lg bg-muted/20 border border-border">
+              <p className="text-xs font-semibold text-foreground">📦 Dados para cálculo de frete FBA</p>
+              <div className="space-y-2">
+                <Label className="text-foreground text-xs font-medium">Peso Real (kg)</Label>
+                <Input type="number" placeholder="0" value={pesoFBA} onChange={(e) => setPesoFBA(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Altura (cm)</Label>
+                  <Input type="number" placeholder="0" value={alturaFBA} onChange={(e) => setAlturaFBA(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Largura (cm)</Label>
+                  <Input type="number" placeholder="0" value={larguraFBA} onChange={(e) => setLarguraFBA(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-foreground text-xs">Compr. (cm)</Label>
+                  <Input type="number" placeholder="0" value={comprimentoFBA} onChange={(e) => setComprimentoFBA(e.target.value)} />
+                </div>
+              </div>
+              {pesoCubadoFBA > 0 && (
+                <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2 space-y-1">
+                  <p>Peso cubado (C×L×A÷6000): <span className="font-semibold text-foreground">{pesoCubadoFBA.toFixed(2)} kg</span></p>
+                  <p>Peso real: <span className="font-semibold text-foreground">{pesoRealFBA.toFixed(2)} kg</span></p>
+                  <p>Peso considerado: <span className="font-semibold text-primary">{pesoFinalFBA.toFixed(2)} kg</span></p>
+                </div>
+              )}
+              {fbaFreteInfo && (
+                <div className="text-xs bg-muted/30 rounded p-2">
+                  <p>Faixa: <span className="font-semibold text-foreground">{fbaFreteInfo.faixa?.label ?? "Acima de 10kg"}</span></p>
+                  <p>Coluna: <span className="font-semibold text-foreground">{preco <= 50 ? "Até R$50" : "Acima de R$50"}</span></p>
+                  <p>Frete FBA: <span className="font-semibold text-primary">{formatCurrency(fbaFreteInfo.valor)}</span></p>
+                </div>
+              )}
+            </div>
+          )}
             <input
               type="number"
               placeholder="0,00"
