@@ -553,8 +553,9 @@ const AmazonCalculadora = () => {
 
   const pesoCubadoFBA  = (altCm > 0 && largCm > 0 && compCm > 0) ? calcularPesoCubadoFBA(altCm, largCm, compCm) : 0;
   const pesoFinalFBA   = Math.max(pesoRealFBA, pesoCubadoFBA);
-  const fbaFreteInfo   = modelo === "fba" && pesoFinalFBA > 0 && preco > 0 ? calcularFreteFBA(pesoFinalFBA, preco) : null;
-  const valorFreteFBA  = fbaFreteInfo ? fbaFreteInfo.valor : 0;
+  const fbaFreteInfo      = modelo === "fba" && pesoFinalFBA > 0 && preco > 0 ? calcularFreteFBA(pesoFinalFBA, preco) : null;
+  const fbaOnsiteInfo     = modelo === "fba_onsite" && pesoFinalFBA > 0 ? calcularFreteFBAOnsite(pesoFinalFBA) : null;
+  const valorFreteFBA     = fbaFreteInfo ? fbaFreteInfo.valor : fbaOnsiteInfo ? fbaOnsiteInfo.valor : 0;
 
   const valorComissao  = preco > 0 ? calcularComissaoAmazon(preco, categoria) : 0;
   const valorImposto   = preco * (impostoPerc / 100);
