@@ -607,6 +607,7 @@ const AmazonCalculadora = () => {
   const [alturaFBA, setAlturaFBA]           = usePersistedState("calc_amazon_altura_fba", "");
   const [larguraFBA, setLarguraFBA]         = usePersistedState("calc_amazon_largura_fba", "");
   const [comprimentoFBA, setComprimentoFBA] = usePersistedState("calc_amazon_comprimento_fba", "");
+  const [dbaZona, setDbaZona]               = usePersistedState<AmazonDBAZona>("calc_amazon_dba_zona", "sp");
 
   const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome)!;
   const preco          = parseNum(precoVenda);
@@ -622,7 +623,8 @@ const AmazonCalculadora = () => {
   const pesoFinalFBA   = Math.max(pesoRealFBA, pesoCubadoFBA);
   const fbaFreteInfo      = modelo === "fba" && pesoFinalFBA > 0 && preco > 0 ? calcularFreteFBA(pesoFinalFBA, preco) : null;
   const fbaOnsiteInfo     = modelo === "fba_onsite" && pesoFinalFBA > 0 ? calcularFreteFBAOnsite(pesoFinalFBA) : null;
-  const valorFreteFBA     = fbaFreteInfo ? fbaFreteInfo.valor : fbaOnsiteInfo ? fbaOnsiteInfo.valor : 0;
+  const dbaFreteInfo      = modelo === "dba" && preco > 0 ? calcularFreteDBA(pesoFinalFBA, preco, dbaZona) : null;
+  const valorFrete        = fbaFreteInfo ? fbaFreteInfo.valor : fbaOnsiteInfo ? fbaOnsiteInfo.valor : dbaFreteInfo ? dbaFreteInfo.valor : 0;
 
   const valorComissao  = preco > 0 ? calcularComissaoAmazon(preco, categoria) : 0;
   const valorImposto   = preco * (impostoPerc / 100);
