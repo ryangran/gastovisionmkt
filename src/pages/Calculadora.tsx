@@ -453,7 +453,31 @@ const AMAZON_FBA_TABELA: AmazonFBAFaixa[] = [
 
 const AMAZON_FBA_QUILO_ADICIONAL = { ate50: 3.25, acima50: 3.50 };
 
-type AmazonModelo = "dba" | "fba";
+// Tabela de frete FBA Onsite
+type AmazonFBAOnsiteFaixa = {
+  label: string;
+  maxKg: number;
+  valor: number;
+};
+
+const AMAZON_FBA_ONSITE_TABELA: AmazonFBAOnsiteFaixa[] = [
+  { label: "0 a 250g",       maxKg: 0.25, valor: 23.95 },
+  { label: "250 a 500g",     maxKg: 0.5,  valor: 24.95 },
+  { label: "500g a 1kg",     maxKg: 1,    valor: 26.45 },
+  { label: "1 a 2kg",        maxKg: 2,    valor: 27.95 },
+  { label: "2 a 3kg",        maxKg: 3,    valor: 29.95 },
+  { label: "3 a 4kg",        maxKg: 4,    valor: 32.95 },
+  { label: "4 a 5kg",        maxKg: 5,    valor: 36.45 },
+  { label: "5 a 6kg",        maxKg: 6,    valor: 41.45 },
+  { label: "6 a 7kg",        maxKg: 7,    valor: 46.45 },
+  { label: "7 a 8kg",        maxKg: 8,    valor: 51.45 },
+  { label: "8 a 9kg",        maxKg: 9,    valor: 56.45 },
+  { label: "9 a 10kg",       maxKg: 10,   valor: 71.45 },
+];
+
+const AMAZON_FBA_ONSITE_QUILO_ADICIONAL = 4.00;
+
+type AmazonModelo = "dba" | "fba" | "fba_onsite";
 
 function calcularFreteFBA(pesoKg: number, precoVenda: number): { faixa: AmazonFBAFaixa | null; valor: number } {
   const coluna: "ate50" | "acima50" = precoVenda <= 50 ? "ate50" : "acima50";
@@ -465,6 +489,16 @@ function calcularFreteFBA(pesoKg: number, precoVenda: number): { faixa: AmazonFB
   const quilosExtra = Math.ceil(pesoKg - 10);
   const adicional = AMAZON_FBA_QUILO_ADICIONAL[coluna];
   return { faixa: faixaBase, valor: faixaBase[coluna] + quilosExtra * adicional };
+}
+
+function calcularFreteFBAOnsite(pesoKg: number): { faixa: AmazonFBAOnsiteFaixa | null; valor: number } {
+  if (pesoKg <= 10) {
+    const faixa = AMAZON_FBA_ONSITE_TABELA.find(f => pesoKg <= f.maxKg) ?? AMAZON_FBA_ONSITE_TABELA[AMAZON_FBA_ONSITE_TABELA.length - 1];
+    return { faixa, valor: faixa.valor };
+  }
+  const faixaBase = AMAZON_FBA_ONSITE_TABELA[AMAZON_FBA_ONSITE_TABELA.length - 1];
+  const quilosExtra = Math.ceil(pesoKg - 10);
+  return { faixa: faixaBase, valor: faixaBase.valor + quilosExtra * AMAZON_FBA_ONSITE_QUILO_ADICIONAL };
 }
 
 function calcularPesoCubadoFBA(alturaCm: number, larguraCm: number, comprimentoCm: number): number {
