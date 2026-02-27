@@ -2625,7 +2625,7 @@ const Calculadora = () => {
           <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
             <TabsTrigger value="shopee"><img src={shopeeLogo} alt="Shopee" className="h-4 inline-block mr-1 object-contain" /> Shopee</TabsTrigger>
             <TabsTrigger value="mercadolivre"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 inline-block mr-1 object-contain" /> Mercado Livre</TabsTrigger>
-            <TabsTrigger value="amazon">📦 Amazon</TabsTrigger>
+            <TabsTrigger value="amazon"><img src={amazonLogo} alt="Amazon" className="h-4 inline-block mr-1 object-contain" /> Amazon</TabsTrigger>
             <TabsTrigger value="magalu">🏪 Magalu</TabsTrigger>
             <TabsTrigger value="tiktok">🎵 TikTok</TabsTrigger>
             <TabsTrigger value="shein">👗 Shein</TabsTrigger>
