@@ -630,7 +630,7 @@ const AmazonCalculadora = () => {
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
-  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFreteFBA;
+  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete;
   const lucro          = receitaLiquida - custo;
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
