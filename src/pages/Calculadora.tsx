@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import shopeeLogo from "@/assets/shopee-logo.png";
 import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
 import amazonLogo from "@/assets/amazon-logo.png";
@@ -8,7 +9,7 @@ import magaluLogo from "@/assets/magalu-logo.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, LogOut, Plus, Trash2 } from "lucide-react";
+import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
@@ -2693,6 +2694,22 @@ const PlaceholderPlatform = ({ nome }: { nome: string }) => (
   </div>
 );
 
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme();
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="h-8 w-8"
+    >
+      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <span className="sr-only">Alternar tema</span>
+    </Button>
+  );
+};
+
 // ─── Página Principal ──────────────────────────────────────────────────────────
 const Calculadora = () => {
   const navigate = useNavigate();
@@ -2772,6 +2789,7 @@ const Calculadora = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <UserProfileDialog />
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="w-4 h-4" />
