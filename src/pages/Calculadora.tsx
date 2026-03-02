@@ -8,7 +8,7 @@ import magaluLogo from "@/assets/magalu-logo.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, LogOut, Plus, Trash2 } from "lucide-react";
+import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
@@ -2772,6 +2772,7 @@ const Calculadora = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <UserProfileDialog />
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="w-4 h-4" />
