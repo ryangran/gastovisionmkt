@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import shopeeLogo from "@/assets/shopee-logo.png";
 import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
 import amazonLogo from "@/assets/amazon-logo.png";
