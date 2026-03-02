@@ -2785,13 +2785,13 @@ const Calculadora = () => {
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="shopee">
-          <TabsList className="mb-6 flex flex-wrap gap-1 h-auto">
-            <TabsTrigger value="shopee"><img src={shopeeLogo} alt="Shopee" className="h-4 inline-block mr-1 object-contain" /> Shopee</TabsTrigger>
-            <TabsTrigger value="mercadolivre"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 inline-block mr-1 object-contain" /> Mercado Livre</TabsTrigger>
-            <TabsTrigger value="amazon"><img src={amazonLogo} alt="Amazon" className="h-4 inline-block mr-1 object-contain" /> Amazon</TabsTrigger>
-            <TabsTrigger value="magalu"><img src={magaluLogo} alt="Magalu" className="h-4 inline-block mr-1 object-contain" /> Magalu</TabsTrigger>
-            <TabsTrigger value="tiktok"><img src={tiktokLogo} alt="TikTok" className="h-4 inline-block mr-1 object-contain" /> TikTok</TabsTrigger>
-            <TabsTrigger value="shein"><img src={sheinLogo} alt="Shein" className="h-4 inline-block mr-1 object-contain" /> Shein</TabsTrigger>
+          <TabsList className="mb-6 w-full overflow-x-auto scrollbar-hide flex gap-1 h-auto bg-transparent p-0 justify-start">
+            <TabsTrigger value="shopee" className="flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 border border-border bg-card transition-all"><img src={shopeeLogo} alt="Shopee" className="h-4 inline-block mr-1.5 object-contain" /> Shopee</TabsTrigger>
+            <TabsTrigger value="mercadolivre" className="flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 border border-border bg-card transition-all"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 inline-block mr-1.5 object-contain" /> Mercado Livre</TabsTrigger>
+            <TabsTrigger value="amazon" className="flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 border border-border bg-card transition-all"><img src={amazonLogo} alt="Amazon" className="h-4 inline-block mr-1.5 object-contain" /> Amazon</TabsTrigger>
+            <TabsTrigger value="magalu" className="flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 border border-border bg-card transition-all"><img src={magaluLogo} alt="Magalu" className="h-4 inline-block mr-1.5 object-contain" /> Magalu</TabsTrigger>
+            <TabsTrigger value="tiktok" className="flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 border border-border bg-card transition-all"><img src={tiktokLogo} alt="TikTok" className="h-4 inline-block mr-1.5 object-contain" /> TikTok</TabsTrigger>
+            <TabsTrigger value="shein" className="flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-2 border border-border bg-card transition-all"><img src={sheinLogo} alt="Shein" className="h-4 inline-block mr-1.5 object-contain" /> Shein</TabsTrigger>
           </TabsList>
 
           <TabsContent value="shopee">
