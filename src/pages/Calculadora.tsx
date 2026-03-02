@@ -2802,7 +2802,7 @@ const Calculadora = () => {
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="shopee" orientation="vertical" className="flex flex-col md:flex-row gap-6">
-          <div className="flex flex-row md:flex-col gap-1 md:w-48 md:min-w-48 overflow-x-auto md:overflow-x-visible scrollbar-hide md:sticky md:top-6 md:self-start">
+          <div className="flex flex-row md:flex-col md:justify-between gap-1 md:w-48 md:min-w-48 overflow-x-auto md:overflow-x-visible scrollbar-hide md:sticky md:top-6 md:self-start md:h-[calc(100vh-6rem)]">
             <TabsList className="flex flex-row md:flex-col gap-1 h-auto bg-transparent p-0 w-full">
               <TabsTrigger value="shopee" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={shopeeLogo} alt="Shopee" className="h-4 mr-2 object-contain" /> Shopee</TabsTrigger>
               <TabsTrigger value="mercadolivre" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 mr-2 object-contain" /> Mercado Livre</TabsTrigger>
@@ -2812,8 +2812,8 @@ const Calculadora = () => {
               <TabsTrigger value="shein" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={sheinLogo} alt="Shein" className="h-4 mr-2 object-contain" /> Shein</TabsTrigger>
             </TabsList>
 
-            {/* Perfil e Sair no rodapé do menu lateral */}
-            <div className="hidden md:flex flex-col gap-1 mt-4 pt-4 border-t border-border">
+            {/* Perfil e Sair fixo no rodapé */}
+            <div className="hidden md:flex flex-col gap-1 pt-4 border-t border-border mt-auto">
               <UserProfileDialog />
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 w-full justify-start">
                 <LogOut className="w-4 h-4" />
