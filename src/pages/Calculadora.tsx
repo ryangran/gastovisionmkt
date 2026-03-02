@@ -2790,8 +2790,7 @@ const Calculadora = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <UserProfileDialog />
-              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 md:hidden">
                 <LogOut className="w-4 h-4" />
                 Sair
               </Button>
@@ -2803,14 +2802,25 @@ const Calculadora = () => {
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="shopee" orientation="vertical" className="flex flex-col md:flex-row gap-6">
-          <TabsList className="flex flex-row md:flex-col gap-1 h-auto bg-transparent p-0 md:w-48 md:min-w-48 overflow-x-auto md:overflow-x-visible scrollbar-hide md:sticky md:top-6 md:self-start">
-            <TabsTrigger value="shopee" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={shopeeLogo} alt="Shopee" className="h-4 mr-2 object-contain" /> Shopee</TabsTrigger>
-            <TabsTrigger value="mercadolivre" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 mr-2 object-contain" /> Mercado Livre</TabsTrigger>
-            <TabsTrigger value="amazon" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={amazonLogo} alt="Amazon" className="h-4 mr-2 object-contain" /> Amazon</TabsTrigger>
-            <TabsTrigger value="magalu" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={magaluLogo} alt="Magalu" className="h-4 mr-2 object-contain" /> Magalu</TabsTrigger>
-            <TabsTrigger value="tiktok" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={tiktokLogo} alt="TikTok" className="h-4 mr-2 object-contain" /> TikTok</TabsTrigger>
-            <TabsTrigger value="shein" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={sheinLogo} alt="Shein" className="h-4 mr-2 object-contain" /> Shein</TabsTrigger>
-          </TabsList>
+          <div className="flex flex-row md:flex-col gap-1 md:w-48 md:min-w-48 overflow-x-auto md:overflow-x-visible scrollbar-hide md:sticky md:top-6 md:self-start">
+            <TabsList className="flex flex-row md:flex-col gap-1 h-auto bg-transparent p-0 w-full">
+              <TabsTrigger value="shopee" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={shopeeLogo} alt="Shopee" className="h-4 mr-2 object-contain" /> Shopee</TabsTrigger>
+              <TabsTrigger value="mercadolivre" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={mercadolivreLogo} alt="Mercado Livre" className="h-4 mr-2 object-contain" /> Mercado Livre</TabsTrigger>
+              <TabsTrigger value="amazon" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={amazonLogo} alt="Amazon" className="h-4 mr-2 object-contain" /> Amazon</TabsTrigger>
+              <TabsTrigger value="magalu" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={magaluLogo} alt="Magalu" className="h-4 mr-2 object-contain" /> Magalu</TabsTrigger>
+              <TabsTrigger value="tiktok" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={tiktokLogo} alt="TikTok" className="h-4 mr-2 object-contain" /> TikTok</TabsTrigger>
+              <TabsTrigger value="shein" className="flex-shrink-0 w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><img src={sheinLogo} alt="Shein" className="h-4 mr-2 object-contain" /> Shein</TabsTrigger>
+            </TabsList>
+
+            {/* Perfil e Sair no rodapé do menu lateral */}
+            <div className="hidden md:flex flex-col gap-1 mt-4 pt-4 border-t border-border">
+              <UserProfileDialog />
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 w-full justify-start">
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
+          </div>
 
           <div className="flex-1 min-w-0">
             <TabsContent value="shopee" className="mt-0">
