@@ -1126,39 +1126,40 @@ type MagaluFreteFaixa = {
   semDesconto: number;
   desconto25: number;
   desconto50: number;
+  desconto75: number;
 };
 
 const MAGALU_FRETE_TABELA: MagaluFreteFaixa[] = [
-  { label: "Até 500g",           maxKg: 0.5,   semDesconto: 35.90, desconto25: 26.93, desconto50: 17.95 },
-  { label: "De 500g a 1kg",      maxKg: 1,     semDesconto: 40.80, desconto25: 30.68, desconto50: 20.45 },
-  { label: "De 1kg a 2kg",       maxKg: 2,     semDesconto: 42.90, desconto25: 32.18, desconto50: 21.45 },
-  { label: "De 2kg a 5kg",       maxKg: 5,     semDesconto: 50.90, desconto25: 38.18, desconto50: 25.45 },
-  { label: "De 5kg a 9kg",       maxKg: 9,     semDesconto: 77.90, desconto25: 58.43, desconto50: 38.95 },
-  { label: "De 9kg a 13kg",      maxKg: 13,    semDesconto: 98.00, desconto25: 74.18, desconto50: 49.45 },
-  { label: "De 13kg a 17kg",     maxKg: 17,    semDesconto: 111.90, desconto25: 83.93, desconto50: 55.95 },
-  { label: "De 17kg a 23kg",     maxKg: 23,    semDesconto: 134.90, desconto25: 101.18, desconto50: 67.45 },
-  { label: "De 23kg a 30kg",     maxKg: 30,    semDesconto: 148.90, desconto25: 111.68, desconto50: 74.45 },
-  { label: "De 30kg a 40kg",     maxKg: 40,    semDesconto: 179.90, desconto25: 134.93, desconto50: 89.95 },
-  { label: "De 40kg a 50kg",     maxKg: 50,    semDesconto: 189.90, desconto25: 142.43, desconto50: 94.95 },
-  { label: "De 50kg a 60kg",     maxKg: 60,    semDesconto: 199.90, desconto25: 149.93, desconto50: 99.95 },
-  { label: "De 60kg a 70kg",     maxKg: 70,    semDesconto: 209.90, desconto25: 157.43, desconto50: 104.95 },
-  { label: "De 70kg a 80kg",     maxKg: 80,    semDesconto: 219.90, desconto25: 164.93, desconto50: 109.95 },
-  { label: "De 80kg a 90kg",     maxKg: 90,    semDesconto: 229.90, desconto25: 172.43, desconto50: 114.95 },
-  { label: "De 90kg a 100kg",    maxKg: 100,   semDesconto: 239.90, desconto25: 179.93, desconto50: 119.95 },
-  { label: "De 100kg a 110kg",   maxKg: 110,   semDesconto: 249.90, desconto25: 187.43, desconto50: 124.95 },
-  { label: "De 110kg a 120kg",   maxKg: 120,   semDesconto: 259.90, desconto25: 194.93, desconto50: 129.95 },
-  { label: "De 120kg a 130kg",   maxKg: 130,   semDesconto: 269.90, desconto25: 202.43, desconto50: 134.95 },
-  { label: "De 130kg a 140kg",   maxKg: 140,   semDesconto: 279.90, desconto25: 209.93, desconto50: 139.95 },
-  { label: "De 140kg a 150kg",   maxKg: 150,   semDesconto: 289.90, desconto25: 217.43, desconto50: 144.95 },
-  { label: "De 150kg a 160kg",   maxKg: 160,   semDesconto: 299.90, desconto25: 224.93, desconto50: 149.95 },
-  { label: "De 160kg a 170kg",   maxKg: 170,   semDesconto: 309.90, desconto25: 232.43, desconto50: 154.95 },
-  { label: "De 170kg a 180kg",   maxKg: 180,   semDesconto: 319.90, desconto25: 239.93, desconto50: 159.95 },
-  { label: "De 180kg a 190kg",   maxKg: 190,   semDesconto: 329.90, desconto25: 247.43, desconto50: 164.95 },
-  { label: "De 190kg a 200kg",   maxKg: 200,   semDesconto: 339.90, desconto25: 254.93, desconto50: 169.95 },
-  { label: "Acima de 200kg",     maxKg: Infinity, semDesconto: 349.90, desconto25: 262.43, desconto50: 174.95 },
+  { label: "Até 500g",           maxKg: 0.5,   semDesconto: 35.90, desconto25: 26.93, desconto50: 17.95, desconto75: 8.98 },
+  { label: "De 500g a 1kg",      maxKg: 1,     semDesconto: 40.80, desconto25: 30.68, desconto50: 20.45, desconto75: 10.20 },
+  { label: "De 1kg a 2kg",       maxKg: 2,     semDesconto: 42.90, desconto25: 32.18, desconto50: 21.45, desconto75: 10.73 },
+  { label: "De 2kg a 5kg",       maxKg: 5,     semDesconto: 50.90, desconto25: 38.18, desconto50: 25.45, desconto75: 12.73 },
+  { label: "De 5kg a 9kg",       maxKg: 9,     semDesconto: 77.90, desconto25: 58.43, desconto50: 38.95, desconto75: 19.48 },
+  { label: "De 9kg a 13kg",      maxKg: 13,    semDesconto: 98.00, desconto25: 74.18, desconto50: 49.45, desconto75: 24.50 },
+  { label: "De 13kg a 17kg",     maxKg: 17,    semDesconto: 111.90, desconto25: 83.93, desconto50: 55.95, desconto75: 27.98 },
+  { label: "De 17kg a 23kg",     maxKg: 23,    semDesconto: 134.90, desconto25: 101.18, desconto50: 67.45, desconto75: 33.73 },
+  { label: "De 23kg a 30kg",     maxKg: 30,    semDesconto: 148.90, desconto25: 111.68, desconto50: 74.45, desconto75: 37.23 },
+  { label: "De 30kg a 40kg",     maxKg: 40,    semDesconto: 179.90, desconto25: 134.93, desconto50: 89.95, desconto75: 44.98 },
+  { label: "De 40kg a 50kg",     maxKg: 50,    semDesconto: 189.90, desconto25: 142.43, desconto50: 94.95, desconto75: 47.48 },
+  { label: "De 50kg a 60kg",     maxKg: 60,    semDesconto: 199.90, desconto25: 149.93, desconto50: 99.95, desconto75: 49.98 },
+  { label: "De 60kg a 70kg",     maxKg: 70,    semDesconto: 209.90, desconto25: 157.43, desconto50: 104.95, desconto75: 52.48 },
+  { label: "De 70kg a 80kg",     maxKg: 80,    semDesconto: 219.90, desconto25: 164.93, desconto50: 109.95, desconto75: 54.98 },
+  { label: "De 80kg a 90kg",     maxKg: 90,    semDesconto: 229.90, desconto25: 172.43, desconto50: 114.95, desconto75: 57.48 },
+  { label: "De 90kg a 100kg",    maxKg: 100,   semDesconto: 239.90, desconto25: 179.93, desconto50: 119.95, desconto75: 59.98 },
+  { label: "De 100kg a 110kg",   maxKg: 110,   semDesconto: 249.90, desconto25: 187.43, desconto50: 124.95, desconto75: 62.48 },
+  { label: "De 110kg a 120kg",   maxKg: 120,   semDesconto: 259.90, desconto25: 194.93, desconto50: 129.95, desconto75: 64.98 },
+  { label: "De 120kg a 130kg",   maxKg: 130,   semDesconto: 269.90, desconto25: 202.43, desconto50: 134.95, desconto75: 67.48 },
+  { label: "De 130kg a 140kg",   maxKg: 140,   semDesconto: 279.90, desconto25: 209.93, desconto50: 139.95, desconto75: 69.98 },
+  { label: "De 140kg a 150kg",   maxKg: 150,   semDesconto: 289.90, desconto25: 217.43, desconto50: 144.95, desconto75: 72.48 },
+  { label: "De 150kg a 160kg",   maxKg: 160,   semDesconto: 299.90, desconto25: 224.93, desconto50: 149.95, desconto75: 74.98 },
+  { label: "De 160kg a 170kg",   maxKg: 170,   semDesconto: 309.90, desconto25: 232.43, desconto50: 154.95, desconto75: 77.48 },
+  { label: "De 170kg a 180kg",   maxKg: 180,   semDesconto: 319.90, desconto25: 239.93, desconto50: 159.95, desconto75: 79.98 },
+  { label: "De 180kg a 190kg",   maxKg: 190,   semDesconto: 329.90, desconto25: 247.43, desconto50: 164.95, desconto75: 82.48 },
+  { label: "De 190kg a 200kg",   maxKg: 200,   semDesconto: 339.90, desconto25: 254.93, desconto50: 169.95, desconto75: 84.98 },
+  { label: "Acima de 200kg",     maxKg: Infinity, semDesconto: 349.90, desconto25: 262.43, desconto50: 174.95, desconto75: 87.48 },
 ];
 
-type MagaluDescontoFrete = "sem_desconto" | "desconto_25" | "desconto_50";
+type MagaluDescontoFrete = "sem_desconto" | "desconto_25" | "desconto_50" | "desconto_75";
 type MagaluTipoProduto = "leves" | "pesados";
 
 function calcularPesoCubado(alturaM: number, larguraM: number, comprimentoM: number, tipo: MagaluTipoProduto): number {
@@ -1168,7 +1169,7 @@ function calcularPesoCubado(alturaM: number, larguraM: number, comprimentoM: num
 
 function getMagaluFrete(pesoKg: number, desconto: MagaluDescontoFrete): { faixa: MagaluFreteFaixa; valor: number } {
   const faixa = MAGALU_FRETE_TABELA.find(f => pesoKg <= f.maxKg) ?? MAGALU_FRETE_TABELA[MAGALU_FRETE_TABELA.length - 1];
-  const valor = desconto === "desconto_50" ? faixa.desconto50 : desconto === "desconto_25" ? faixa.desconto25 : faixa.semDesconto;
+  const valor = desconto === "desconto_75" ? faixa.desconto75 : desconto === "desconto_50" ? faixa.desconto50 : desconto === "desconto_25" ? faixa.desconto25 : faixa.semDesconto;
   return { faixa, valor };
 }
 
@@ -1331,6 +1332,7 @@ const MagaluCalculadora = () => {
                   <option value="sem_desconto">{"< 87% (Sem desconto)"}</option>
                   <option value="desconto_25">Entre 87% e 97% (Desconto 25%)</option>
                   <option value="desconto_50">{"> 97% (Desconto 50%)"}</option>
+                  <option value="desconto_75">Full Magalu (Desconto 75%)</option>
                 </select>
                 <p className="text-xs text-muted-foreground">Baseado na reputação do vendedor</p>
               </div>
@@ -1491,10 +1493,11 @@ const MagaluCalculadora = () => {
               <table className="w-full text-xs">
                 <thead className="sticky top-0 bg-card">
                   <tr className="border-b border-border">
-                    <th className="text-left px-3 py-2 text-muted-foreground font-medium">Faixa</th>
-                    <th className="text-center px-2 py-2 text-muted-foreground font-medium">Sem desc.</th>
-                    <th className="text-center px-2 py-2 text-muted-foreground font-medium">25%</th>
-                    <th className="text-center px-2 py-2 text-muted-foreground font-medium">50%</th>
+                     <th className="text-left px-3 py-2 text-muted-foreground font-medium">Faixa</th>
+                     <th className="text-center px-2 py-2 text-muted-foreground font-medium">Sem desc.</th>
+                     <th className="text-center px-2 py-2 text-muted-foreground font-medium">25%</th>
+                     <th className="text-center px-2 py-2 text-muted-foreground font-medium">50%</th>
+                     <th className="text-center px-2 py-2 text-muted-foreground font-medium">75%</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1506,6 +1509,7 @@ const MagaluCalculadora = () => {
                         <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "sem_desconto" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.semDesconto)}</td>
                         <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "desconto_25" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.desconto25)}</td>
                         <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "desconto_50" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.desconto50)}</td>
+                        <td className={`px-2 py-1.5 text-center font-mono ${ativa && descontoFrete === "desconto_75" ? "text-primary font-semibold" : "text-foreground"}`}>{formatCurrency(faixa.desconto75)}</td>
                       </tr>
                     );
                   })}
@@ -2151,19 +2155,23 @@ const TikTokCalculadora = () => {
   const [marketing, setMarketing]           = usePersistedState("calc_tiktok_marketing", "");
   const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_tiktok_usarMkt", false);
   const [incentivoComissao, setIncentivoComissao] = usePersistedState("calc_tiktok_incentivo", false);
+  const [usarFreteGratis, setUsarFreteGratis] = usePersistedState("calc_tiktok_fretegratis", false);
 
   const preco          = parseNum(precoVenda);
   const custo          = parseNum(custoProduto);
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
 
+  const TIKTOK_FRETE_GRATIS_TAXA = 0.06; // +6%
   const comissaoPerc   = incentivoComissao ? 0 : TIKTOK_COMISSAO;
+  const freteGratisPerc = usarFreteGratis ? TIKTOK_FRETE_GRATIS_TAXA : 0;
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
+  const valorFreteGratis = preco > 0 ? preco * freteGratisPerc : 0;
   const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
-  const receitaLiquida = preco - valorComissao - valorTaxaFixa - valorImposto - valorMarketing;
+  const receitaLiquida = preco - valorComissao - valorFreteGratis - valorTaxaFixa - valorImposto - valorMarketing;
   const lucro          = receitaLiquida - custo;
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
@@ -2212,6 +2220,17 @@ const TikTokCalculadora = () => {
             <Switch checked={incentivoComissao} onCheckedChange={setIncentivoComissao} />
           </div>
 
+          {/* Frete Grátis */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-foreground font-medium">Frete Grátis</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {usarFreteGratis ? "Taxa adicional de 6% ativa" : "Ative se utilizar frete grátis (+6%)"}
+              </p>
+            </div>
+            <Switch checked={usarFreteGratis} onCheckedChange={setUsarFreteGratis} />
+          </div>
+
           {/* Marketing */}
           <div className="flex items-center justify-between">
             <div>
@@ -2249,6 +2268,12 @@ const TikTokCalculadora = () => {
                 <span className="text-foreground text-sm">Taxa fixa por item</span>
                 <Badge variant="secondary" className="font-mono">R$4,00</Badge>
               </div>
+              {usarFreteGratis && (
+                <div className="flex items-center justify-between">
+                  <span className="text-foreground text-sm">Taxa Frete Grátis</span>
+                  <Badge className="bg-primary/20 text-primary font-mono border-0">+6%</Badge>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -2275,6 +2300,12 @@ const TikTokCalculadora = () => {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Comissão (incentivo)</span>
                   <span className="text-success font-medium">R$0,00</span>
+                </div>
+              )}
+              {usarFreteGratis && valorFreteGratis > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Frete Grátis (6%)</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorFreteGratis)}</span>
                 </div>
               )}
               <div className="flex items-center justify-between text-sm">
@@ -2352,6 +2383,11 @@ const TikTokCalculadora = () => {
             <div className="space-y-1">
               <p className="font-semibold text-foreground">🏷️ Taxa fixa</p>
               <p>A taxa por item vendido é fixada em <span className="font-semibold text-foreground">R$4,00</span> por item, incluindo impostos aplicáveis (IVA).</p>
+            </div>
+            <Separator />
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground">🚚 Frete Grátis</p>
+              <p>Ao utilizar o frete grátis, é cobrada uma taxa adicional de <span className="font-semibold text-foreground">6%</span> sobre o preço de venda.</p>
             </div>
           </CardContent>
         </Card>
