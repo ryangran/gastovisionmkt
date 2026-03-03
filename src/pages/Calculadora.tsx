@@ -2716,6 +2716,7 @@ const Calculadora = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState("shopee");
 
   useEffect(() => {
     const checkAccess = async () => {
