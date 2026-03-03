@@ -2789,6 +2789,9 @@ const Calculadora = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <div className="md:hidden">
+                <UserProfileDialog />
+              </div>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 md:hidden">
                 <LogOut className="w-4 h-4" />
                 Sair
