@@ -2698,13 +2698,14 @@ const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
   return (
-    <div className="flex items-center gap-2">
-      <Sun className="h-4 w-4 text-muted-foreground" />
+    <div className="flex items-center gap-1.5 md:gap-2">
+      <Sun className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
       <Switch
         checked={isDark}
         onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+        className="scale-90 md:scale-100"
       />
-      <Moon className="h-4 w-4 text-muted-foreground" />
+      <Moon className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
     </div>
   );
 };
