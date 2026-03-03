@@ -2721,28 +2721,44 @@ const Calculadora = () => {
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout ao validar sessão")), 8000),
+          ),
+        ]);
+
+        const { data: { session } } = sessionResult;
+
         if (!session) {
           navigate("/auth");
           return;
         }
 
-        const { data: purchases, error } = await supabase
-          .from("purchases")
-          .select("id, plan_type, expires_at")
-          .eq("status", "approved")
-          .order("created_at", { ascending: false });
+        const purchasesResult = await Promise.race([
+          supabase
+            .from("purchases")
+            .select("id, plan_type, expires_at")
+            .eq("status", "approved")
+            .eq("user_email", session.user.email ?? "")
+            .order("created_at", { ascending: false }),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout ao verificar compras")), 8000),
+          ),
+        ]);
+
+        const { data: purchases, error } = purchasesResult;
 
         if (error) {
           console.error("Erro ao verificar compras:", error);
           toast.error("Erro ao verificar acesso. Tente novamente.");
-          setLoading(false);
+          navigate("/auth");
           return;
         }
 
         if (!purchases || purchases.length === 0) {
           toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
-          await supabase.auth.signOut();
+          supabase.auth.signOut();
           navigate("/");
           return;
         }
@@ -2756,7 +2772,7 @@ const Calculadora = () => {
 
         if (!hasActive) {
           toast.error("Seu plano expirou. Renove para continuar usando.");
-          await supabase.auth.signOut();
+          supabase.auth.signOut();
           navigate("/");
           return;
         }
@@ -2764,7 +2780,8 @@ const Calculadora = () => {
         setAuthorized(true);
       } catch (err) {
         console.error("Erro inesperado ao verificar acesso:", err);
-        toast.error("Erro inesperado. Tente novamente.");
+        toast.error("Não foi possível carregar seu acesso. Tente novamente.");
+        navigate("/auth");
       } finally {
         setLoading(false);
       }
