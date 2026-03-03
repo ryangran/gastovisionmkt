@@ -2720,41 +2720,54 @@ const Calculadora = () => {
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        const { data: purchases, error } = await supabase
+          .from("purchases")
+          .select("id, plan_type, expires_at")
+          .eq("status", "approved")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Erro ao verificar compras:", error);
+          toast.error("Erro ao verificar acesso. Tente novamente.");
+          setLoading(false);
+          return;
+        }
+
+        if (!purchases || purchases.length === 0) {
+          toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
+          await supabase.auth.signOut();
+          navigate("/");
+          return;
+        }
+
+        const now = new Date();
+        const hasActive = purchases.some((p: any) => {
+          if (p.plan_type === "lifetime") return true;
+          if (p.expires_at && new Date(p.expires_at) > now) return true;
+          return false;
+        });
+
+        if (!hasActive) {
+          toast.error("Seu plano expirou. Renove para continuar usando.");
+          await supabase.auth.signOut();
+          navigate("/");
+          return;
+        }
+
+        setAuthorized(true);
+      } catch (err) {
+        console.error("Erro inesperado ao verificar acesso:", err);
+        toast.error("Erro inesperado. Tente novamente.");
+      } finally {
+        setLoading(false);
       }
-
-      const { data: purchases } = await supabase
-        .from("purchases")
-        .select("id, plan_type, expires_at")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false });
-
-      if (!purchases || purchases.length === 0) {
-        toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
-        await supabase.auth.signOut();
-        navigate("/");
-        return;
-      }
-
-      const now = new Date();
-      const hasActive = purchases.some((p: any) => {
-        if (p.plan_type === "lifetime") return true;
-        if (p.expires_at && new Date(p.expires_at) > now) return true;
-        return false;
-      });
-
-      if (!hasActive) {
-        toast.error("Seu plano expirou. Renove para continuar usando.");
-        await supabase.auth.signOut();
-        navigate("/");
-        return;
-      }
-
-      setAuthorized(true);
-      setLoading(false);
     };
 
     checkAccess();
