@@ -2877,6 +2877,12 @@ const Calculadora = () => {
 
             {/* Perfil e Sair fixo no rodapé */}
             <div className="flex flex-col gap-1 pt-4 border-t border-border mt-auto">
+              {isAdminUser && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/admin-panel")} className="gap-2 w-full justify-start">
+                  <Shield className="w-4 h-4" />
+                  Painel Admin
+                </Button>
+              )}
               <UserProfileDialog />
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 w-full justify-start">
                 <LogOut className="w-4 h-4" />
