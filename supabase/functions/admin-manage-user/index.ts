@@ -119,6 +119,40 @@ Deno.serve(async (req) => {
         });
       }
 
+      case "create_user": {
+        if (!data?.email || !data?.password) {
+          return new Response(JSON.stringify({ error: "email e password obrigatórios" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: data.email as string,
+          password: data.password as string,
+          email_confirm: true,
+        });
+        if (createError) throw createError;
+
+        // Create purchase for the new user
+        const planType = (data.plan_type as string) || "monthly";
+        const purchaseData: Record<string, unknown> = {
+          user_email: data.email,
+          plan_type: planType,
+          status: "approved",
+          purchased_at: new Date().toISOString(),
+        };
+        if (planType === "monthly") {
+          const exp = new Date();
+          exp.setDate(exp.getDate() + 30);
+          purchaseData.expires_at = exp.toISOString();
+        }
+        await supabaseAdmin.from("purchases").insert(purchaseData);
+
+        return new Response(JSON.stringify({ success: true, userId: newUser.user?.id }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       case "reset_password": {
         if (!userId) {
           return new Response(JSON.stringify({ error: "userId obrigatório" }), {
