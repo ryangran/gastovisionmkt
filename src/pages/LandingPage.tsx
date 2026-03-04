@@ -81,7 +81,7 @@ const stats = [
 { value: "500+", label: "Sellers ativos", icon: Users },
 { value: "R$2M+", label: "Em vendas calculadas", icon: DollarSign },
 { value: "4.9/5", label: "Avaliação média", icon: Star },
-{ value: "2min", label: "Para precificar", icon: Clock }];
+{ value: "1 min", label: "Para precificar", icon: Clock }];
 
 
 const benefits = [
