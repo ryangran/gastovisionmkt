@@ -79,6 +79,10 @@ const AdminPanel = () => {
     user: null,
   });
   const [addPlanType, setAddPlanType] = useState("monthly");
+  const [createUserDialog, setCreateUserDialog] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("Gasto123");
+  const [newUserPlanType, setNewUserPlanType] = useState("monthly");
 
   useEffect(() => {
     checkAccessAndLoad();
@@ -187,6 +191,31 @@ const AdminPanel = () => {
       await loadUsers();
     } catch (err: any) {
       toast.error(err.message || "Erro ao adicionar plano");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    if (!newUserEmail || !newUserPassword) {
+      toast.error("Preencha email e senha");
+      return;
+    }
+    setActionLoading("creating");
+    try {
+      await invokeAdmin("create_user", undefined, {
+        email: newUserEmail,
+        password: newUserPassword,
+        plan_type: newUserPlanType,
+      });
+      toast.success("Usuário criado com sucesso");
+      setCreateUserDialog(false);
+      setNewUserEmail("");
+      setNewUserPassword("Gasto123");
+      setNewUserPlanType("monthly");
+      await loadUsers();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao criar usuário");
     } finally {
       setActionLoading(null);
     }
@@ -326,6 +355,15 @@ const AdminPanel = () => {
               className="pl-9"
             />
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCreateUserDialog(true)}
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Usuário
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -532,6 +570,54 @@ const AdminPanel = () => {
             </Button>
             <Button onClick={handleAddPlan} disabled={actionLoading !== null}>
               Adicionar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create User Dialog */}
+      <Dialog open={createUserDialog} onOpenChange={setCreateUserDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar Novo Usuário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Email</label>
+              <Input
+                type="email"
+                placeholder="email@exemplo.com"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Senha</label>
+              <Input
+                type="text"
+                value={newUserPassword}
+                onChange={(e) => setNewUserPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Plano</label>
+              <Select value={newUserPlanType} onValueChange={setNewUserPlanType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
+                  <SelectItem value="lifetime">Vitalício</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateUserDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateUser} disabled={actionLoading !== null}>
+              Criar Usuário
             </Button>
           </DialogFooter>
         </DialogContent>
