@@ -614,6 +614,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_users_with_purchases: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          last_sign_in_at: string
+          plan_type: string
+          product_name: string
+          purchase_id: string
+          purchased_at: string
+          status: string
+          user_id: string
+        }[]
+      }
       get_my_email: { Args: never; Returns: string }
       get_registered_emails: {
         Args: never

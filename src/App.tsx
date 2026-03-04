@@ -9,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/calculadora" element={<Calculadora />} />
+                <Route path="/admin-panel" element={<AdminPanel />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
