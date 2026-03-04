@@ -1553,13 +1553,7 @@ type MLProduto = {
   premiumPerc: number;
 };
 
-const ML_PRODUTOS_DEFAULT: MLProduto[] = [
-  { nome: "Brinquedos",            classicoPerc: 0.115, premiumPerc: 0.13 },
-  { nome: "Protetores Eletrônicos", classicoPerc: 0.13,  premiumPerc: 0.18 },
-  { nome: "Terra Lux",             classicoPerc: 0.115, premiumPerc: 0.165 },
-  { nome: "Filtro de Linha",       classicoPerc: 0.115, premiumPerc: 0.165 },
-  { nome: "Módulo Isolador",       classicoPerc: 0.13,  premiumPerc: 0.18 },
-];
+const ML_PRODUTOS_DEFAULT: MLProduto[] = [];
 
 // Faixas de peso (kg) — limites superiores
 const ML_PESOS = [
