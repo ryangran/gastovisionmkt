@@ -1,5 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import shopeeLogo from "@/assets/shopee-logo.png";
+import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
+import amazonLogo from "@/assets/amazon-logo.png";
+import magaluLogo from "@/assets/magalu-logo.png";
+import tiktokLogo from "@/assets/tiktok-logo.png";
+import sheinLogo from "@/assets/shein-logo.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -220,16 +226,21 @@ const LandingPage = () => {
             </h2>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
-            {["🛒 Shopee", "🛍️ Mercado Livre", "📦 Amazon", "🏪 Magalu", "🎵 TikTok"].map(
-              (p) =>
+            {[
+              { name: "Shopee", logo: shopeeLogo },
+              { name: "Mercado Livre", logo: mercadolivreLogo },
+              { name: "Amazon", logo: amazonLogo },
+              { name: "Magalu", logo: magaluLogo },
+              { name: "TikTok", logo: tiktokLogo },
+              { name: "Shein", logo: sheinLogo },
+            ].map((p) => (
               <div
-                key={p}
-                className="px-8 py-4 rounded-2xl border bg-card text-foreground font-semibold text-lg hover:border-primary/50 transition-colors">
-                
-                  {p}
-                </div>
-
-            )}
+                key={p.name}
+                className="flex items-center gap-3 px-8 py-4 rounded-2xl border bg-card text-foreground font-semibold text-lg hover:border-primary/50 transition-colors">
+                <img src={p.logo} alt={p.name} className="h-8 w-8 object-contain" />
+                {p.name}
+              </div>
+            ))}
           </div>
         </div>
       </section>
