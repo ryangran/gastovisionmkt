@@ -9,7 +9,7 @@ import magaluLogo from "@/assets/magalu-logo.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon } from "lucide-react";
+import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon, Shield } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
@@ -2717,6 +2717,7 @@ const Calculadora = () => {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState("shopee");
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -2778,6 +2779,9 @@ const Calculadora = () => {
         }
 
         setAuthorized(true);
+        if (session.user.email === "ryanzinho.gran@gmail.com") {
+          setIsAdminUser(true);
+        }
       } catch (err) {
         console.error("Erro inesperado ao verificar acesso:", err);
         toast.error("Não foi possível carregar seu acesso. Tente novamente.");
@@ -2825,6 +2829,12 @@ const Calculadora = () => {
               <div className="md:hidden">
                 <UserProfileDialog />
               </div>
+              {isAdminUser && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/admin-panel")} className="gap-2">
+                  <Shield className="w-4 h-4" />
+                  <span className="hidden sm:inline">Admin</span>
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 md:hidden">
                 <LogOut className="w-4 h-4" />
                 Sair
