@@ -15,77 +15,77 @@ import {
   Star,
   Quote,
   Users,
-  Clock,
-} from "lucide-react";
+  Clock } from
+"lucide-react";
 
 const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/32i2hyh";
 const CHECKOUT_URL_LIFETIME = "https://pay.cakto.com.br/6m7kaiz_785267";
 
 const features = [
-  {
-    icon: ShoppingCart,
-    title: "Multi-plataforma",
-    desc: "Shopee, Mercado Livre, Amazon, Magalu e TikTok em um só lugar",
-  },
-  {
-    icon: TrendingUp,
-    title: "Margens Precisas",
-    desc: "Cálculo automático com comissões, frete, impostos e marketing",
-  },
-  {
-    icon: DollarSign,
-    title: "Lucro Real",
-    desc: "Saiba exatamente quanto vai lucrar antes de anunciar",
-  },
-  {
-    icon: Shield,
-    title: "Sempre Atualizado",
-    desc: "Tabelas de comissão atualizadas conforme as plataformas",
-  },
-];
+{
+  icon: ShoppingCart,
+  title: "Multi-plataforma",
+  desc: "Shopee, Mercado Livre, Amazon, Magalu e TikTok em um só lugar"
+},
+{
+  icon: TrendingUp,
+  title: "Margens Precisas",
+  desc: "Cálculo automático com comissões, frete, impostos e marketing"
+},
+{
+  icon: DollarSign,
+  title: "Lucro Real",
+  desc: "Saiba exatamente quanto vai lucrar antes de anunciar"
+},
+{
+  icon: Shield,
+  title: "Sempre Atualizado",
+  desc: "Tabelas de comissão atualizadas conforme as plataformas"
+}];
+
 
 const testimonials = [
-  {
-    name: "Carlos M.",
-    role: "Seller Shopee & ML",
-    text: "Antes eu precificava no achismo e perdia dinheiro sem saber. Com o Gasto Vision descobri que 3 dos meus produtos estavam dando prejuízo. Ajustei e meu lucro subiu 40%.",
-    rating: 5,
-  },
-  {
-    name: "Ana Paula S.",
-    role: "Lojista Amazon",
-    text: "Ferramenta indispensável! Economizei horas de planilha por semana. Agora sei exatamente minha margem antes de anunciar qualquer produto.",
-    rating: 5,
-  },
-  {
-    name: "Roberto F.",
-    role: "Vendedor Multi-plataforma",
-    text: "Testei várias calculadoras e essa é disparada a melhor. Atualiza as comissões automaticamente e cobre todas as plataformas que eu uso.",
-    rating: 5,
-  },
-  {
-    name: "Juliana C.",
-    role: "Seller Magalu & Shopee",
-    text: "Comecei a usar e no primeiro mês já recuperei o investimento. Descobri que estava cobrando muito barato na Shopee. Recomendo demais!",
-    rating: 5,
-  },
-];
+{
+  name: "Carlos M.",
+  role: "Seller Shopee & ML",
+  text: "Antes eu precificava no achismo e perdia dinheiro sem saber. Com o Gasto Vision descobri que 3 dos meus produtos estavam dando prejuízo. Ajustei e meu lucro subiu 40%.",
+  rating: 5
+},
+{
+  name: "Ana Paula S.",
+  role: "Lojista Amazon",
+  text: "Ferramenta indispensável! Economizei horas de planilha por semana. Agora sei exatamente minha margem antes de anunciar qualquer produto.",
+  rating: 5
+},
+{
+  name: "Roberto F.",
+  role: "Vendedor Multi-plataforma",
+  text: "Testei várias calculadoras e essa é disparada a melhor. Atualiza as comissões automaticamente e cobre todas as plataformas que eu uso.",
+  rating: 5
+},
+{
+  name: "Juliana C.",
+  role: "Seller Magalu & Shopee",
+  text: "Comecei a usar e no primeiro mês já recuperei o investimento. Descobri que estava cobrando muito barato na Shopee. Recomendo demais!",
+  rating: 5
+}];
+
 
 const stats = [
-  { value: "500+", label: "Sellers ativos", icon: Users },
-  { value: "R$2M+", label: "Em vendas calculadas", icon: DollarSign },
-  { value: "4.9/5", label: "Avaliação média", icon: Star },
-  { value: "2min", label: "Para precificar", icon: Clock },
-];
+{ value: "500+", label: "Sellers ativos", icon: Users },
+{ value: "R$2M+", label: "Em vendas calculadas", icon: DollarSign },
+{ value: "4.9/5", label: "Avaliação média", icon: Star },
+{ value: "2min", label: "Para precificar", icon: Clock }];
+
 
 const benefits = [
-  "Calcule margens em segundos",
-  "Compare preços entre plataformas",
-  "Inclua impostos e custos de marketing",
-  "Tabelas completas de comissão",
-  "Frete e taxas fixas inclusos",
-  "Compare preços entre plataformas",
-];
+"Calcule margens em segundos",
+"Compare preços entre plataformas",
+"Inclua impostos e custos de marketing",
+"Tabelas completas de comissão",
+"Frete e taxas fixas inclusos",
+"Compare preços entre plataformas"];
+
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -105,8 +105,8 @@ const LandingPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
+              transition={{ duration: 0.6 }}>
+              
               <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
                 <Zap className="w-3 h-3 mr-1" />
                 Ferramenta #1 para sellers
@@ -120,9 +120,9 @@ const LandingPage = () => {
                 nos marketplaces
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-                Calcule suas margens de lucro com precisão em Shopee, Mercado Livre,
-                Amazon e Magalu. Descubra o preço ideal antes de anunciar.
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">Calcule suas margens de lucro com precisão em Shopee, Mercado Livre, Tik Tok, Shein, Amazon e Magalu. Descubra o preço ideal antes de anunciar.
+
+
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -130,11 +130,11 @@ const LandingPage = () => {
                   size="lg"
                   className="text-lg px-8 py-6 gap-2 shadow-lg shadow-primary/20"
                   onClick={() =>
-                    document
-                      .getElementById("pricing")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
-                >
+                  document.
+                  getElementById("pricing")?.
+                  scrollIntoView({ behavior: "smooth" })
+                  }>
+                  
                   Quero Acessar Agora
                   <ArrowRight className="w-5 h-5" />
                 </Button>
@@ -142,8 +142,8 @@ const LandingPage = () => {
                   variant="outline"
                   size="lg"
                   className="text-lg px-8 py-6"
-                  onClick={() => navigate("/auth")}
-                >
+                  onClick={() => navigate("/auth")}>
+                  
                   Já sou aluno
                 </Button>
               </div>
@@ -156,20 +156,20 @@ const LandingPage = () => {
       <section className="border-y bg-card/50 py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center gap-2 p-6 rounded-2xl bg-card border"
-              >
+            {stats.map((stat, i) =>
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="flex flex-col items-center gap-2 p-6 rounded-2xl bg-card border">
+              
                 <stat.icon className="w-6 h-6 text-primary mb-1" />
                 <span className="text-3xl md:text-4xl font-extrabold text-foreground">{stat.value}</span>
                 <span className="text-sm text-muted-foreground font-medium">{stat.label}</span>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -189,15 +189,15 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow"
-              >
+            {features.map((f, i) =>
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow">
+              
                 <div className="p-3 rounded-xl bg-primary/10 w-fit mb-4">
                   <f.icon className="w-6 h-6 text-primary" />
                 </div>
@@ -206,7 +206,7 @@ const LandingPage = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">{f.desc}</p>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -221,14 +221,14 @@ const LandingPage = () => {
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             {["🛒 Shopee", "🛍️ Mercado Livre", "📦 Amazon", "🏪 Magalu", "🎵 TikTok"].map(
-              (p) => (
-                <div
-                  key={p}
-                  className="px-8 py-4 rounded-2xl border bg-card text-foreground font-semibold text-lg hover:border-primary/50 transition-colors"
-                >
+              (p) =>
+              <div
+                key={p}
+                className="px-8 py-4 rounded-2xl border bg-card text-foreground font-semibold text-lg hover:border-primary/50 transition-colors">
+                
                   {p}
                 </div>
-              )
+
             )}
           </div>
         </div>
@@ -247,20 +247,20 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow"
-              >
+            {testimonials.map((t, i) =>
+            <motion.div
+              key={t.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="relative p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow">
+              
                 <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
                 <div className="flex gap-1 mb-3">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-primary fill-primary" />
-                  ))}
+                  {[...Array(t.rating)].map((_, j) =>
+                <Star key={j} className="w-4 h-4 text-primary fill-primary" />
+                )}
                 </div>
                 <p className="text-foreground mb-4 text-sm leading-relaxed">"{t.text}"</p>
                 <div className="flex items-center gap-3">
@@ -273,7 +273,7 @@ const LandingPage = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -288,15 +288,15 @@ const LandingPage = () => {
               </h2>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
-              {benefits.map((b) => (
-                <div
-                  key={b}
-                  className="flex items-center gap-3 p-4 rounded-xl border bg-card"
-                >
+              {benefits.map((b) =>
+              <div
+                key={b}
+                className="flex items-center gap-3 p-4 rounded-xl border bg-card">
+                
                   <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                   <span className="text-foreground font-medium">{b}</span>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -334,8 +334,8 @@ const LandingPage = () => {
                 variant="outline"
                 size="lg"
                 className="w-full text-base py-6"
-                onClick={() => window.open(CHECKOUT_URL_MONTHLY, "_blank")}
-              >
+                onClick={() => window.open(CHECKOUT_URL_MONTHLY, "_blank")}>
+                
                 Assinar Mensal
               </Button>
             </div>
@@ -364,8 +364,8 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 className="w-full text-base py-6 gap-2 shadow-lg shadow-primary/20"
-                onClick={() => window.open(CHECKOUT_URL_LIFETIME, "_blank")}
-              >
+                onClick={() => window.open(CHECKOUT_URL_LIFETIME, "_blank")}>
+                
                 Garantir Acesso Vitalício
                 <ArrowRight className="w-5 h-5" />
               </Button>
@@ -384,8 +384,8 @@ const LandingPage = () => {
           <p>© {new Date().getFullYear()} Gasto Vision. Todos os direitos reservados.</p>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 };
 
 export default LandingPage;
