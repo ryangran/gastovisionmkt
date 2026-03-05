@@ -111,6 +111,10 @@ Deno.serve(async (req) => {
           const exp = new Date();
           exp.setDate(exp.getDate() + 30);
           insertData.expires_at = exp.toISOString();
+        } else if (data.plan_type === "daily") {
+          const exp = new Date();
+          exp.setDate(exp.getDate() + 1);
+          insertData.expires_at = exp.toISOString();
         }
         const { error: insertError } = await supabaseAdmin.from("purchases").insert(insertData);
         if (insertError) throw insertError;
@@ -144,6 +148,10 @@ Deno.serve(async (req) => {
         if (planType === "monthly") {
           const exp = new Date();
           exp.setDate(exp.getDate() + 30);
+          purchaseData.expires_at = exp.toISOString();
+        } else if (planType === "daily") {
+          const exp = new Date();
+          exp.setDate(exp.getDate() + 1);
           purchaseData.expires_at = exp.toISOString();
         }
         await supabaseAdmin.from("purchases").insert(purchaseData);

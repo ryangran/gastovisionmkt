@@ -162,6 +162,10 @@ const AdminPanel = () => {
       };
       if (editPlanType === "lifetime") {
         updateData.expires_at = null;
+      } else if (editPlanType === "daily") {
+        const exp = new Date();
+        exp.setDate(exp.getDate() + 1);
+        updateData.expires_at = exp.toISOString();
       } else {
         const exp = new Date();
         exp.setDate(exp.getDate() + 30);
@@ -240,6 +244,13 @@ const AdminPanel = () => {
     }
     if (user.plan_type === "lifetime") {
       return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">👑 Vitalício</Badge>;
+    }
+    if (user.plan_type === "daily") {
+      const days = getDaysRemaining(user.expires_at);
+      if (days !== null && days <= 0) {
+        return <Badge variant="destructive">Teste Expirado</Badge>;
+      }
+      return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">🧪 Teste 1 dia</Badge>;
     }
     const days = getDaysRemaining(user.expires_at);
     if (days !== null && days <= 0) {
@@ -530,6 +541,7 @@ const AdminPanel = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="daily">Diário (1 dia - teste)</SelectItem>
                 <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
                 <SelectItem value="lifetime">Vitalício</SelectItem>
               </SelectContent>
@@ -559,6 +571,7 @@ const AdminPanel = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="daily">Diário (1 dia - teste)</SelectItem>
                 <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
                 <SelectItem value="lifetime">Vitalício</SelectItem>
               </SelectContent>
@@ -605,10 +618,11 @@ const AdminPanel = () => {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
-                  <SelectItem value="lifetime">Vitalício</SelectItem>
-                </SelectContent>
+              <SelectContent>
+                <SelectItem value="daily">Diário (1 dia - teste)</SelectItem>
+                <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
+                <SelectItem value="lifetime">Vitalício</SelectItem>
+              </SelectContent>
               </Select>
             </div>
           </div>
