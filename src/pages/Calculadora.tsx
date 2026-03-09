@@ -1703,7 +1703,7 @@ const MercadoLivreCalculadora = () => {
     }
     const novas = mlCategorias.filter(c => c.nome !== nome);
     setMlCategorias(novas);
-    if (produtoNome === nome) setProdutoNome(novas[0]?.nome || ""e || "");
+    if (produtoNome === nome) setProdutoNome(novas[0]?.nome || ""e || ""e || "");
     toast.success("Categoria removida");
   };
 
@@ -1809,7 +1809,7 @@ const MercadoLivreCalculadora = () => {
               >
                 Clássico (C)
                 <span className="block text-xs mt-0.5 font-mono">
-             (produto?.classicoPerc ?? 0)icoPerc * 100).toFixed(1)}%
+      (produto?.classicoPerc ?? 0)ssicoPerc ?? 0)icoPerc * 100).toFixed(1)}%
                 </span>
               </button>
               <button
@@ -1822,7 +1822,7 @@ const MercadoLivreCalculadora = () => {
               >
                 Premium (P)
                 <span className="block text-xs mt-0.5 font-mono">
-                  {(produto.premiumPerc * 100).toFixed(1)}%
+     (produto?.premiumPerc ?? 0)uto.premiumPerc * 100).toFixed(1)}%
                 </span>
               </button>
             </div>
