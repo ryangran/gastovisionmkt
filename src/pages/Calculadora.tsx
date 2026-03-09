@@ -1703,7 +1703,7 @@ const MercadoLivreCalculadora = () => {
     }
     const novas = mlCategorias.filter(c => c.nome !== nome);
     setMlCategorias(novas);
-    if (produtoNome === nome) setProdutoNome(novas[0].nome);
+    if (produtoNome === nome) setProdutoNome(novas[0]?.nome || "");
     toast.success("Categoria removida");
   };
 
