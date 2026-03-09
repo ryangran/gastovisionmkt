@@ -1809,7 +1809,7 @@ const MercadoLivreCalculadora = () => {
               >
                 Clássico (C)
                 <span className="block text-xs mt-0.5 font-mono">
-      {((produto?.classicoPerc ?? 0) * 100).toFixed(1)}%
+      {((produto?.classicoPerc ?? 0)
                 </span>
               </button>
               <button
@@ -1822,7 +1822,7 @@ const MercadoLivreCalculadora = () => {
               >
                 Premium (P)
                 <span className="block text-xs mt-0.5 font-mono">
-     (produto?.premiumPerc ?? 0)uto.premiumPerc * 100).toFixed(1)}%
+     (produto?.premiumPer{((produto?.premiumPerc ?? 0)
                 </span>
               </button>
             </div>
