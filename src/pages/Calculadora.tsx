@@ -1809,7 +1809,7 @@ const MercadoLivreCalculadora = () => {
               >
                 Clássico (C)
                 <span className="block text-xs mt-0.5 font-mono">
-      (produto?.classicoPerc ?? 0)ssicoPerc ?? 0)icoPerc * 100).toFixed(1)}%
+      {((produto?.classicoPerc ?? 0) * 100).toFixed(1)}%
                 </span>
               </button>
               <button
