@@ -1662,7 +1662,7 @@ const MercadoLivreCalculadora = () => {
   const marketingPerc = parseNum(marketing);
   const pesoNum      = parseNum(peso);
 
-  const comissaoPerc   = tipoAnuncio === "classico" ? produto?.classicoPerc || 0 : produto?.premiumPerc || 0;
+  const comissaoPerc   = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
