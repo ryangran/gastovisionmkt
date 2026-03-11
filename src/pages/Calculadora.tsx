@@ -612,7 +612,7 @@ const AmazonCalculadora = () => {
   const [comprimentoFBA, setComprimentoFBA] = usePersistedState("calc_amazon_comprimento_fba", "");
   const [dbaZona, setDbaZona]               = usePersistedState<AmazonDBAZona>("calc_amazon_dba_zona", "sp");
 
-  const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome)!;
+  const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome) ?? AMAZON_CATEGORIAS[0];
   const preco          = parseNum(precoVenda);
   const custo          = parseNum(custoProduto);
   const impostoPerc    = parseNum(imposto);
