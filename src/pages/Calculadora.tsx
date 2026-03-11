@@ -612,7 +612,7 @@ const AmazonCalculadora = () => {
   const [comprimentoFBA, setComprimentoFBA] = usePersistedState("calc_amazon_comprimento_fba", "");
   const [dbaZona, setDbaZona]               = usePersistedState<AmazonDBAZona>("calc_amazon_dba_zona", "sp");
 
-  const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome)!;
+  const categoria      = AMAZON_CATEGORIAS.find((c) => c.nome === categoriaNome) ?? AMAZON_CATEGORIAS[0];
   const preco          = parseNum(precoVenda);
   const custo          = parseNum(custoProduto);
   const impostoPerc    = parseNum(imposto);
@@ -1655,14 +1655,14 @@ const MercadoLivreCalculadora = () => {
   const [novaCategoriaClassico, setNovaCategoriaClassico] = useState("");
   const [novaCategoriaPremium, setNovaCategoriaPremium] = useState("");
 
-  const produto      = mlCategorias.find((p) => p.nome === produtoNome) || mlCategorias[0];
+  const produto      = mlCategorias.find((p) => p.nome === produtoNome) ?? mlCategorias[0] ?? null;
   const preco        = parseNum(precoVenda);
   const custo        = parseNum(custoProduto);
   const impostoPerc  = parseNum(imposto);
   const marketingPerc = parseNum(marketing);
   const pesoNum      = parseNum(peso);
 
-  const comissaoPerc   = tipoAnuncio === "classico" ? produto?.classicoPerc || 0 : produto?.premiumPerc || 0;
+  const comissaoPerc   = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
@@ -1925,7 +1925,7 @@ const MercadoLivreCalculadora = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-foreground text-sm">{produto.nome}</span>
+                <span className="text-foreground text-sm">{produto?.nome ?? "Sem categoria"}</span>
                 <Badge variant="secondary" className="font-mono">
                   {tipoAnuncio === "classico" ? "Clássico" : "Premium"} · {(comissaoPerc * 100).toFixed(1)}%
                 </Badge>
