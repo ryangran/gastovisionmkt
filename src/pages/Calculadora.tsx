@@ -1925,7 +1925,7 @@ const MercadoLivreCalculadora = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-foreground text-sm">{produto.nome}</span>
+                <span className="text-foreground text-sm">{produto?.nome ?? "Sem categoria"}</span>
                 <Badge variant="secondary" className="font-mono">
                   {tipoAnuncio === "classico" ? "Clássico" : "Premium"} · {(comissaoPerc * 100).toFixed(1)}%
                 </Badge>
