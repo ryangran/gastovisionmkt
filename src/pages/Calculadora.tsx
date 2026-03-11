@@ -1655,7 +1655,7 @@ const MercadoLivreCalculadora = () => {
   const [novaCategoriaClassico, setNovaCategoriaClassico] = useState("");
   const [novaCategoriaPremium, setNovaCategoriaPremium] = useState("");
 
-  const produto      = mlCategorias.find((p) => p.nome === produtoNome) || mlCategorias[0];
+  const produto      = mlCategorias.find((p) => p.nome === produtoNome) ?? mlCategorias[0] ?? null;
   const preco        = parseNum(precoVenda);
   const custo        = parseNum(custoProduto);
   const impostoPerc  = parseNum(imposto);
