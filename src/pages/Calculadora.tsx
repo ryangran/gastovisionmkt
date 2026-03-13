@@ -1310,7 +1310,7 @@ const MagaluCalculadora = () => {
                   <Input type="number" placeholder="0" value={altura} onChange={(e) => setAltura(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-foreground text-xs">Largura (m)</Label>
+                  <Label className="text-foreground text-xs">Largura (cm)</Label>
                   <Input type="number" placeholder="0" value={largura} onChange={(e) => setLargura(e.target.value)} />
                 </div>
                 <div className="space-y-1">
