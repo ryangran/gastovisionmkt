@@ -1314,7 +1314,7 @@ const MagaluCalculadora = () => {
                   <Input type="number" placeholder="0" value={largura} onChange={(e) => setLargura(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-foreground text-xs">Compr. (m)</Label>
+                  <Label className="text-foreground text-xs">Compr. (cm)</Label>
                   <Input type="number" placeholder="0" value={comprimento} onChange={(e) => setComprimento(e.target.value)} />
                 </div>
               </div>
