@@ -1195,9 +1195,12 @@ const MagaluCalculadora = () => {
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
   const pesoRealKg     = parseNum(pesoReal);
-  const alturaM        = parseNum(altura);
-  const larguraM       = parseNum(largura);
-  const comprimentoM   = parseNum(comprimento);
+  const alturaCm       = parseNum(altura);
+  const larguraCm      = parseNum(largura);
+  const comprimentoCm  = parseNum(comprimento);
+  const alturaM        = alturaCm / 100;
+  const larguraM       = larguraCm / 100;
+  const comprimentoM   = comprimentoCm / 100;
 
   const pesoCubado     = (alturaM > 0 && larguraM > 0 && comprimentoM > 0) ? calcularPesoCubado(alturaM, larguraM, comprimentoM, tipoProduto) : 0;
   const pesoFinal      = Math.max(pesoRealKg, pesoCubado);
@@ -1303,15 +1306,15 @@ const MagaluCalculadora = () => {
 
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-foreground text-xs">Altura (m)</Label>
+                  <Label className="text-foreground text-xs">Altura (cm)</Label>
                   <Input type="number" placeholder="0" value={altura} onChange={(e) => setAltura(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-foreground text-xs">Largura (m)</Label>
+                  <Label className="text-foreground text-xs">Largura (cm)</Label>
                   <Input type="number" placeholder="0" value={largura} onChange={(e) => setLargura(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-foreground text-xs">Compr. (m)</Label>
+                  <Label className="text-foreground text-xs">Compr. (cm)</Label>
                   <Input type="number" placeholder="0" value={comprimento} onChange={(e) => setComprimento(e.target.value)} />
                 </div>
               </div>
