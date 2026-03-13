@@ -1195,9 +1195,12 @@ const MagaluCalculadora = () => {
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
   const pesoRealKg     = parseNum(pesoReal);
-  const alturaM        = parseNum(altura);
-  const larguraM       = parseNum(largura);
-  const comprimentoM   = parseNum(comprimento);
+  const alturaCm       = parseNum(altura);
+  const larguraCm      = parseNum(largura);
+  const comprimentoCm  = parseNum(comprimento);
+  const alturaM        = alturaCm / 100;
+  const larguraM       = larguraCm / 100;
+  const comprimentoM   = comprimentoCm / 100;
 
   const pesoCubado     = (alturaM > 0 && larguraM > 0 && comprimentoM > 0) ? calcularPesoCubado(alturaM, larguraM, comprimentoM, tipoProduto) : 0;
   const pesoFinal      = Math.max(pesoRealKg, pesoCubado);
