@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Cakto checkout URLs to identify plan type
-const MONTHLY_CHECKOUT_IDENTIFIERS = ["32i2hyh"];
+const MONTHLY_CHECKOUT_IDENTIFIERS = ["n9b89by", "32i2hyh"];
 const LIFETIME_CHECKOUT_IDENTIFIERS = ["6m7kaiz"];
 
 function identifyPlanType(body: any): "monthly" | "lifetime" {
