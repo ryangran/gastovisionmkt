@@ -24,7 +24,7 @@ import {
   Clock } from
 "lucide-react";
 
-const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/n9b89by";
+const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/vgi2b7q";
 const CHECKOUT_URL_LIFETIME = "https://pay.cakto.com.br/6m7kaiz_785267";
 
 const features = [
