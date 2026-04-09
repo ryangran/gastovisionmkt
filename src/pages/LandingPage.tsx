@@ -163,12 +163,14 @@ const LandingPage = () => {
             </h2>
           </div>
           <div className="max-w-[800px] mx-auto">
-            <div className="relative aspect-video rounded-2xl bg-card border overflow-hidden flex items-center justify-center cursor-pointer group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
-              <div className="relative w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
-                <Play className="w-7 h-7 text-primary-foreground ml-1" />
-              </div>
-            </div>
+            <video
+              className="w-full aspect-video rounded-2xl border bg-card"
+              controls
+              preload="metadata"
+              poster=""
+            >
+              <source src="/demo-video.mp4" type="video/mp4" />
+            </video>
             <p className="text-center text-sm text-muted-foreground mt-4">
               Precifique qualquer produto em menos de 60 segundos
             </p>
