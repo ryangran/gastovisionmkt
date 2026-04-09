@@ -53,7 +53,7 @@ const features = [
 {
   icon: Shield,
   title: "Sempre Atualizado",
-  desc: "Tabelas de comissão atualizadas conforme as plataformas"
+  desc: "Tabelas de comissão atualizadas conforme as plataformas mudam"
 }];
 
 
@@ -96,11 +96,11 @@ const stats = [
 
 
 const benefits = [
-"Calcule margens em segundos",
-"Compare preços entre plataformas",
+"Calculadoras específicas para cada marketplace",
+"Compare o lucro entre plataformas na mesma tela",
 "Inclua impostos e custos de marketing",
-"Tabelas completas de comissão",
-"Frete e taxas fixas inclusos",
+"Tabelas completas de comissão sempre atualizadas",
+"Frete e taxas fixas inclusos no cálculo",
 "Histórico de precificações salvo"];
 
 
@@ -155,16 +155,15 @@ const LandingPage = () => {
               </Badge>
 
               <h1 className="text-4xl md:text-6xl font-extrabold text-foreground leading-tight mb-6">
-                Pare de{" "}
+                Antes de colocar qualquer produto à venda no marketplace, você precisa saber{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  perder dinheiro
+                  exatamente quanto vai lucrar
                 </span>{" "}
-                nos marketplaces
+                — ou vai trabalhar de graça
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">Calcule suas margens de lucro com precisão em Shopee, Mercado Livre, Tik Tok, Shein, Amazon e Magalu. Descubra o preço ideal antes de anunciar.
-
-
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+                Vender no marketplace parece simples. O problema é que entre o preço que você cobra e o dinheiro que chega na sua conta, a plataforma desconta comissão, frete, imposto e taxas fixas — e cada marketplace desconta de um jeito diferente, com uma fórmula que muda o tempo todo.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -177,7 +176,7 @@ const LandingPage = () => {
                   scrollIntoView({ behavior: "smooth" })
                   }>
                   
-                  Quero Acessar Agora
+                  Quero Calcular Meu Lucro Agora
                   <ArrowRight className="w-5 h-5" />
                 </Button>
                 <Button
@@ -240,18 +239,32 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Problem Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+              O erro que faz sellers{" "}
+              <span className="text-primary">perderem dinheiro</span> sem saber
+            </h2>
+            <div className="text-muted-foreground text-left space-y-4 text-base leading-relaxed">
+              <p>Não importa se você está colocando seu primeiro produto à venda ou se já tem centenas de SKUs rodando: precificar no chute é o caminho mais curto para trabalhar de graça.</p>
+              <p>Cada marketplace tem sua própria fórmula de cobrança. A Shopee cobra diferente da Magalu. A Amazon cobra diferente do TikTok. E as tabelas mudam — às vezes sem aviso prévio.</p>
+              <p>Uma planilha genérica não sabe que a Shopee mudou a comissão da sua categoria. Ela não calcula o subsídio de frete do Mercado Livre. Ela não desconta o custo de anúncio interno da Amazon.</p>
+              <p>Em vez de uma fórmula genérica, cada calculadora do Gasto Vision foi construída para uma plataforma específica — com as taxas reais e atualizadas. Você entra com preço de venda, custo do produto e imposto. Em 60 segundos sabe exatamente quanto vai lucrar — antes de anunciar.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="py-20">
+      <section id="features" className="py-20 bg-card/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Tudo que você precisa para{" "}
               <span className="text-primary">precificar com lucro</span>
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Calculadoras específicas para cada marketplace com todas as taxas e
-              comissões atualizadas.
-            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -313,7 +326,7 @@ const LandingPage = () => {
               O que nossos <span className="text-primary">sellers dizem</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Veja como o Gasto Vision está transformando o negócio de centenas de vendedores
+              Iniciantes e experientes usando o Gasto Vision para nunca mais precificar no chute
             </p>
           </div>
 
@@ -379,7 +392,7 @@ const LandingPage = () => {
               Escolha seu plano
             </h2>
             <p className="text-muted-foreground mb-6">
-              Comece a precificar com inteligência hoje mesmo
+              Descubra o lucro real de cada produto antes de anunciar
             </p>
 
             {/* Countdown Timer */}
@@ -477,6 +490,15 @@ const LandingPage = () => {
               Garantia de 7 dias — Se não gostar, devolvemos 100% do valor. Sem perguntas.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* P.S. Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto">
+            P.S. — Se você está começando, o Gasto Vision evita o erro que a maioria dos sellers comete na primeira semana. Se você já vende, ele confirma se o que você está calculando está certo. De qualquer forma, o teste é sem risco: 7 dias de garantia, sem burocracia.
+          </p>
         </div>
       </section>
 
