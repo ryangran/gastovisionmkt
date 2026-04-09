@@ -6,6 +6,10 @@ import amazonLogo from "@/assets/amazon-logo.png";
 import magaluLogo from "@/assets/magalu-logo.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
 import sheinLogo from "@/assets/shein-logo.png";
+import avatarAna from "@/assets/avatar-ana.jpg";
+import avatarMarcos from "@/assets/avatar-marcos.jpg";
+import avatarJuliana from "@/assets/avatar-juliana.jpg";
+import avatarRicardo from "@/assets/avatar-ricardo.jpg";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -57,19 +61,29 @@ const testimonials = [
   name: "Ana Paula S.",
   role: "Vendedora na Shopee há 2 anos",
   text: "Antes eu chutava o preço e vivia no prejuízo sem saber. Com o Gasto Vision descobri que estava perdendo R$3 em cada venda. Corrigi em 1 dia.",
-  rating: 5
+  rating: 5,
+  avatar: avatarAna
 },
 {
   name: "Marcos R.",
   role: "Seller no Mercado Livre",
   text: "Ferramenta simples e certeira. Já calculei mais de 200 produtos e nunca mais tive surpresa com as comissões da plataforma.",
-  rating: 5
+  rating: 5,
+  avatar: avatarMarcos
 },
 {
   name: "Juliana T.",
   role: "Loja no TikTok Shop e Amazon",
   text: "O que mais gosto é ter tudo em um lugar só. Shopee, ML, Amazon — comparo os lucros lado a lado antes de decidir onde anunciar.",
-  rating: 5
+  rating: 5,
+  avatar: avatarJuliana
+},
+{
+  name: "Ricardo L.",
+  role: "Seller na Shopee e Magalu",
+  text: "Eu perdia tempo toda semana atualizando planilha. Agora em 2 minutos sei a margem exata de cada produto em cada plataforma. Indispensável.",
+  rating: 5,
+  avatar: avatarRicardo
 }];
 
 
