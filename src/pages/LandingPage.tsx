@@ -143,7 +143,7 @@ const LandingPage = () => {
             <img src={logo} alt="Gasto Vision MKT" className="h-36" />
           </nav>
 
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -154,7 +154,7 @@ const LandingPage = () => {
                 Ferramenta #1 para sellers
               </Badge>
 
-              <h1 className="text-3xl md:text-5xl font-extrabold text-foreground leading-tight mb-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground leading-snug mb-6 max-w-3xl mx-auto">
                 Antes de colocar qualquer produto à venda no marketplace, você precisa saber{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   exatamente quanto vai lucrar
@@ -162,14 +162,14 @@ const LandingPage = () => {
                 ou vai trabalhar de graça
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+              <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
                 Vender no marketplace parece simples. O problema é que entre o preço que você cobra e o dinheiro que chega na sua conta, a plataforma desconta comissão, frete, imposto e taxas fixas — e cada marketplace desconta de um jeito diferente, com uma fórmula que muda o tempo todo.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
-                  className="text-lg px-8 py-6 gap-2 shadow-lg shadow-primary/20"
+                  className="text-base md:text-lg px-8 py-6 gap-2 shadow-lg shadow-primary/20"
                   onClick={() =>
                   document.
                   getElementById("pricing")?.
@@ -182,7 +182,7 @@ const LandingPage = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="text-lg px-8 py-6"
+                  className="text-base md:text-lg px-8 py-6"
                   onClick={() => navigate("/auth")}>
                   
                   Já sou aluno
