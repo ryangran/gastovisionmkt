@@ -383,32 +383,30 @@ const LandingPage = () => {
             </p>
 
             {/* Countdown Timer */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="inline-flex flex-col items-center gap-2 px-6 py-4 rounded-2xl border border-destructive/30 bg-destructive/5"
-            >
-              <p className="text-sm font-semibold text-destructive flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                {timerExpired ? "O tempo acabou! Mas ainda dá tempo..." : "🔥 Oferta expira em:"}
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
-                    {String(minutes).padStart(2, "0")}
-                  </span>
-                  <span className="text-xl font-bold text-muted-foreground">:</span>
-                  <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
-                    {String(seconds).padStart(2, "0")}
-                  </span>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {timerExpired ? "Garanta seu acesso agora antes que o preço suba" : "Garanta o melhor preço antes que acabe"}
-              </p>
-            </motion.div>
           </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="w-full flex items-center justify-center gap-4 md:gap-6 px-4 py-4 rounded-2xl border border-destructive/30 bg-destructive/5 mb-10"
+          >
+            <p className="text-sm font-semibold text-destructive flex items-center gap-2 shrink-0">
+              <Zap className="w-4 h-4" />
+              {timerExpired ? "O tempo acabou! Mas ainda dá tempo..." : "🔥 Oferta expira em:"}
+            </p>
+            <div className="flex items-center gap-1">
+              <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
+                {String(minutes).padStart(2, "0")}
+              </span>
+              <span className="text-xl font-bold text-muted-foreground">:</span>
+              <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
+                {String(seconds).padStart(2, "0")}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground shrink-0 hidden sm:block">
+              {timerExpired ? "Garanta seu acesso agora antes que o preço suba" : "Garanta o melhor preço antes que acabe"}
+            </p>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {/* Mensal */}
