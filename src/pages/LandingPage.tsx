@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
 import logo from "@/assets/logo.png";
 import shopeeLogo from "@/assets/shopee-logo.png";
 import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
@@ -105,6 +106,31 @@ const benefits = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const saved = sessionStorage.getItem("gv_timer");
+    if (saved) {
+      const remaining = Math.max(0, parseInt(saved, 10) - Math.floor(Date.now() / 1000));
+      return remaining > 0 ? remaining : 0;
+    }
+    const end = Math.floor(Date.now() / 1000) + 300;
+    sessionStorage.setItem("gv_timer", String(end));
+    return 300;
+  });
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const id = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) { clearInterval(id); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [timeLeft > 0]);
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const timerExpired = timeLeft <= 0;
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -348,13 +374,40 @@ const LandingPage = () => {
       {/* Pricing */}
       <section id="pricing" className="py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Escolha seu plano
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mb-6">
               Comece a precificar com inteligência hoje mesmo
             </p>
+
+            {/* Countdown Timer */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex flex-col items-center gap-2 px-6 py-4 rounded-2xl border border-destructive/30 bg-destructive/5"
+            >
+              <p className="text-sm font-semibold text-destructive flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                {timerExpired ? "O tempo acabou! Mas ainda dá tempo..." : "🔥 Oferta expira em:"}
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
+                    {String(minutes).padStart(2, "0")}
+                  </span>
+                  <span className="text-xl font-bold text-muted-foreground">:</span>
+                  <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
+                    {String(seconds).padStart(2, "0")}
+                  </span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {timerExpired ? "Garanta seu acesso agora antes que o preço suba" : "Garanta o melhor preço antes que acabe"}
+              </p>
+            </motion.div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
