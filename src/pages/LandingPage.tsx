@@ -107,13 +107,13 @@ const benefits = [
 const LandingPage = () => {
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(() => {
-    const saved = sessionStorage.getItem("gv_timer");
+    const saved = localStorage.getItem("gv_timer");
     if (saved) {
       const remaining = Math.max(0, parseInt(saved, 10) - Math.floor(Date.now() / 1000));
       return remaining > 0 ? remaining : 0;
     }
     const end = Math.floor(Date.now() / 1000) + 300;
-    sessionStorage.setItem("gv_timer", String(end));
+    localStorage.setItem("gv_timer", String(end));
     return 300;
   });
 
