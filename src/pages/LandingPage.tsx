@@ -154,7 +154,7 @@ const LandingPage = () => {
                 Ferramenta #1 para sellers
               </Badge>
 
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground leading-snug mb-6 max-w-3xl mx-auto">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[2.5rem] font-extrabold text-foreground leading-snug mb-6 max-w-3xl mx-auto">
                 Antes de colocar qualquer produto à venda no marketplace, você precisa saber{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   exatamente quanto vai lucrar
@@ -162,8 +162,8 @@ const LandingPage = () => {
                 ou vai trabalhar de graça
               </h1>
 
-              <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-                Vender no marketplace parece simples. O problema é que entre o preço que você cobra e o dinheiro que chega na sua conta, a plataforma desconta comissão, frete, imposto e taxas fixas — e cada marketplace desconta de um jeito diferente, com uma fórmula que muda o tempo todo.
+              <p className="text-sm md:text-base text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+                Vender no marketplace parece simples. Mas entre o preço que você cobra e o que chega na sua conta, a plataforma desconta comissão, frete, imposto e taxas — cada uma do seu jeito, com regras que mudam o tempo todo.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
