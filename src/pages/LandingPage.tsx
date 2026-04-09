@@ -154,12 +154,12 @@ const LandingPage = () => {
                 Ferramenta #1 para sellers
               </Badge>
 
-              <h1 className="text-4xl md:text-6xl font-extrabold text-foreground leading-tight mb-6">
+              <h1 className="text-3xl md:text-5xl font-extrabold text-foreground leading-tight mb-6">
                 Antes de colocar qualquer produto à venda no marketplace, você precisa saber{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   exatamente quanto vai lucrar
                 </span>{" "}
-                — ou vai trabalhar de graça
+                ou vai trabalhar de graça
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
