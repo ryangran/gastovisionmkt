@@ -309,9 +309,7 @@ const LandingPage = () => {
                 </div>
                 <p className="text-foreground mb-4 text-sm leading-relaxed">"{t.text}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary font-bold text-sm">{t.name.charAt(0)}</span>
-                  </div>
+                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover" loading="lazy" width={40} height={40} />
                   <div>
                     <p className="text-foreground font-semibold text-sm">{t.name}</p>
                     <p className="text-muted-foreground text-xs">{t.role}</p>
