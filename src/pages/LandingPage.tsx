@@ -21,7 +21,9 @@ import {
   Star,
   Quote,
   Users,
-  Clock } from
+  Clock,
+  Play,
+  ShieldCheck } from
 "lucide-react";
 
 const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/vgi2b7q";
@@ -52,27 +54,21 @@ const features = [
 
 const testimonials = [
 {
-  name: "Carlos M.",
-  role: "Seller Shopee & ML",
-  text: "Antes eu precificava no achismo e perdia dinheiro sem saber. Com o Gasto Vision descobri que 3 dos meus produtos estavam dando prejuízo. Ajustei e meu lucro subiu 40%.",
-  rating: 5
-},
-{
   name: "Ana Paula S.",
-  role: "Lojista Amazon",
-  text: "Ferramenta indispensável! Economizei horas de planilha por semana. Agora sei exatamente minha margem antes de anunciar qualquer produto.",
+  role: "Vendedora na Shopee há 2 anos",
+  text: "Antes eu chutava o preço e vivia no prejuízo sem saber. Com o Gasto Vision descobri que estava perdendo R$3 em cada venda. Corrigi em 1 dia.",
   rating: 5
 },
 {
-  name: "Roberto F.",
-  role: "Vendedor Multi-plataforma",
-  text: "Testei várias calculadoras e essa é disparada a melhor. Atualiza as comissões automaticamente e cobre todas as plataformas que eu uso.",
+  name: "Marcos R.",
+  role: "Seller no Mercado Livre",
+  text: "Ferramenta simples e certeira. Já calculei mais de 200 produtos e nunca mais tive surpresa com as comissões da plataforma.",
   rating: 5
 },
 {
-  name: "Juliana C.",
-  role: "Seller Magalu & Shopee",
-  text: "Comecei a usar e no primeiro mês já recuperei o investimento. Descobri que estava cobrando muito barato na Shopee. Recomendo demais!",
+  name: "Juliana T.",
+  role: "Loja no TikTok Shop e Amazon",
+  text: "O que mais gosto é ter tudo em um lugar só. Shopee, ML, Amazon — comparo os lucros lado a lado antes de decidir onde anunciar.",
   rating: 5
 }];
 
@@ -90,7 +86,7 @@ const benefits = [
 "Inclua impostos e custos de marketing",
 "Tabelas completas de comissão",
 "Frete e taxas fixas inclusos",
-"Compare preços entre plataformas"];
+"Histórico de precificações salvo"];
 
 
 const LandingPage = () => {
@@ -154,6 +150,28 @@ const LandingPage = () => {
                 </Button>
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Video Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Veja como funciona em 1 minuto
+            </h2>
+          </div>
+          <div className="max-w-[800px] mx-auto">
+            <div className="relative aspect-video rounded-2xl bg-card border overflow-hidden flex items-center justify-center cursor-pointer group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
+              <div className="relative w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
+                <Play className="w-7 h-7 text-primary-foreground ml-1" />
+              </div>
+            </div>
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              Precifique qualquer produto em menos de 60 segundos
+            </p>
           </div>
         </div>
       </section>
@@ -364,6 +382,7 @@ const LandingPage = () => {
                   R$<span className="text-primary">97</span>
                   <span className="text-lg font-normal text-muted-foreground">,00</span>
                 </div>
+                <p className="text-sm font-semibold mt-1" style={{ color: 'hsl(25, 95%, 53%)' }}>⚡ Oferta por tempo limitado</p>
                 <div className="text-sm text-primary font-medium mt-1">Pagamento único</div>
               </div>
               <ul className="text-sm text-muted-foreground space-y-3 mb-8 text-left">
@@ -386,6 +405,13 @@ const LandingPage = () => {
           <p className="text-xs text-muted-foreground text-center mt-6">
             Pagamento seguro via Cakto • Acesso imediato após confirmação
           </p>
+
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">
+              Garantia de 7 dias — Se não gostar, devolvemos 100% do valor. Sem perguntas.
+            </p>
+          </div>
         </div>
       </section>
 
