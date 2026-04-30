@@ -313,24 +313,24 @@ const ShopeeCalculadora = () => {
                   ✓ Produto rentável neste preço.
                 </p>
               )}
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => saveCalculation({
-                    platform: "Shopee",
-                    product_name: nomeProduto,
-                    sale_price: preco,
-                    cost: custo,
-                    profit_margin_percent: margemLucro,
-                    profit_margin_value: lucro,
-                  })}
-                >
-                  <BookmarkPlus className="w-4 h-4" />
-                  Salvar produto
-                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{nomeProduto || <span className="text-muted-foreground italic text-xs">Sem nome definido</span>}</p>
+                <p className="text-xs text-muted-foreground">
+                  Margem: <span className={isLucrativo ? "text-success font-medium" : "text-destructive font-medium"}>{margemLucro.toFixed(1)}%</span>
+                  {" · "}{formatCurrency(lucro)}
+                </p>
               </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Shopee", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
+                <BookmarkPlus className="w-4 h-4" />
+                Salvar
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -993,24 +993,24 @@ const AmazonCalculadora = () => {
               {isLucrativo && (
                 <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>
               )}
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => saveCalculation({
-                    platform: "Amazon",
-                    product_name: nomeProduto,
-                    sale_price: preco,
-                    cost: custo,
-                    profit_margin_percent: margemLucro,
-                    profit_margin_value: lucro,
-                  })}
-                >
-                  <BookmarkPlus className="w-4 h-4" />
-                  Salvar produto
-                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{nomeProduto || <span className="text-muted-foreground italic text-xs">Sem nome definido</span>}</p>
+                <p className="text-xs text-muted-foreground">
+                  Margem: <span className={isLucrativo ? "text-success font-medium" : "text-destructive font-medium"}>{margemLucro.toFixed(1)}%</span>
+                  {" · "}{formatCurrency(lucro)}
+                </p>
               </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Amazon", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
+                <BookmarkPlus className="w-4 h-4" />
+                Salvar
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -1513,24 +1513,24 @@ const MagaluCalculadora = () => {
               {isLucrativo && (
                 <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>
               )}
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => saveCalculation({
-                    platform: "Magalu",
-                    product_name: nomeProduto,
-                    sale_price: preco,
-                    cost: custo,
-                    profit_margin_percent: margemLucro,
-                    profit_margin_value: lucro,
-                  })}
-                >
-                  <BookmarkPlus className="w-4 h-4" />
-                  Salvar produto
-                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{nomeProduto || <span className="text-muted-foreground italic text-xs">Sem nome definido</span>}</p>
+                <p className="text-xs text-muted-foreground">
+                  Margem: <span className={isLucrativo ? "text-success font-medium" : "text-destructive font-medium"}>{margemLucro.toFixed(1)}%</span>
+                  {" · "}{formatCurrency(lucro)}
+                </p>
               </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Magalu", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
+                <BookmarkPlus className="w-4 h-4" />
+                Salvar
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -2087,24 +2087,24 @@ const MercadoLivreCalculadora = () => {
               {isLucrativo && (
                 <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>
               )}
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => saveCalculation({
-                    platform: "Mercado Livre",
-                    product_name: nomeProduto,
-                    sale_price: preco,
-                    cost: custo,
-                    profit_margin_percent: margemLucro,
-                    profit_margin_value: lucro,
-                  })}
-                >
-                  <BookmarkPlus className="w-4 h-4" />
-                  Salvar produto
-                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{nomeProduto || <span className="text-muted-foreground italic text-xs">Sem nome definido</span>}</p>
+                <p className="text-xs text-muted-foreground">
+                  Margem: <span className={isLucrativo ? "text-success font-medium" : "text-destructive font-medium"}>{margemLucro.toFixed(1)}%</span>
+                  {" · "}{formatCurrency(lucro)}
+                </p>
               </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Mercado Livre", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
+                <BookmarkPlus className="w-4 h-4" />
+                Salvar
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -2431,24 +2431,24 @@ const TikTokCalculadora = () => {
               </div>
               {!isLucrativo && <p className="text-sm text-destructive mt-3 font-medium">⚠️ Este preço não cobre os custos. Revise o valor de venda.</p>}
               {isLucrativo && <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>}
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => saveCalculation({
-                    platform: "TikTok Shop",
-                    product_name: nomeProduto,
-                    sale_price: preco,
-                    cost: custo,
-                    profit_margin_percent: margemLucro,
-                    profit_margin_value: lucro,
-                  })}
-                >
-                  <BookmarkPlus className="w-4 h-4" />
-                  Salvar produto
-                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{nomeProduto || <span className="text-muted-foreground italic text-xs">Sem nome definido</span>}</p>
+                <p className="text-xs text-muted-foreground">
+                  Margem: <span className={isLucrativo ? "text-success font-medium" : "text-destructive font-medium"}>{margemLucro.toFixed(1)}%</span>
+                  {" · "}{formatCurrency(lucro)}
+                </p>
               </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "TikTok Shop", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
+                <BookmarkPlus className="w-4 h-4" />
+                Salvar
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -2729,24 +2729,24 @@ const SheinCalculadora = () => {
               </div>
               {!isLucrativo && <p className="text-sm text-destructive mt-3 font-medium">⚠️ Este preço não cobre os custos. Revise o valor de venda.</p>}
               {isLucrativo && <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>}
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => saveCalculation({
-                    platform: "Shein",
-                    product_name: nomeProduto,
-                    sale_price: preco,
-                    cost: custo,
-                    profit_margin_percent: margemLucro,
-                    profit_margin_value: lucro,
-                  })}
-                >
-                  <BookmarkPlus className="w-4 h-4" />
-                  Salvar produto
-                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {preco > 0 && (
+          <Card className="border-border bg-card">
+            <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{nomeProduto || <span className="text-muted-foreground italic text-xs">Sem nome definido</span>}</p>
+                <p className="text-xs text-muted-foreground">
+                  Margem: <span className={isLucrativo ? "text-success font-medium" : "text-destructive font-medium"}>{margemLucro.toFixed(1)}%</span>
+                  {" · "}{formatCurrency(lucro)}
+                </p>
               </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Shein", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
+                <BookmarkPlus className="w-4 h-4" />
+                Salvar
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -2947,6 +2947,9 @@ const Calculadora = () => {
                   <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
+              <Button variant="outline" size="sm" onClick={() => navigate("/produtos-salvos")} className="gap-2 md:hidden">
+                <BookmarkPlus className="w-4 h-4" />
+              </Button>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 md:hidden">
                 <LogOut className="w-4 h-4" />
                 Sair
@@ -2989,6 +2992,10 @@ const Calculadora = () => {
 
             {/* Perfil e Sair fixo no rodapé */}
             <div className="flex flex-col gap-1 pt-4 border-t border-border mt-auto">
+              <Button variant="outline" size="sm" onClick={() => navigate("/produtos-salvos")} className="gap-2 w-full justify-start">
+                <BookmarkPlus className="w-4 h-4" />
+                Produtos Salvos
+              </Button>
               {isAdminUser && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin-panel")} className="gap-2 w-full justify-start">
                   <Shield className="w-4 h-4" />
