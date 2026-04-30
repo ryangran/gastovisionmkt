@@ -490,6 +490,42 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_calculations: {
+        Row: {
+          cost: number
+          created_at: string
+          id: string
+          platform: string
+          product_name: string
+          profit_margin_percent: number
+          profit_margin_value: number
+          sale_price: number
+          user_email: string
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          id?: string
+          platform: string
+          product_name: string
+          profit_margin_percent: number
+          profit_margin_value: number
+          sale_price: number
+          user_email: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          id?: string
+          platform?: string
+          product_name?: string
+          profit_margin_percent?: number
+          profit_margin_value?: number
+          sale_price?: number
+          user_email?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           created_at: string | null
