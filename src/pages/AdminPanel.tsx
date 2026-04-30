@@ -61,7 +61,18 @@ interface UserWithPurchase {
   product_name: string | null;
 }
 
-const ADMIN_EMAIL = "ryanzinho.gran@gmail.com";
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string;
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const generateSecurePassword = (): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+  let pwd = "";
+  for (let i = 0; i < 12; i++) {
+    pwd += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return pwd;
+};
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -81,7 +92,7 @@ const AdminPanel = () => {
   const [addPlanType, setAddPlanType] = useState("monthly");
   const [createUserDialog, setCreateUserDialog] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("Gasto123");
+  const [newUserPassword, setNewUserPassword] = useState(() => generateSecurePassword());
   const [newUserPlanType, setNewUserPlanType] = useState("monthly");
 
   useEffect(() => {
@@ -91,7 +102,17 @@ const AdminPanel = () => {
   const checkAccessAndLoad = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session || session.user.email !== ADMIN_EMAIL) {
+      if (!session) {
+        toast.error("Acesso restrito");
+        navigate("/");
+        return;
+      }
+      // Verify admin role via database RPC (not just email)
+      const { data: isAdmin } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin",
+      });
+      if (!isAdmin && session.user.email !== ADMIN_EMAIL) {
         toast.error("Acesso restrito");
         navigate("/");
         return;
@@ -205,6 +226,14 @@ const AdminPanel = () => {
       toast.error("Preencha email e senha");
       return;
     }
+    if (!EMAIL_REGEX.test(newUserEmail)) {
+      toast.error("Email inválido");
+      return;
+    }
+    if (newUserPassword.length < 8) {
+      toast.error("Senha deve ter no mínimo 8 caracteres");
+      return;
+    }
     setActionLoading("creating");
     try {
       await invokeAdmin("create_user", undefined, {
@@ -215,7 +244,7 @@ const AdminPanel = () => {
       toast.success("Usuário criado com sucesso");
       setCreateUserDialog(false);
       setNewUserEmail("");
-      setNewUserPassword("Gasto123");
+      setNewUserPassword(generateSecurePassword());
       setNewUserPlanType("monthly");
       await loadUsers();
     } catch (err: any) {
@@ -467,7 +496,7 @@ const AdminPanel = () => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Resetar senha?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            A senha de <strong>{user.email}</strong> será resetada para <strong>Gasto123</strong>.
+                            A senha de <strong>{user.email}</strong> será resetada para uma senha temporária segura. Informe o usuário para alterar no próximo acesso.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -606,11 +635,24 @@ const AdminPanel = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Senha</label>
-              <Input
-                type="text"
-                value={newUserPassword}
-                onChange={(e) => setNewUserPassword(e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  minLength={8}
+                  maxLength={128}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setNewUserPassword(generateSecurePassword())}
+                  title="Gerar senha segura"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Plano</label>

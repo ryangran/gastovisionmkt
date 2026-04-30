@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,28 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+// Rate limiting: max 5 attempts per 15 minutes per session
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000;
+
+interface Purchase {
+  id: string;
+  plan_type: string | null;
+  expires_at: string | null;
+}
+
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const navigate = useNavigate();
+
+  const attemptsRef = useRef<number>(0);
+  const lockoutEndRef = useRef<number>(0);
+  const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,20 +47,59 @@ const Auth = () => {
     });
   }, [navigate]);
 
+  useEffect(() => {
+    return () => {
+      if (lockoutTimerRef.current) clearInterval(lockoutTimerRef.current);
+    };
+  }, []);
+
+  const startLockoutCountdown = (endsAt: number) => {
+    setIsLocked(true);
+    if (lockoutTimerRef.current) clearInterval(lockoutTimerRef.current);
+
+    lockoutTimerRef.current = setInterval(() => {
+      const remaining = Math.ceil((endsAt - Date.now()) / 1000);
+      if (remaining <= 0) {
+        setIsLocked(false);
+        setLockoutRemaining(0);
+        attemptsRef.current = 0;
+        if (lockoutTimerRef.current) clearInterval(lockoutTimerRef.current);
+      } else {
+        setLockoutRemaining(remaining);
+      }
+    }, 1000);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check lockout
+    if (Date.now() < lockoutEndRef.current) {
+      const remaining = Math.ceil((lockoutEndRef.current - Date.now()) / 1000);
+      toast.error(`Muitas tentativas. Aguarde ${remaining}s para tentar novamente.`);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        if (error.message.includes("Invalid login")) {
-          toast.error("Email ou senha incorretos. Verifique seus dados de acesso enviados por email.");
+        attemptsRef.current += 1;
+
+        if (attemptsRef.current >= MAX_ATTEMPTS) {
+          lockoutEndRef.current = Date.now() + LOCKOUT_MS;
+          startLockoutCountdown(lockoutEndRef.current);
+          toast.error("Conta temporariamente bloqueada por segurança. Tente novamente em 15 minutos.");
         } else {
-          toast.error(error.message);
+          // Generic message — never reveals if the email exists
+          toast.error("Email ou senha incorretos. Verifique seus dados de acesso.");
         }
         return;
       }
+
+      // Reset attempts on success
+      attemptsRef.current = 0;
 
       const { data: purchases } = await supabase
         .from("purchases")
@@ -59,9 +114,8 @@ const Auth = () => {
         return;
       }
 
-      // Check if any purchase grants active access
       const now = new Date();
-      const hasActiveAccess = purchases.some((p: any) => {
+      const hasActiveAccess = (purchases as Purchase[]).some((p) => {
         if (p.plan_type === "lifetime") return true;
         if (p.expires_at && new Date(p.expires_at) > now) return true;
         return false;
@@ -74,8 +128,7 @@ const Auth = () => {
         return;
       }
 
-      // Check if monthly plan is expiring within 7 days
-      const expiringPurchase = purchases.find((p: any) => {
+      const expiringPurchase = (purchases as Purchase[]).find((p) => {
         if (p.plan_type !== "monthly" || !p.expires_at) return false;
         const expiresAt = new Date(p.expires_at);
         const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -83,14 +136,19 @@ const Auth = () => {
       });
 
       if (expiringPurchase) {
-        const daysLeft = Math.ceil((new Date(expiringPurchase.expires_at).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        toast.warning(`Seu plano mensal expira em ${daysLeft} dia${daysLeft > 1 ? 's' : ''}. Renove para não perder o acesso!`, { duration: 8000 });
+        const daysLeft = Math.ceil(
+          (new Date(expiringPurchase.expires_at!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        toast.warning(
+          `Seu plano mensal expira em ${daysLeft} dia${daysLeft > 1 ? "s" : ""}. Renove para não perder o acesso!`,
+          { duration: 8000 }
+        );
       }
 
       toast.success("Bem-vindo de volta!");
       navigate("/calculadora");
-    } catch (error: any) {
-      toast.error(error.message || "Erro na autenticação");
+    } catch {
+      toast.error("Erro na autenticação. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +162,7 @@ const Auth = () => {
           <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-accent rounded-full blur-3xl" />
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -190,7 +248,8 @@ const Auth = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 py-5"
                   required
-                  disabled={isLoading}
+                  disabled={isLoading || isLocked}
+                  maxLength={254}
                 />
               </div>
             </div>
@@ -206,8 +265,9 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10 py-5"
                   required
-                  disabled={isLoading}
+                  disabled={isLoading || isLocked}
                   minLength={6}
+                  maxLength={128}
                 />
                 <button
                   type="button"
@@ -219,7 +279,17 @@ const Auth = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full py-5 text-base" disabled={isLoading}>
+            {isLocked && (
+              <p className="text-sm text-destructive text-center">
+                Conta bloqueada por segurança. Tente novamente em {lockoutRemaining}s.
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full py-5 text-base"
+              disabled={isLoading || isLocked}
+            >
               {isLoading ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...</>
               ) : (

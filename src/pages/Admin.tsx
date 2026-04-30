@@ -20,8 +20,20 @@ const Admin = () => {
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        // Verify admin role via database — not just session existence
+        const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
+          _user_id: session.user.id,
+          _role: "admin",
+        });
+
+        if (roleError || !isAdmin) {
+          toast({ title: "Acesso restrito", description: "Você não tem permissão para acessar esta página.", variant: "destructive" });
           navigate("/auth");
           return;
         }

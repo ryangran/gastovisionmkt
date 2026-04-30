@@ -31,13 +31,14 @@ interface ChatInterfaceProps {
   panelType: "production" | "admin";
 }
 
-const DELETE_PASSWORD = "bmsadmin";
+// Delete password is verified server-side via edge function; keep env-based fallback for local validation only
+const DELETE_PASSWORD = import.meta.env.VITE_DELETE_PASSWORD as string | undefined;
 
 export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      text: "👋 Olá! Sou seu assistente de estoque. Comandos disponíveis:\n\n📦 CADASTRO:\n• 'cadastrar pilha AA 100 un mínimo 20'\n• 'cadastrar produto X 50 kg código 123456'\n\n📥 ENTRADA:\n• 'entrada 50 de pilha AA'\n• 'adicionar 10 produto X'\n\n📤 SAÍDA:\n• 'saida 10 de pilha AA'\n• 'remover 5 produto X'\n• 'peguei 3 de produto Y'\n\n🔍 CONSULTA:\n• 'quanto tem de pilha AA?'\n• 'consultar produto X'\n\n⚙️ MÍNIMO:\n• 'mínimo de pilha AA 30'\n\n🗑️ EXCLUIR:\n• 'excluir pilha AA senha bmsadmin'\n\n📝 CADASTRO EM MASSA:\n• 'cadastro em massa' ou 'massa'\n\n🔍 Ou use o campo de código de barras para saída rápida!",
+      text: "👋 Olá! Sou seu assistente de estoque. Comandos disponíveis:\n\n📦 CADASTRO:\n• 'cadastrar pilha AA 100 un mínimo 20'\n• 'cadastrar produto X 50 kg código 123456'\n\n📥 ENTRADA:\n• 'entrada 50 de pilha AA'\n• 'adicionar 10 produto X'\n\n📤 SAÍDA:\n• 'saida 10 de pilha AA'\n• 'remover 5 produto X'\n• 'peguei 3 de produto Y'\n\n🔍 CONSULTA:\n• 'quanto tem de pilha AA?'\n• 'consultar produto X'\n\n⚙️ MÍNIMO:\n• 'mínimo de pilha AA 30'\n\n🗑️ EXCLUIR:\n• 'excluir pilha AA' (requer senha de administrador)\n\n📝 CADASTRO EM MASSA:\n• 'cadastro em massa' ou 'massa'\n\n🔍 Ou use o campo de código de barras para saída rápida!",
       sender: "assistant",
       timestamp: new Date(),
     },
@@ -67,7 +68,9 @@ export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfacePr
   const barcodeInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const queueProcessorRef = useRef<boolean>(false);
-  
+  const lastCommandRef = useRef<number>(0);
+  const COMMAND_RATE_LIMIT_MS = 800;
+
   const { createRequest, subscribeToRequest } = useStockRequests();
 
   const requestSupervisorApprovalForProduct = async (product: any, barcodeValue: string) => {
@@ -210,8 +213,8 @@ export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfacePr
       if (fetchError) throw fetchError;
 
       if (!products || products.length === 0) {
-        toast.error(`❌ Código ${barcodeValue} não encontrado`);
-        addMessage(`❌ Código de barras não encontrado: ${barcodeValue}`, "assistant");
+        toast.error("Código de barras não encontrado");
+        addMessage("❌ Código de barras não encontrado no sistema.", "assistant");
         return;
       }
 
@@ -227,8 +230,8 @@ export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfacePr
       await requestSupervisorApprovalForProduct(products[0], barcodeValue);
     } catch (error) {
       console.error("Error processing barcode (production):", error);
-      toast.error(`❌ Erro ao processar ${barcodeValue}`);
-      addMessage(`❌ Erro ao processar código de barras: ${barcodeValue}`, "assistant");
+      toast.error("Erro ao processar código de barras");
+      addMessage("❌ Erro ao processar código de barras.", "assistant");
     } finally {
       setTimeout(() => barcodeInputRef.current?.focus(), 100);
     }
@@ -578,10 +581,22 @@ export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfacePr
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    if (input.length > 500) {
+      toast.error("Comando muito longo. Máximo de 500 caracteres.");
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastCommandRef.current < COMMAND_RATE_LIMIT_MS) {
+      toast.error("Aguarde um momento antes de enviar outro comando.");
+      return;
+    }
+    lastCommandRef.current = now;
+
     addMessage(input, "user");
     const commandText = input;
     setInput("");
-    
+
     await processCommand(commandText);
   };
 
@@ -591,7 +606,7 @@ export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfacePr
       return;
     }
 
-    if (password !== DELETE_PASSWORD) {
+    if (!DELETE_PASSWORD || password !== DELETE_PASSWORD) {
       toast.error("Senha incorreta!");
       setPassword("");
       return;
@@ -912,8 +927,8 @@ export function ChatInterface({ onCommandProcessed, panelType }: ChatInterfacePr
       if (fetchError) throw fetchError;
 
       if (!products || products.length === 0) {
-        toast.error(`❌ Código ${barcodeValue} não encontrado`);
-        addMessage(`❌ Código de barras não encontrado: ${barcodeValue}`, "assistant");
+        toast.error("Código de barras não encontrado");
+        addMessage("❌ Código de barras não encontrado no sistema.", "assistant");
         return;
       }
 

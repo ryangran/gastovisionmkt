@@ -79,9 +79,11 @@ export const usePagePermission = (pagePath: string): UsePagePermissionResult => 
       });
 
     // Re-check on auth changes (login/logout)
+    let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       // Avoid calling Supabase inside the callback directly
-      setTimeout(() => {
+      pendingTimeout = setTimeout(() => {
         if (!isMounted) return;
         setIsLoading(true);
         checkPermissionForSession(session?.user ?? null).finally(() => {
@@ -92,6 +94,7 @@ export const usePagePermission = (pagePath: string): UsePagePermissionResult => 
 
     return () => {
       isMounted = false;
+      if (pendingTimeout) clearTimeout(pendingTimeout);
       subscription.unsubscribe();
     };
   }, [pagePath]);
