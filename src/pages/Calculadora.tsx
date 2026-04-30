@@ -8,8 +8,9 @@ import sheinLogo from "@/assets/shein-logo.png";
 import magaluLogo from "@/assets/magalu-logo.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useSavedCalculations } from "@/hooks/useSavedCalculations";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon, Shield } from "lucide-react";
+import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon, Shield, BookmarkPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ function parseNum(val: string): number {
 
 // ─── Calculadora Shopee ────────────────────────────────────────────────────────
 const ShopeeCalculadora = () => {
+  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]   = usePersistedState("calc_shopee_nome", "");
   const [precoVenda, setPrecoVenda]     = usePersistedState("calc_shopee_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_shopee_custo", "");
@@ -311,6 +313,24 @@ const ShopeeCalculadora = () => {
                   ✓ Produto rentável neste preço.
                 </p>
               )}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => saveCalculation({
+                    platform: "Shopee",
+                    product_name: nomeProduto,
+                    sale_price: preco,
+                    cost: custo,
+                    profit_margin_percent: margemLucro,
+                    profit_margin_value: lucro,
+                  })}
+                >
+                  <BookmarkPlus className="w-4 h-4" />
+                  Salvar produto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -598,6 +618,7 @@ function descricaoTaxa(categoria: AmazonCategoria): string {
 }
 
 const AmazonCalculadora = () => {
+  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_amazon_nome", "");
   const [categoriaNome, setCategoriaNome]   = usePersistedState("calc_amazon_cat", AMAZON_CATEGORIAS[0].nome);
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_amazon_preco", "");
@@ -972,6 +993,24 @@ const AmazonCalculadora = () => {
               {isLucrativo && (
                 <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>
               )}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => saveCalculation({
+                    platform: "Amazon",
+                    product_name: nomeProduto,
+                    sale_price: preco,
+                    cost: custo,
+                    profit_margin_percent: margemLucro,
+                    profit_margin_value: lucro,
+                  })}
+                >
+                  <BookmarkPlus className="w-4 h-4" />
+                  Salvar produto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -1176,6 +1215,7 @@ function getMagaluFrete(pesoKg: number, desconto: MagaluDescontoFrete): { faixa:
 }
 
 const MagaluCalculadora = () => {
+  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_magalu_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_magalu_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_magalu_custo", "");
@@ -1473,6 +1513,24 @@ const MagaluCalculadora = () => {
               {isLucrativo && (
                 <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>
               )}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => saveCalculation({
+                    platform: "Magalu",
+                    product_name: nomeProduto,
+                    sale_price: preco,
+                    cost: custo,
+                    profit_margin_percent: margemLucro,
+                    profit_margin_value: lucro,
+                  })}
+                >
+                  <BookmarkPlus className="w-4 h-4" />
+                  Salvar produto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -1640,6 +1698,7 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
+  const { saveCalculation } = useSavedCalculations();
   const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
   const [nomeProduto, setNomeProduto] = usePersistedState("calc_ml_nome", "");
   const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", mlCategorias[0]?.nome || "");
@@ -2028,6 +2087,24 @@ const MercadoLivreCalculadora = () => {
               {isLucrativo && (
                 <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>
               )}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => saveCalculation({
+                    platform: "Mercado Livre",
+                    product_name: nomeProduto,
+                    sale_price: preco,
+                    cost: custo,
+                    profit_margin_percent: margemLucro,
+                    profit_margin_value: lucro,
+                  })}
+                >
+                  <BookmarkPlus className="w-4 h-4" />
+                  Salvar produto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -2147,6 +2224,7 @@ const TIKTOK_COMISSAO = 0.06; // 6%
 const TIKTOK_TAXA_FIXA = 4.00; // R$4 por item
 
 const TikTokCalculadora = () => {
+  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_tiktok_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_tiktok_custo", "");
@@ -2353,6 +2431,24 @@ const TikTokCalculadora = () => {
               </div>
               {!isLucrativo && <p className="text-sm text-destructive mt-3 font-medium">⚠️ Este preço não cobre os custos. Revise o valor de venda.</p>}
               {isLucrativo && <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => saveCalculation({
+                    platform: "TikTok Shop",
+                    product_name: nomeProduto,
+                    sale_price: preco,
+                    cost: custo,
+                    profit_margin_percent: margemLucro,
+                    profit_margin_value: lucro,
+                  })}
+                >
+                  <BookmarkPlus className="w-4 h-4" />
+                  Salvar produto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -2417,6 +2513,7 @@ function calcularFreteShein(pesoRealKg: number, comprimento: number, largura: nu
 }
 
 const SheinCalculadora = () => {
+  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_shein_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_shein_custo", "");
@@ -2632,6 +2729,24 @@ const SheinCalculadora = () => {
               </div>
               {!isLucrativo && <p className="text-sm text-destructive mt-3 font-medium">⚠️ Este preço não cobre os custos. Revise o valor de venda.</p>}
               {isLucrativo && <p className="text-sm text-success mt-3 font-medium">✓ Produto rentável neste preço.</p>}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => saveCalculation({
+                    platform: "Shein",
+                    product_name: nomeProduto,
+                    sale_price: preco,
+                    cost: custo,
+                    profit_margin_percent: margemLucro,
+                    profit_margin_value: lucro,
+                  })}
+                >
+                  <BookmarkPlus className="w-4 h-4" />
+                  Salvar produto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}

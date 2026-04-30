@@ -7,30 +7,44 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Cakto checkout URLs to identify plan type
 const MONTHLY_CHECKOUT_IDENTIFIERS = ["vgi2b7q", "n9b89by", "32i2hyh"];
 const LIFETIME_CHECKOUT_IDENTIFIERS = ["6m7kaiz"];
 
-function identifyPlanType(body: any): "monthly" | "lifetime" {
-  // Check product/offer info from Cakto payload
-  const checkoutUrl = body?.checkout_url || body?.checkout?.url || body?.product?.checkout_url || "";
-  const productName = (body?.product?.name || body?.product_name || "").toLowerCase();
-  const offerId = body?.offer?.id || body?.offer_id || "";
-  const transactionId = body?.transaction?.id || body?.transaction_id || body?.id || "";
+function identifyPlanType(body: unknown): "monthly" | "lifetime" {
+  const b = body as Record<string, unknown>;
+  const product = (b?.product ?? {}) as Record<string, unknown>;
+  const checkout = (b?.checkout ?? {}) as Record<string, unknown>;
+  const offer = (b?.offer ?? {}) as Record<string, unknown>;
 
-  // Check if any lifetime identifier matches
-  const allText = `${checkoutUrl} ${productName} ${offerId} ${transactionId}`.toLowerCase();
-  
-  if (LIFETIME_CHECKOUT_IDENTIFIERS.some(id => allText.includes(id))) {
+  const checkoutUrl = String(
+    b?.checkout_url ?? checkout?.url ?? product?.checkout_url ?? ""
+  );
+  const productName = String(
+    product?.name ?? b?.product_name ?? ""
+  ).toLowerCase();
+  const offerId = String(offer?.id ?? b?.offer_id ?? "");
+
+  const allText = `${checkoutUrl} ${productName} ${offerId}`.toLowerCase();
+
+  if (LIFETIME_CHECKOUT_IDENTIFIERS.some((id) => allText.includes(id))) {
     return "lifetime";
   }
-  
-  if (productName.includes("vitalício") || productName.includes("vitalicio") || productName.includes("lifetime")) {
+  if (
+    productName.includes("vitalício") ||
+    productName.includes("vitalicio") ||
+    productName.includes("lifetime")
+  ) {
     return "lifetime";
+  }
+
+  if (MONTHLY_CHECKOUT_IDENTIFIERS.some((id) => allText.includes(id))) {
+    return "monthly";
   }
 
   return "monthly";
 }
+
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -39,97 +53,129 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
+    console.log("Cakto webhook received:", JSON.stringify(body));
 
-    console.log("Webhook payload:", JSON.stringify(body));
+    const b = body as Record<string, unknown>;
+    const customer = (b?.customer ?? {}) as Record<string, unknown>;
+    const buyer = (b?.buyer ?? {}) as Record<string, unknown>;
+    const transaction = (b?.transaction ?? {}) as Record<string, unknown>;
 
-    const email = body?.customer?.email || body?.buyer?.email || body?.email;
-    const transactionId = body?.transaction?.id || body?.transaction_id || body?.id || "unknown";
-    const status = body?.transaction?.status || body?.status || "approved";
+    const email = String(
+      customer?.email ?? buyer?.email ?? b?.email ?? ""
+    ).toLowerCase().trim();
+
+    const transactionId = String(
+      transaction?.id ?? b?.transaction_id ?? b?.id ?? "unknown"
+    );
+
+    const status = String(
+      transaction?.status ?? b?.status ?? "approved"
+    ).toLowerCase();
 
     if (!email) {
-      console.error("No email found in webhook payload:", JSON.stringify(body));
+      console.error("No email in payload");
       return new Response(
         JSON.stringify({ error: "Email not found in payload" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (status !== "approved" && status !== "completed" && status !== "paid") {
-      console.log(`Transaction ${transactionId} status: ${status} - skipping`);
+    if (!["approved", "completed", "paid"].includes(status)) {
+      console.log(`Transaction ${transactionId} status "${status}" — skipping`);
       return new Response(
         JSON.stringify({ message: "Transaction not approved, skipping" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const planType = identifyPlanType(body);
-    console.log(`Identified plan type: ${planType}`);
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const defaultPassword = "Gasto123";
-
-    // Check if user already exists
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const userExists = existingUsers?.users?.find(
-      (u) => u.email?.toLowerCase() === normalizedEmail
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    if (!userExists) {
-      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-        email: normalizedEmail,
-        password: defaultPassword,
-        email_confirm: true,
-      });
+    // Evitar processar a mesma transação duas vezes
+    if (transactionId !== "unknown") {
+      const { data: existing } = await supabase
+        .from("purchases")
+        .select("id")
+        .eq("transaction_id", transactionId)
+        .maybeSingle();
 
-      if (createError) {
+      if (existing) {
+        console.log(`Transaction ${transactionId} already processed — skipping`);
+        return new Response(
+          JSON.stringify({ message: "Already processed" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    const planType = identifyPlanType(body);
+    console.log(`Plan identified: ${planType} for ${email}`);
+
+    // Tentar criar usuário; se já existe, continuar normalmente
+    let isNewUser = false;
+    const password = "Gasto123";
+
+    const { error: createError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (createError) {
+      const msg = createError.message ?? "";
+      if (
+        createError.status === 422 ||
+        msg.includes("already been registered") ||
+        msg.includes("already exists")
+      ) {
+        console.log(`User ${email} already exists — updating plan only`);
+      } else {
         console.error("Error creating user:", createError);
         return new Response(
           JSON.stringify({ error: "Failed to create user" }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-
-      console.log(`User created for ${normalizedEmail}`);
     } else {
-      console.log(`User already exists for ${normalizedEmail}`);
+      isNewUser = true;
+      console.log(`New user created: ${email}`);
     }
 
-    // Calculate expires_at for monthly plans (30 days from now)
-    const expiresAt = planType === "monthly" 
-      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-      : null;
+    // Registrar compra
+    const expiresAt =
+      planType === "monthly"
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        : null;
 
-    // Insert purchase record
-    const { error } = await supabase.from("purchases").insert({
-      user_email: normalizedEmail,
+    const { error: purchaseError } = await supabase.from("purchases").insert({
+      user_email: email,
       transaction_id: transactionId,
       status: "approved",
       plan_type: planType,
       expires_at: expiresAt,
     });
 
-    if (error) {
-      console.error("Error inserting purchase:", error);
+    if (purchaseError) {
+      console.error("Error inserting purchase:", purchaseError);
       return new Response(
         JSON.stringify({ error: "Failed to save purchase" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Purchase recorded for ${normalizedEmail}, plan: ${planType}, transaction: ${transactionId}, expires: ${expiresAt || 'never'}`);
+    console.log(
+      `Purchase recorded — email: ${email}, plan: ${planType}, tx: ${transactionId}, expires: ${expiresAt ?? "never"}`
+    );
 
     return new Response(
-      JSON.stringify({ success: true, plan_type: planType }),
+      JSON.stringify({ success: true, plan_type: planType, new_user: isNewUser }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
-    console.error("Webhook error:", error);
+  } catch (err) {
+    console.error("Webhook error:", err);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
