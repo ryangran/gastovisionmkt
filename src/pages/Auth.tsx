@@ -14,6 +14,7 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
+  MessageCircle,
 } from "lucide-react";
 
 // Rate limiting: max 5 attempts per 15 minutes per session
