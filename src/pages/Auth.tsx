@@ -310,6 +310,21 @@ const Auth = () => {
               </button>
             </p>
           </div>
+
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-sm text-muted-foreground text-center mb-3">
+              Precisa de ajuda para acessar?
+            </p>
+            <a
+              href="https://wa.me/5511944804280?text=Ol%C3%A1%2C%20sou%20aluno%20do%20Gasto%20Vision%20e%20preciso%20de%20suporte%20para%20acessar%20minha%20conta."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-md bg-[#25D366] hover:bg-[#1faa52] text-white font-medium transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Falar com suporte no WhatsApp
+            </a>
+          </div>
         </motion.div>
       </div>
     </div>
