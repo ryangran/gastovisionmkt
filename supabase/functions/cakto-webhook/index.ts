@@ -10,29 +10,21 @@ const corsHeaders = {
 const MONTHLY_CHECKOUT_IDENTIFIERS = ["vgi2b7q", "n9b89by", "32i2hyh"];
 const LIFETIME_CHECKOUT_IDENTIFIERS = ["6m7kaiz"];
 
-function identifyPlanType(body: unknown): "monthly" | "lifetime" {
-  const b = body as Record<string, unknown>;
-  const product = (b?.product ?? {}) as Record<string, unknown>;
-  const checkout = (b?.checkout ?? {}) as Record<string, unknown>;
-  const offer = (b?.offer ?? {}) as Record<string, unknown>;
+function identifyPlanType(data: Record<string, unknown>): "monthly" | "lifetime" {
+  const offer = (data?.offer ?? {}) as Record<string, unknown>;
+  const offerId = String(offer?.id ?? "");
+  const offerName = String(offer?.name ?? "").toLowerCase();
+  const checkoutUrl = String(data?.checkoutUrl ?? "");
 
-  const checkoutUrl = String(
-    b?.checkout_url ?? checkout?.url ?? product?.checkout_url ?? ""
-  );
-  const productName = String(
-    product?.name ?? b?.product_name ?? ""
-  ).toLowerCase();
-  const offerId = String(offer?.id ?? b?.offer_id ?? "");
-
-  const allText = `${checkoutUrl} ${productName} ${offerId}`.toLowerCase();
+  const allText = `${checkoutUrl} ${offerName} ${offerId}`.toLowerCase();
 
   if (LIFETIME_CHECKOUT_IDENTIFIERS.some((id) => allText.includes(id))) {
     return "lifetime";
   }
   if (
-    productName.includes("vitalício") ||
-    productName.includes("vitalicio") ||
-    productName.includes("lifetime")
+    offerName.includes("vitalício") ||
+    offerName.includes("vitalicio") ||
+    offerName.includes("lifetime")
   ) {
     return "lifetime";
   }
@@ -56,21 +48,13 @@ Deno.serve(async (req) => {
     console.log("Cakto webhook received:", JSON.stringify(body));
 
     const b = body as Record<string, unknown>;
-    const customer = (b?.customer ?? {}) as Record<string, unknown>;
-    const buyer = (b?.buyer ?? {}) as Record<string, unknown>;
-    const transaction = (b?.transaction ?? {}) as Record<string, unknown>;
+    // Cakto wraps all purchase data inside a "data" key
+    const data = (b?.data ?? {}) as Record<string, unknown>;
+    const customer = (data?.customer ?? {}) as Record<string, unknown>;
 
-    const email = String(
-      customer?.email ?? buyer?.email ?? b?.email ?? ""
-    ).toLowerCase().trim();
-
-    const transactionId = String(
-      transaction?.id ?? b?.transaction_id ?? b?.id ?? "unknown"
-    );
-
-    const status = String(
-      transaction?.status ?? b?.status ?? "approved"
-    ).toLowerCase();
+    const email = String(customer?.email ?? "").toLowerCase().trim();
+    const transactionId = String(data?.id ?? "unknown");
+    const status = String(data?.status ?? "").toLowerCase();
 
     if (!email) {
       console.error("No email in payload");
@@ -111,7 +95,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const planType = identifyPlanType(body);
+    const planType = identifyPlanType(data);
     console.log(`Plan identified: ${planType} for ${email}`);
 
     // Tentar criar usuário; se já existe, continuar normalmente
