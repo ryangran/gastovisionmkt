@@ -1249,10 +1249,11 @@ const MagaluCalculadora = () => {
   const valorFrete     = freteInfo ? freteInfo.valor : 0;
 
   const valorComissao       = preco > 0 ? preco * MAGALU_COMISSAO : 0;
+  const valorTaxaFixa       = parseNum(taxaFixa);
   const valorImposto        = preco * (impostoPerc / 100);
   const valorMarketing      = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
-  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete;
+  const receitaLiquida = preco - valorComissao - valorTaxaFixa - valorImposto - valorMarketing - valorFrete;
   const lucro          = receitaLiquida - custo;
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
