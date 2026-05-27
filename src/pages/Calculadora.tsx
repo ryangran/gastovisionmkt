@@ -1311,6 +1311,17 @@ const MagaluCalculadora = () => {
             <p className="text-xs text-muted-foreground">Ex: Simples Nacional, MEI, etc.</p>
           </div>
 
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Taxa Fixa (R$)</Label>
+            <Input
+              type="number"
+              placeholder="0,00"
+              value={taxaFixa}
+              onChange={(e) => setTaxaFixa(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Tarifa fixa cobrada por pedido (ex: R$ 5,00 em vendas abaixo de R$ 79).</p>
+          </div>
+
           <Separator />
 
           {/* Cálculo de Frete */}
