@@ -1229,6 +1229,7 @@ const MagaluCalculadora = () => {
   const [comprimento, setComprimento]       = usePersistedState("calc_magalu_comprimento", "");
   const [tipoProduto, setTipoProduto]       = usePersistedState<MagaluTipoProduto>("calc_magalu_tipo", "leves");
   const [descontoFrete, setDescontoFrete]   = usePersistedState<MagaluDescontoFrete>("calc_magalu_desconto", "sem_desconto");
+  const [taxaFixa, setTaxaFixa]             = usePersistedState("calc_magalu_taxaFixa", "");
 
   const preco          = parseNum(precoVenda);
   const custo          = parseNum(custoProduto);
@@ -1248,10 +1249,11 @@ const MagaluCalculadora = () => {
   const valorFrete     = freteInfo ? freteInfo.valor : 0;
 
   const valorComissao       = preco > 0 ? preco * MAGALU_COMISSAO : 0;
+  const valorTaxaFixa       = parseNum(taxaFixa);
   const valorImposto        = preco * (impostoPerc / 100);
   const valorMarketing      = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
-  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete;
+  const receitaLiquida = preco - valorComissao - valorTaxaFixa - valorImposto - valorMarketing - valorFrete;
   const lucro          = receitaLiquida - custo;
   const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
   const isLucrativo    = lucro > 0;
@@ -1307,6 +1309,17 @@ const MagaluCalculadora = () => {
               onChange={(e) => setImposto(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">Ex: Simples Nacional, MEI, etc.</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Taxa Fixa (R$)</Label>
+            <Input
+              type="number"
+              placeholder="0,00"
+              value={taxaFixa}
+              onChange={(e) => setTaxaFixa(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Tarifa fixa cobrada por pedido (ex: R$ 5,00 em vendas abaixo de R$ 79).</p>
           </div>
 
           <Separator />
@@ -1456,6 +1469,12 @@ const MagaluCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão Magalu (18%)</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
+              {valorTaxaFixa > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Taxa Fixa</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorTaxaFixa)}</span>
+                </div>
+              )}
               {valorFrete > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Frete Preço Certo</span>
