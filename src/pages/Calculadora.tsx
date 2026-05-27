@@ -1229,6 +1229,7 @@ const MagaluCalculadora = () => {
   const [comprimento, setComprimento]       = usePersistedState("calc_magalu_comprimento", "");
   const [tipoProduto, setTipoProduto]       = usePersistedState<MagaluTipoProduto>("calc_magalu_tipo", "leves");
   const [descontoFrete, setDescontoFrete]   = usePersistedState<MagaluDescontoFrete>("calc_magalu_desconto", "sem_desconto");
+  const [taxaFixa, setTaxaFixa]             = usePersistedState("calc_magalu_taxaFixa", "");
 
   const preco          = parseNum(precoVenda);
   const custo          = parseNum(custoProduto);
