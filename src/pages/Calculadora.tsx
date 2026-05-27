@@ -1469,6 +1469,12 @@ const MagaluCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão Magalu (18%)</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
+              {valorTaxaFixa > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">− Taxa Fixa</span>
+                  <span className="text-destructive font-medium">−{formatCurrency(valorTaxaFixa)}</span>
+                </div>
+              )}
               {valorFrete > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Frete Preço Certo</span>
