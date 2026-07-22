@@ -2396,10 +2396,11 @@ const TikTokCalculadora = () => {
               </div>
               {valorComissao > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">− Comissão (6%)</span>
+                  <span className="text-muted-foreground">− Comissão ({(TIKTOK_COMISSAO * 100).toFixed(0)}%)</span>
                   <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
                 </div>
               )}
+
               {incentivoComissao && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Comissão (incentivo)</span>
