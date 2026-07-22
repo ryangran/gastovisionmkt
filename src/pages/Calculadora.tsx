@@ -2499,14 +2499,22 @@ const TikTokCalculadora = () => {
           <CardContent className="space-y-3 text-xs text-muted-foreground">
             <div className="space-y-1">
               <p className="font-semibold text-foreground">💰 Comissão</p>
-              <p>A tarifa de comissão atual é de <span className="font-semibold text-foreground">6%</span>, incluindo impostos aplicáveis (IVA).</p>
+              <p>Novas tarifas vigentes a partir de <span className="font-semibold text-foreground">15/07/2026</span>:</p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                <li>Preço &lt; R$50,00 → comissão <span className="font-semibold text-foreground">10%</span></li>
+                <li>Preço ≥ R$50,00 → comissão <span className="font-semibold text-foreground">6%</span></li>
+              </ul>
               <p>Com o <span className="font-semibold text-primary">incentivo de comissão</span> ativo, a comissão é <span className="font-semibold text-success">0%</span>.</p>
             </div>
             <Separator />
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">🏷️ Taxa fixa</p>
-              <p>A taxa por item vendido é fixada em <span className="font-semibold text-foreground">R$4,00</span> por item, incluindo impostos aplicáveis (IVA).</p>
+              <p className="font-semibold text-foreground">🏷️ Taxa fixa por item</p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                <li>Preço &lt; R$50,00 → <span className="font-semibold text-foreground">R$4,00</span></li>
+                <li>Preço ≥ R$50,00 → <span className="font-semibold text-foreground">R$6,00</span></li>
+              </ul>
             </div>
+
             <Separator />
             <div className="space-y-1">
               <p className="font-semibold text-foreground">🚚 Frete Grátis</p>
