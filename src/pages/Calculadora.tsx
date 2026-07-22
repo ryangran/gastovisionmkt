@@ -2364,13 +2364,14 @@ const TikTokCalculadora = () => {
               <div className="flex items-center justify-between">
                 <span className="text-foreground text-sm">Comissão</span>
                 <Badge variant="secondary" className="font-mono">
-                  {incentivoComissao ? "0% (incentivo)" : "6%"}
+                  {incentivoComissao ? "0% (incentivo)" : `${(TIKTOK_COMISSAO * 100).toFixed(0)}%`}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-foreground text-sm">Taxa fixa por item</span>
-                <Badge variant="secondary" className="font-mono">R$4,00</Badge>
+                <Badge variant="secondary" className="font-mono">{formatCurrency(TIKTOK_TAXA_FIXA)}</Badge>
               </div>
+
               {usarFreteGratis && (
                 <div className="flex items-center justify-between">
                   <span className="text-foreground text-sm">Taxa Frete Grátis</span>
