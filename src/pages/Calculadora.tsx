@@ -2239,8 +2239,13 @@ const MercadoLivreCalculadora = () => {
   );
 };
 // ─── Calculadora TikTok Shop ──────────────────────────────────────────────────
-const TIKTOK_COMISSAO = 0.06; // 6%
-const TIKTOK_TAXA_FIXA = 4.00; // R$4 por item
+// Novas taxas vigentes a partir de 15/07/2026:
+// - Preço < R$50: comissão 10% + taxa fixa R$4,00
+// - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
+const getTiktokFees = (preco: number) => {
+  if (preco < 50) return { comissao: 0.10, taxaFixa: 4.00 };
+  return { comissao: 0.06, taxaFixa: 6.00 };
+};
 
 const TikTokCalculadora = () => {
   const { saveCalculation } = useSavedCalculations();
@@ -2258,12 +2263,14 @@ const TikTokCalculadora = () => {
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
 
+  const { comissao: TIKTOK_COMISSAO, taxaFixa: TIKTOK_TAXA_FIXA } = getTiktokFees(preco);
   const TIKTOK_FRETE_GRATIS_TAXA = 0.06; // +6%
   const comissaoPerc   = incentivoComissao ? 0 : TIKTOK_COMISSAO;
   const freteGratisPerc = usarFreteGratis ? TIKTOK_FRETE_GRATIS_TAXA : 0;
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorFreteGratis = preco > 0 ? preco * freteGratisPerc : 0;
   const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
+
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
