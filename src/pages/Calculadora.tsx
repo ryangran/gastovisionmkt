@@ -2239,8 +2239,13 @@ const MercadoLivreCalculadora = () => {
   );
 };
 // ─── Calculadora TikTok Shop ──────────────────────────────────────────────────
-const TIKTOK_COMISSAO = 0.06; // 6%
-const TIKTOK_TAXA_FIXA = 4.00; // R$4 por item
+// Novas taxas vigentes a partir de 15/07/2026:
+// - Preço < R$50: comissão 10% + taxa fixa R$4,00
+// - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
+const getTiktokFees = (preco: number) => {
+  if (preco < 50) return { comissao: 0.10, taxaFixa: 4.00 };
+  return { comissao: 0.06, taxaFixa: 6.00 };
+};
 
 const TikTokCalculadora = () => {
   const { saveCalculation } = useSavedCalculations();
@@ -2258,12 +2263,14 @@ const TikTokCalculadora = () => {
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
 
+  const { comissao: TIKTOK_COMISSAO, taxaFixa: TIKTOK_TAXA_FIXA } = getTiktokFees(preco);
   const TIKTOK_FRETE_GRATIS_TAXA = 0.06; // +6%
   const comissaoPerc   = incentivoComissao ? 0 : TIKTOK_COMISSAO;
   const freteGratisPerc = usarFreteGratis ? TIKTOK_FRETE_GRATIS_TAXA : 0;
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorFreteGratis = preco > 0 ? preco * freteGratisPerc : 0;
   const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
+
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
 
@@ -2357,13 +2364,14 @@ const TikTokCalculadora = () => {
               <div className="flex items-center justify-between">
                 <span className="text-foreground text-sm">Comissão</span>
                 <Badge variant="secondary" className="font-mono">
-                  {incentivoComissao ? "0% (incentivo)" : "6%"}
+                  {incentivoComissao ? "0% (incentivo)" : `${(TIKTOK_COMISSAO * 100).toFixed(0)}%`}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-foreground text-sm">Taxa fixa por item</span>
-                <Badge variant="secondary" className="font-mono">R$4,00</Badge>
+                <Badge variant="secondary" className="font-mono">{formatCurrency(TIKTOK_TAXA_FIXA)}</Badge>
               </div>
+
               {usarFreteGratis && (
                 <div className="flex items-center justify-between">
                   <span className="text-foreground text-sm">Taxa Frete Grátis</span>
@@ -2388,10 +2396,11 @@ const TikTokCalculadora = () => {
               </div>
               {valorComissao > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">− Comissão (6%)</span>
+                  <span className="text-muted-foreground">− Comissão ({(TIKTOK_COMISSAO * 100).toFixed(0)}%)</span>
                   <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
                 </div>
               )}
+
               {incentivoComissao && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Comissão (incentivo)</span>
@@ -2490,14 +2499,22 @@ const TikTokCalculadora = () => {
           <CardContent className="space-y-3 text-xs text-muted-foreground">
             <div className="space-y-1">
               <p className="font-semibold text-foreground">💰 Comissão</p>
-              <p>A tarifa de comissão atual é de <span className="font-semibold text-foreground">6%</span>, incluindo impostos aplicáveis (IVA).</p>
+              <p>Novas tarifas vigentes a partir de <span className="font-semibold text-foreground">15/07/2026</span>:</p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                <li>Preço &lt; R$50,00 → comissão <span className="font-semibold text-foreground">10%</span></li>
+                <li>Preço ≥ R$50,00 → comissão <span className="font-semibold text-foreground">6%</span></li>
+              </ul>
               <p>Com o <span className="font-semibold text-primary">incentivo de comissão</span> ativo, a comissão é <span className="font-semibold text-success">0%</span>.</p>
             </div>
             <Separator />
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">🏷️ Taxa fixa</p>
-              <p>A taxa por item vendido é fixada em <span className="font-semibold text-foreground">R$4,00</span> por item, incluindo impostos aplicáveis (IVA).</p>
+              <p className="font-semibold text-foreground">🏷️ Taxa fixa por item</p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                <li>Preço &lt; R$50,00 → <span className="font-semibold text-foreground">R$4,00</span></li>
+                <li>Preço ≥ R$50,00 → <span className="font-semibold text-foreground">R$6,00</span></li>
+              </ul>
             </div>
+
             <Separator />
             <div className="space-y-1">
               <p className="font-semibold text-foreground">🚚 Frete Grátis</p>
