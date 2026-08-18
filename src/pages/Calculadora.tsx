@@ -373,11 +373,12 @@ const ShopeeCalculadora = () => {
               </thead>
               <tbody>
                 {[
-                  { label: "Até R$79,99",         comissao: "20% + R$4",  pix: "—",  idx: 0 },
-                  { label: "R$80 – R$99,99",       comissao: "14% + R$16", pix: "5%", idx: 1 },
-                  { label: "R$100 – R$199,99",     comissao: "14% + R$20", pix: "5%", idx: 2 },
-                  { label: "R$200 – R$499,99",     comissao: "14% + R$26", pix: "5%", idx: 3 },
-                  { label: "Acima de R$500",       comissao: "14% + R$26", pix: "8%", idx: 4 },
+                  { label: "Abaixo de R$8,00",     comissao: "20% + 50% do item", pix: "—",  idx: 0 },
+                  { label: "R$8 – R$79,99",        comissao: "20% + R$4",  pix: "—",  idx: 1 },
+                  { label: "R$80 – R$99,99",       comissao: "14% + R$16", pix: "5%", idx: 2 },
+                  { label: "R$100 – R$199,99",     comissao: "14% + R$20", pix: "5%", idx: 3 },
+                  { label: "R$200 – R$499,99",     comissao: "14% + R$26", pix: "5%", idx: 4 },
+                  { label: "Acima de R$500",       comissao: "14% + R$26", pix: "8%", idx: 5 },
                 ].map((row) => {
                   const faixaAtiva = comissao && preco > 0 && SHOPEE_COMISSOES[row.idx] === comissao;
                   return (
