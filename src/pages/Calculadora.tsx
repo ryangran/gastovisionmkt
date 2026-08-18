@@ -204,8 +204,11 @@ const ShopeeCalculadora = () => {
               <div className="flex items-center justify-between">
                 <span className="text-foreground">Comissão</span>
                 <Badge variant="secondary" className="font-mono">
-                  {formatPercent(comissao.percentual)} + R${comissao.fixo}
+                  {comissao.fixoPercentual
+                    ? `${formatPercent(comissao.percentual)} + ${formatPercent(comissao.fixoPercentual)} do item`
+                    : `${formatPercent(comissao.percentual)} + R$${comissao.fixo}`}
                 </Badge>
+
               </div>
               {usarSubsidioPix && comissao.subsidioPix > 0 && (
                 <div className="flex items-center justify-between">
