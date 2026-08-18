@@ -29,10 +29,13 @@ type ShopeeComissao = {
   max: number;
   percentual: number;
   fixo: number;
+  /** Taxa fixa calculada como % do valor do item (usado na faixa abaixo de R$8) */
+  fixoPercentual?: number;
   subsidioPix: number;
 };
 
 const SHOPEE_COMISSOES: ShopeeComissao[] = [
+  { max: 7.99,     percentual: 0.20, fixo: 0,  fixoPercentual: 0.5, subsidioPix: 0 },
   { max: 79.99,    percentual: 0.20, fixo: 4,  subsidioPix: 0    },
   { max: 99.99,    percentual: 0.14, fixo: 16, subsidioPix: 0.05 },
   { max: 199.99,   percentual: 0.14, fixo: 20, subsidioPix: 0.05 },
@@ -43,6 +46,11 @@ const SHOPEE_COMISSOES: ShopeeComissao[] = [
 function getShopeeComissao(preco: number): ShopeeComissao {
   return SHOPEE_COMISSOES.find((c) => preco <= c.max) ?? SHOPEE_COMISSOES[SHOPEE_COMISSOES.length - 1];
 }
+
+function getShopeeTaxaFixa(comissao: ShopeeComissao, preco: number): number {
+  return comissao.fixoPercentual ? preco * comissao.fixoPercentual : comissao.fixo;
+}
+
 
 function formatCurrency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
