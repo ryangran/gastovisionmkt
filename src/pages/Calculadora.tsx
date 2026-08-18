@@ -29,10 +29,13 @@ type ShopeeComissao = {
   max: number;
   percentual: number;
   fixo: number;
+  /** Taxa fixa calculada como % do valor do item (usado na faixa abaixo de R$8) */
+  fixoPercentual?: number;
   subsidioPix: number;
 };
 
 const SHOPEE_COMISSOES: ShopeeComissao[] = [
+  { max: 7.99,     percentual: 0.20, fixo: 0,  fixoPercentual: 0.5, subsidioPix: 0 },
   { max: 79.99,    percentual: 0.20, fixo: 4,  subsidioPix: 0    },
   { max: 99.99,    percentual: 0.14, fixo: 16, subsidioPix: 0.05 },
   { max: 199.99,   percentual: 0.14, fixo: 20, subsidioPix: 0.05 },
@@ -43,6 +46,11 @@ const SHOPEE_COMISSOES: ShopeeComissao[] = [
 function getShopeeComissao(preco: number): ShopeeComissao {
   return SHOPEE_COMISSOES.find((c) => preco <= c.max) ?? SHOPEE_COMISSOES[SHOPEE_COMISSOES.length - 1];
 }
+
+function getShopeeTaxaFixa(comissao: ShopeeComissao, preco: number): number {
+  return comissao.fixoPercentual ? preco * comissao.fixoPercentual : comissao.fixo;
+}
+
 
 function formatCurrency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -74,7 +82,7 @@ const ShopeeCalculadora = () => {
 
   const comissao = preco > 0 ? getShopeeComissao(preco) : null;
 
-  const valorComissao  = comissao ? preco * comissao.percentual + comissao.fixo : 0;
+  const valorComissao  = comissao ? preco * comissao.percentual + getShopeeTaxaFixa(comissao, preco) : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
   const subsidio       = comissao && usarSubsidioPix ? preco * comissao.subsidioPix : 0;
@@ -196,8 +204,11 @@ const ShopeeCalculadora = () => {
               <div className="flex items-center justify-between">
                 <span className="text-foreground">Comissão</span>
                 <Badge variant="secondary" className="font-mono">
-                  {formatPercent(comissao.percentual)} + R${comissao.fixo}
+                  {comissao.fixoPercentual
+                    ? `${formatPercent(comissao.percentual)} + ${formatPercent(comissao.fixoPercentual)} do item`
+                    : `${formatPercent(comissao.percentual)} + R$${comissao.fixo}`}
                 </Badge>
+
               </div>
               {usarSubsidioPix && comissao.subsidioPix > 0 && (
                 <div className="flex items-center justify-between">
@@ -362,11 +373,12 @@ const ShopeeCalculadora = () => {
               </thead>
               <tbody>
                 {[
-                  { label: "Até R$79,99",         comissao: "20% + R$4",  pix: "—",  idx: 0 },
-                  { label: "R$80 – R$99,99",       comissao: "14% + R$16", pix: "5%", idx: 1 },
-                  { label: "R$100 – R$199,99",     comissao: "14% + R$20", pix: "5%", idx: 2 },
-                  { label: "R$200 – R$499,99",     comissao: "14% + R$26", pix: "5%", idx: 3 },
-                  { label: "Acima de R$500",       comissao: "14% + R$26", pix: "8%", idx: 4 },
+                  { label: "Abaixo de R$8,00",     comissao: "20% + 50% do item", pix: "—",  idx: 0 },
+                  { label: "R$8 – R$79,99",        comissao: "20% + R$4",  pix: "—",  idx: 1 },
+                  { label: "R$80 – R$99,99",       comissao: "14% + R$16", pix: "5%", idx: 2 },
+                  { label: "R$100 – R$199,99",     comissao: "14% + R$20", pix: "5%", idx: 3 },
+                  { label: "R$200 – R$499,99",     comissao: "14% + R$26", pix: "5%", idx: 4 },
+                  { label: "Acima de R$500",       comissao: "14% + R$26", pix: "8%", idx: 5 },
                 ].map((row) => {
                   const faixaAtiva = comissao && preco > 0 && SHOPEE_COMISSOES[row.idx] === comissao;
                   return (
