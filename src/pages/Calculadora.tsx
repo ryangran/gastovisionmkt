@@ -82,7 +82,7 @@ const ShopeeCalculadora = () => {
 
   const comissao = preco > 0 ? getShopeeComissao(preco) : null;
 
-  const valorComissao  = comissao ? preco * comissao.percentual + comissao.fixo : 0;
+  const valorComissao  = comissao ? preco * comissao.percentual + getShopeeTaxaFixa(comissao, preco) : 0;
   const valorImposto   = preco * (impostoPerc / 100);
   const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
   const subsidio       = comissao && usarSubsidioPix ? preco * comissao.subsidioPix : 0;
