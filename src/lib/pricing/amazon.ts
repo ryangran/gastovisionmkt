@@ -2,7 +2,7 @@ import type { BaseInput, LinhaDetalhe, PricingResult } from "./types";
 import { RESULTADO_VAZIO } from "./types";
 
 /** Uma categoria Amazon: taxa única (percentual) ou escalonada (tiered), + taxa fixa somada por item. */
-type AmazonCategoria = {
+export type AmazonCategoria = {
   nome: string;
   percentual?: number;
   tiered?: { ate: number; taxa: number; taxaExcedente: number };
@@ -107,7 +107,7 @@ const AMAZON_FBA_ONSITE_QUILO_ADICIONAL = 4.00;
 // Produtos até R$30: tarifa fixa R$4,50
 // Produtos até R$79: tarifa fixa R$8,00
 // Produtos a partir de R$79: tabela por peso e zona
-type AmazonDBAZona = "sp" | "zona1" | "zona2" | "centro_norte";
+export type AmazonDBAZona = "sp" | "zona1" | "zona2" | "centro_norte";
 
 type AmazonDBAFaixa = {
   label: string;
@@ -135,7 +135,7 @@ const AMAZON_DBA_TABELA: AmazonDBAFaixa[] = [
 
 const AMAZON_DBA_QUILO_ADICIONAL = 4.00; // todas as zonas
 
-type AmazonModelo = "dba" | "fba" | "fba_onsite";
+export type AmazonModelo = "dba" | "fba" | "fba_onsite";
 
 /** Tabelas de taxas/frete que a Amazon usa: comissão por categoria + frete FBA, FBA Onsite e DBA. */
 export type AmazonTaxas = {
@@ -158,11 +158,11 @@ export const AMAZON_TAXAS: AmazonTaxas = {
   dbaQuiloAdicional: AMAZON_DBA_QUILO_ADICIONAL,
 };
 
-function buscarCategoriaAmazon(nome: string, taxas: AmazonTaxas): AmazonCategoria {
+export function buscarCategoriaAmazon(nome: string, taxas: AmazonTaxas): AmazonCategoria {
   return taxas.categorias.find((c) => c.nome === nome) ?? taxas.categorias[0];
 }
 
-function calcularComissaoAmazon(preco: number, categoria: AmazonCategoria): number {
+export function calcularComissaoAmazon(preco: number, categoria: AmazonCategoria): number {
   let comissaoPercentual = 0;
   if (categoria.tiered) {
     const { ate, taxa, taxaExcedente } = categoria.tiered;
@@ -177,55 +177,99 @@ function calcularComissaoAmazon(preco: number, categoria: AmazonCategoria): numb
   return comissaoPercentual + categoria.taxaFixa;
 }
 
-function descricaoTaxaAmazon(categoria: AmazonCategoria): string {
+export function descricaoTaxaAmazon(categoria: AmazonCategoria): string {
   if (categoria.tiered) {
     return `${(categoria.tiered.taxa * 100).toFixed(0)}% até R$${categoria.tiered.ate} / ${(categoria.tiered.taxaExcedente * 100).toFixed(0)}% acima`;
   }
   return `${((categoria.percentual ?? 0) * 100).toFixed(0)}%`;
 }
 
-function calcularPesoCubadoFBA(alturaCm: number, larguraCm: number, comprimentoCm: number): number {
+export function calcularPesoCubadoFBA(alturaCm: number, larguraCm: number, comprimentoCm: number): number {
   return (comprimentoCm * larguraCm * alturaCm) / 6000;
 }
 
-function calcularFreteFBA(pesoKg: number, precoVenda: number, taxas: AmazonTaxas): number {
+export interface AmazonFreteInfo {
+  faixa: AmazonFBAFaixa | null;
+  valor: number;
+}
+
+export function freteFBA(
+  pesoKg: number,
+  precoVenda: number,
+  taxas: AmazonTaxas = AMAZON_TAXAS,
+): AmazonFreteInfo {
   const coluna: "ate50" | "acima50" = precoVenda <= 50 ? "ate50" : "acima50";
   const tabela = taxas.fbaTabela;
   if (pesoKg <= 10) {
     const faixa = tabela.find((f) => pesoKg <= f.maxKg) ?? tabela[tabela.length - 1];
-    return faixa[coluna];
+    return { faixa, valor: faixa[coluna] };
   }
   const faixaBase = tabela[tabela.length - 1];
   const quilosExtra = Math.ceil(pesoKg - 10);
-  return faixaBase[coluna] + quilosExtra * taxas.fbaQuiloAdicional[coluna];
+  return {
+    faixa: faixaBase,
+    valor: faixaBase[coluna] + quilosExtra * taxas.fbaQuiloAdicional[coluna],
+  };
 }
 
-function calcularFreteFBAOnsite(pesoKg: number, taxas: AmazonTaxas): number {
+export interface AmazonFreteOnsiteInfo {
+  faixa: AmazonFBAOnsiteFaixa | null;
+  valor: number;
+}
+
+export function freteFBAOnsite(
+  pesoKg: number,
+  taxas: AmazonTaxas = AMAZON_TAXAS,
+): AmazonFreteOnsiteInfo {
   const tabela = taxas.fbaOnsiteTabela;
   if (pesoKg <= 10) {
     const faixa = tabela.find((f) => pesoKg <= f.maxKg) ?? tabela[tabela.length - 1];
-    return faixa.valor;
+    return { faixa, valor: faixa.valor };
   }
   const faixaBase = tabela[tabela.length - 1];
   const quilosExtra = Math.ceil(pesoKg - 10);
-  return faixaBase.valor + quilosExtra * taxas.fbaOnsiteQuiloAdicional;
+  return {
+    faixa: faixaBase,
+    valor: faixaBase.valor + quilosExtra * taxas.fbaOnsiteQuiloAdicional,
+  };
 }
 
-function calcularFreteDBA(pesoKg: number, precoVenda: number, zona: AmazonDBAZona, taxas: AmazonTaxas): number {
+export interface AmazonFreteDBAInfo {
+  valor: number;
+  tipo: string;
+  faixa?: AmazonDBAFaixa;
+}
+
+export function freteDBA(
+  pesoKg: number,
+  precoVenda: number,
+  zona: AmazonDBAZona,
+  taxas: AmazonTaxas = AMAZON_TAXAS,
+): AmazonFreteDBAInfo {
   // Produtos até R$30: tarifa fixa
-  if (precoVenda <= 30) return 4.50;
+  if (precoVenda <= 30) {
+    return { valor: 4.5, tipo: "Tarifa fixa (produto até R$30)" };
+  }
   // Produtos até R$79: tarifa fixa
-  if (precoVenda < 79) return 8.00;
+  if (precoVenda < 79) {
+    return { valor: 8.0, tipo: "Tarifa fixa (produto até R$79)" };
+  }
   // Produtos a partir de R$79: tabela por peso e zona
-  if (pesoKg <= 0) return 0;
+  if (pesoKg <= 0) {
+    return { valor: 0, tipo: "Informe o peso para calcular" };
+  }
   const tabela = taxas.dbaTabela;
   if (pesoKg <= 10) {
     const faixa = tabela.find((f) => pesoKg <= f.maxKg) ?? tabela[tabela.length - 1];
-    return faixa[zona];
+    return { valor: faixa[zona], tipo: `Tabela por peso (${faixa.label})`, faixa };
   }
   const faixaBase = tabela[tabela.length - 1];
   const quilosExtra = Math.ceil(pesoKg - 10);
-  return faixaBase[zona] + quilosExtra * taxas.dbaQuiloAdicional;
+  return {
+    valor: faixaBase[zona] + quilosExtra * taxas.dbaQuiloAdicional,
+    tipo: `Acima de 10kg (+${quilosExtra}kg extra)`,
+    faixa: faixaBase,
+  };
 }
 
 export interface AmazonInput extends BaseInput {
@@ -270,11 +314,11 @@ export function calcularAmazon(
 
   let valorFrete = 0;
   if (modelo === "fba" && pesoFinal > 0) {
-    valorFrete = calcularFreteFBA(pesoFinal, preco, taxas);
+    valorFrete = freteFBA(pesoFinal, preco, taxas).valor;
   } else if (modelo === "fba_onsite" && pesoFinal > 0) {
-    valorFrete = calcularFreteFBAOnsite(pesoFinal, taxas);
+    valorFrete = freteFBAOnsite(pesoFinal, taxas).valor;
   } else if (modelo === "dba") {
-    valorFrete = calcularFreteDBA(pesoFinal, preco, dbaZona, taxas);
+    valorFrete = freteDBA(pesoFinal, preco, dbaZona, taxas).valor;
   }
 
   const valorComissao = calcularComissaoAmazon(preco, categoria);
