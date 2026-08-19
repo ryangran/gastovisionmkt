@@ -12,6 +12,7 @@ import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXA
          type MagaluTipoProduto, type MagaluDescontoFrete } from "@/lib/pricing/magalu";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
+import { MargemSlider } from "@/components/MargemSlider";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 import { useNavigate } from "react-router-dom";
@@ -104,6 +105,12 @@ const ShopeeCalculadora = () => {
               className="text-lg font-semibold"
             />
           </div>
+
+          <MargemSlider
+            platform="shopee"
+            inputs={inputs}
+            onPreco={(p) => setPrecoVenda(String(p))}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -630,6 +637,12 @@ const AmazonCalculadora = () => {
             />
           </div>
 
+          <MargemSlider
+            platform="amazon"
+            inputs={inputs}
+            onPreco={(p) => setPrecoVenda(String(p))}
+          />
+
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
             <input
@@ -1047,6 +1060,12 @@ const MagaluCalculadora = () => {
               className="text-lg font-semibold"
             />
           </div>
+
+          <MargemSlider
+            platform="magalu"
+            inputs={inputs}
+            onPreco={(p) => setPrecoVenda(String(p))}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -1612,6 +1631,12 @@ const MercadoLivreCalculadora = () => {
             />
           </div>
 
+          <MargemSlider
+            platform="mercadolivre"
+            inputs={inputs}
+            onPreco={(p) => setPrecoVenda(String(p))}
+          />
+
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
             <Input
@@ -1993,6 +2018,12 @@ const TikTokCalculadora = () => {
             <Input type="number" placeholder="0,00" value={precoVenda} onChange={(e) => setPrecoVenda(e.target.value)} className="text-lg font-semibold" />
           </div>
 
+          <MargemSlider
+            platform="tiktok"
+            inputs={inputs}
+            onPreco={(p) => setPrecoVenda(String(p))}
+          />
+
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
             <Input type="number" placeholder="0,00" value={custoProduto} onChange={(e) => setCustoProduto(e.target.value)} />
@@ -2282,6 +2313,12 @@ const SheinCalculadora = () => {
             <Label className="text-foreground font-medium">Preço de Venda (R$)</Label>
             <Input type="number" placeholder="0,00" value={precoVenda} onChange={(e) => setPrecoVenda(e.target.value)} className="text-lg font-semibold" />
           </div>
+
+          <MargemSlider
+            platform="shein"
+            inputs={inputs}
+            onPreco={(p) => setPrecoVenda(String(p))}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
