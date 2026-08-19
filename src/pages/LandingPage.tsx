@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import logo from "@/assets/logo.png";
+import logoLight from "@/assets/logo-light.png";
 import shopeeLogo from "@/assets/shopee-logo.png";
 import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
 import amazonLogo from "@/assets/amazon-logo.png";
@@ -61,7 +62,7 @@ const testimonials = [
 {
   name: "Ana Paula S.",
   role: "Vendedora na Shopee há 2 anos",
-  text: "Antes eu chutava o preço e vivia no prejuízo sem saber. Com o Gasto Vision descobri que estava perdendo R$3 em cada venda. Corrigi em 1 dia.",
+  text: "Antes eu chutava o preço e vivia no prejuízo sem saber. Com o Vetrex descobri que estava perdendo R$3 em cada venda. Corrigi em 1 dia.",
   rating: 5,
   avatar: avatarAna
 },
@@ -140,7 +141,8 @@ const LandingPage = () => {
         <div className="container mx-auto px-4 pt-16 pb-20 relative">
           {/* Nav */}
           <nav className="flex justify-center mb-20">
-            <img src={logo} alt="Gasto Vision MKT" className="h-36" />
+            <img src={logo} alt="Vetrex" className="h-20 md:h-24 hidden dark:block" />
+            <img src={logoLight} alt="Vetrex" className="h-20 md:h-24 block dark:hidden" />
           </nav>
 
           <div className="max-w-4xl mx-auto text-center">
@@ -251,7 +253,7 @@ const LandingPage = () => {
               <p>Não importa se você está colocando seu primeiro produto à venda ou se já tem centenas de SKUs rodando: precificar no chute é o caminho mais curto para trabalhar de graça.</p>
               <p>Cada marketplace tem sua própria fórmula de cobrança. A Shopee cobra diferente da Magalu. A Amazon cobra diferente do TikTok. E as tabelas mudam — às vezes sem aviso prévio.</p>
               <p>Uma planilha genérica não sabe que a Shopee mudou a comissão da sua categoria. Ela não calcula o subsídio de frete do Mercado Livre. Ela não desconta o custo de anúncio interno da Amazon.</p>
-              <p>Em vez de uma fórmula genérica, cada calculadora do Gasto Vision foi construída para uma plataforma específica — com as taxas reais e atualizadas. Você entra com preço de venda, custo do produto e imposto. Em 60 segundos sabe exatamente quanto vai lucrar — antes de anunciar.</p>
+              <p>Em vez de uma fórmula genérica, cada calculadora do Vetrex foi construída para uma plataforma específica — com as taxas reais e atualizadas. Você entra com preço de venda, custo do produto e imposto. Em 60 segundos sabe exatamente quanto vai lucrar — antes de anunciar.</p>
             </div>
           </div>
         </div>
@@ -326,7 +328,7 @@ const LandingPage = () => {
               O que nossos <span className="text-primary">sellers dizem</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Iniciantes e experientes usando o Gasto Vision para nunca mais precificar no chute
+              Iniciantes e experientes usando o Vetrex para nunca mais precificar no chute
             </p>
           </div>
 
@@ -460,7 +462,7 @@ const LandingPage = () => {
                   R$<span className="text-primary">97</span>
                   <span className="text-lg font-normal text-muted-foreground">,00</span>
                 </div>
-                <p className="text-sm font-semibold mt-1" style={{ color: 'hsl(25, 95%, 53%)' }}>⚡ Oferta por tempo limitado</p>
+                <p className="text-sm font-semibold mt-1 text-primary">⚡ Oferta por tempo limitado</p>
                 <div className="text-sm text-primary font-medium mt-1">Pagamento único</div>
               </div>
               <ul className="text-sm text-muted-foreground space-y-3 mb-8 text-left">
@@ -497,7 +499,7 @@ const LandingPage = () => {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-            P.S. — Se você está começando, o Gasto Vision evita o erro que a maioria dos sellers comete na primeira semana. Se você já vende, ele confirma se o que você está calculando está certo. De qualquer forma, o teste é sem risco: 7 dias de garantia, sem burocracia.
+            P.S. — Se você está começando, o Vetrex evita o erro que a maioria dos sellers comete na primeira semana. Se você já vende, ele confirma se o que você está calculando está certo. De qualquer forma, o teste é sem risco: 7 dias de garantia, sem burocracia.
           </p>
         </div>
       </section>
@@ -505,7 +507,7 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Gasto Vision. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Vetrex. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>);

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.png";
+import logoLight from "@/assets/logo-light.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,7 +112,7 @@ const Auth = () => {
 
       if (!purchases || purchases.length === 0) {
         await supabase.auth.signOut();
-        toast.error("Você não possui acesso. Adquira o Gasto Vision primeiro.");
+        toast.error("Você não possui acesso. Adquira o Vetrex primeiro.");
         navigate("/");
         return;
       }
@@ -124,7 +126,7 @@ const Auth = () => {
 
       if (!hasActiveAccess) {
         await supabase.auth.signOut();
-        toast.error("Seu plano expirou. Renove para continuar usando o Gasto Vision.");
+        toast.error("Seu plano expirou. Renove para continuar usando o Vetrex.");
         navigate("/");
         return;
       }
@@ -170,13 +172,9 @@ const Auth = () => {
           transition={{ duration: 0.6 }}
           className="relative z-10 max-w-md"
         >
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 rounded-2xl bg-primary/10">
-              <Eye className="w-8 h-8 text-primary" />
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Gasto Vision
-            </span>
+          <div className="mb-8">
+            <img src={logo} alt="Vetrex" className="h-16 hidden dark:block" />
+            <img src={logoLight} alt="Vetrex" className="h-16 block dark:hidden" />
           </div>
 
           <h2 className="text-3xl font-bold text-foreground mb-4">
@@ -219,13 +217,9 @@ const Auth = () => {
           </Button>
 
           {/* Mobile brand */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <Eye className="w-6 h-6 text-primary" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Gasto Vision
-            </span>
+          <div className="mb-8 lg:hidden">
+            <img src={logo} alt="Vetrex" className="h-12 hidden dark:block" />
+            <img src={logoLight} alt="Vetrex" className="h-12 block dark:hidden" />
           </div>
 
           <div className="mb-8">
@@ -306,7 +300,7 @@ const Auth = () => {
                 onClick={() => navigate("/")}
                 className="text-primary font-medium hover:underline"
               >
-                Adquira o Gasto Vision
+                Adquira o Vetrex
               </button>
             </p>
           </div>

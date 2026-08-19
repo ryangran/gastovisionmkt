@@ -1,5 +1,5 @@
 // Service Worker for Push Notifications
-const CACHE_NAME = 'hubbms-v1';
+const CACHE_NAME = 'vetrex-v1';
 
 // Install event
 self.addEventListener('install', (event) => {

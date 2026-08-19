@@ -1,4 +1,4 @@
-# Gasto Vision Ecom — CLAUDE.md
+# Vetrex — CLAUDE.md
 
 ## Visão Geral
 
@@ -93,6 +93,37 @@ Todas as tabelas devem ter Row Level Security habilitado. Verificar policies em 
 - Fallback para pattern matching local quando IA indisponível
 - Aprovação de saídas em produção exige supervisor via `useStockRequests`
 - Senha de exclusão de produtos via `VITE_DELETE_PASSWORD` (env)
+
+## Identidade Visual (Vetrex)
+
+**Marca:** Vetrex. Nunca usar "Gasto Vision" — o nome foi aposentado.
+
+**Paleta:** preto e vermelho. Definida como tokens HSL em `src/index.css`; o tema `dark` é o padrão (`App.tsx`) e representa a identidade principal.
+
+| Token | Dark (identidade) | Light |
+|-------|-------------------|-------|
+| `--background` | `0 0% 4%` | `0 0% 98%` |
+| `--primary` | `0 84% 55%` | `0 74% 48%` |
+| `--accent` | `0 72% 42%` | `0 72% 38%` |
+| `--border` | `0 0% 16%` | `0 0% 88%` |
+
+Cinzas são neutros puros (saturação 0%) — nada de warm charcoal.
+
+**Regra:** usar sempre os tokens (`text-primary`, `bg-accent`, `border-border`), nunca hex ou `hsl()` inline para cor de marca.
+
+**Laranja/âmbar remanescente NÃO é resíduo da marca antiga** — não trocar por vermelho. São, por categoria:
+- cor própria do marketplace (Shopee `#FF7733`/`orange-500`, Amazon/ML amarelo) em `ProdutosSalvos.tsx` e `Custos.tsx`
+- status semântico (pendente/atenção) em `StockRequestDialog.tsx`, `AdminPanel.tsx`, `CRM.tsx`, `ProductsTable.tsx`
+- ouro de troféu/vitalício em `AdsComparisonAnalyzer.tsx`, `UserProfileDialog.tsx`
+- paletas categóricas de gráfico/avatar em `Index.tsx`, `AdsAnalyzer.tsx`, `Reports.tsx`, `CRM.tsx`
+
+**Assets do logo** (`src/assets/`, fundo transparente):
+- `logo.png` — lockup branco (X + wordmark), para fundo escuro
+- `logo-light.png` — lockup preto, para fundo claro
+- `logo-mark.png` / `logo-mark-light.png` — só o símbolo X
+- `public/favicon.png`, `favicon.ico`, `apple-touch-icon.png`, `og-image.png`
+
+Renderizar sempre o par com `hidden dark:block` / `block dark:hidden` para o logo não sumir ao trocar de tema.
 
 ## Convenções
 
