@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "next-themes";
-import logoMark from "@/assets/logo-mark.png";
-import logoMarkLight from "@/assets/logo-mark-light.png";
+import logoHorizontal from "@/assets/logo-horizontal.png";
+import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 import shopeeLogo from "@/assets/shopee-logo.png";
 import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
 import amazonLogo from "@/assets/amazon-logo.png";
@@ -2976,15 +2976,12 @@ const Calculadora = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10">
-                <img src={logoMark} alt="" className="w-6 h-6 object-contain hidden dark:block" />
-                <img src={logoMarkLight} alt="" className="w-6 h-6 object-contain block dark:hidden" />
-              </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Vetrex
+                <h1>
+                  <img src={logoHorizontal} alt="Vetrex" className="h-8 w-auto hidden dark:block" />
+                  <img src={logoHorizontalLight} alt="Vetrex" className="h-8 w-auto block dark:hidden" />
                 </h1>
-                <p className="text-xs text-muted-foreground">Simule margens por plataforma</p>
+                <p className="text-xs text-muted-foreground mt-1">Simule margens por plataforma</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

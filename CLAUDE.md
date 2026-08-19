@@ -120,7 +120,8 @@ Cinzas são neutros puros (saturação 0%) — nada de warm charcoal.
 **Assets do logo** (`src/assets/`, fundo transparente):
 - `logo.png` — lockup branco (X + wordmark), para fundo escuro
 - `logo-light.png` — lockup preto, para fundo claro
-- `logo-mark.png` / `logo-mark-light.png` — só o símbolo X
+- `logo-horizontal.png` / `logo-horizontal-light.png` — lockup deitado (X + wordmark lado a lado), para barras de header compactas; legível já a 32px de altura
+- `logo-mark.png` / `logo-mark-light.png` — só o símbolo X (sem wordmark; usar apenas onde não cabe texto)
 - `public/favicon.png`, `favicon.ico`, `apple-touch-icon.png`, `og-image.png`
 
 Renderizar sempre o par com `hidden dark:block` / `block dark:hidden` para o logo não sumir ao trocar de tema.
