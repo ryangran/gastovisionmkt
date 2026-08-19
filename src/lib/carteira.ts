@@ -10,6 +10,9 @@ export interface ProdutoSalvo {
   stock_quantity: number;
   inputs: Record<string, unknown>;
   created_at: string;
+  /** Margem antes do último recálculo por mudança de taxa. */
+  previous_margin_percent?: number | null;
+  recalculated_at?: string | null;
 }
 
 export interface ResumoPlataforma {

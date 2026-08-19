@@ -13,6 +13,7 @@ import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXA
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import { MargemSlider } from "@/components/MargemSlider";
+import { useTaxas } from "@/components/layout/TaxasProvider";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 import { useNavigate } from "react-router-dom";
@@ -47,6 +48,7 @@ function parseNum(val: string): number {
 
 // ─── Calculadora Shopee ────────────────────────────────────────────────────────
 const ShopeeCalculadora = () => {
+  const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]   = usePersistedState("calc_shopee_nome", "");
   const [precoVenda, setPrecoVenda]     = usePersistedState("calc_shopee_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_shopee_custo", "");
@@ -69,7 +71,7 @@ const ShopeeCalculadora = () => {
     marketingPercent: usarMarketing ? marketingPerc : 0,
     usarSubsidioPix,
   };
-  const resultado = calcularShopee(inputs);
+  const resultado = calcularShopee(inputs, taxas.shopee);
   const { valorComissao, valorImposto, valorMarketing, subsidio, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -414,6 +416,7 @@ const AMAZON_DBA_ZONAS: { value: AmazonDBAZona; label: string }[] = [
 ];
 
 const AmazonCalculadora = () => {
+  const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_amazon_nome", "");
   const [categoriaNome, setCategoriaNome]   = usePersistedState("calc_amazon_cat", AMAZON_TAXAS.categorias[0].nome);
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_amazon_preco", "");
@@ -457,7 +460,7 @@ const AmazonCalculadora = () => {
     larguraCm: largCm,
     comprimentoCm: compCm,
   };
-  const resultado = calcularAmazon(inputs);
+  const resultado = calcularAmazon(inputs, taxas.amazon);
   const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -976,6 +979,7 @@ const AmazonCalculadora = () => {
 
 // ─── Calculadora Magalu ───────────────────────────────────────────────────────
 const MagaluCalculadora = () => {
+  const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_magalu_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_magalu_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_magalu_custo", "");
@@ -1021,7 +1025,7 @@ const MagaluCalculadora = () => {
     taxaFixa: valorTaxaFixa,
     usarFrete,
   };
-  const resultado = calcularMagalu(inputs);
+  const resultado = calcularMagalu(inputs, taxas.magalu);
   const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -1420,6 +1424,7 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
+  const taxas = useTaxas();
   const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
   const [nomeProduto, setNomeProduto] = usePersistedState("calc_ml_nome", "");
   const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", mlCategorias[0]?.nome || "");
@@ -1457,7 +1462,7 @@ const MercadoLivreCalculadora = () => {
     pesoKg: pesoNum,
     usarFrete,
   };
-  const resultado = calcularMercadoLivre(inputs);
+  const resultado = calcularMercadoLivre(inputs, taxas.mercadolivre);
   const { valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -1962,6 +1967,7 @@ const MercadoLivreCalculadora = () => {
 // - Preço < R$50: comissão 10% + taxa fixa R$4,00
 // - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
 const TikTokCalculadora = () => {
+  const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_tiktok_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_tiktok_custo", "");
@@ -1993,7 +1999,7 @@ const TikTokCalculadora = () => {
     freteGratis: usarFreteGratis,
     incentivoComissao,
   };
-  const resultado = calcularTikTok(inputs);
+  const resultado = calcularTikTok(inputs, taxas.tiktok);
   const { valorImposto, valorMarketing, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -2257,6 +2263,7 @@ const TikTokCalculadora = () => {
 
 // ─── Calculadora Shein ─────────────────────────────────────────────────────────
 const SheinCalculadora = () => {
+  const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_shein_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_shein_custo", "");
@@ -2289,7 +2296,7 @@ const SheinCalculadora = () => {
     largura: larg,
     altura: alt,
   };
-  const resultado = calcularShein(inputs);
+  const resultado = calcularShein(inputs, taxas.shein);
   const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;

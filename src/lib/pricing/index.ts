@@ -1,14 +1,15 @@
 import type { PlatformKey, PricingResult } from "./types";
-import { calcularShopee, type ShopeeInput, type ShopeeTaxas } from "./shopee";
+import { calcularShopee, SHOPEE_TAXAS, type ShopeeInput, type ShopeeTaxas } from "./shopee";
 import {
   calcularMercadoLivre,
   type MercadoLivreInput,
   type MercadoLivreTaxas,
+  MERCADOLIVRE_TAXAS,
 } from "./mercadolivre";
-import { calcularAmazon, type AmazonInput, type AmazonTaxas } from "./amazon";
-import { calcularMagalu, type MagaluInput, type MagaluTaxas } from "./magalu";
-import { calcularTikTok, type TikTokInput, type TikTokTaxas } from "./tiktok";
-import { calcularShein, type SheinInput, type SheinTaxas } from "./shein";
+import { calcularAmazon, AMAZON_TAXAS, type AmazonInput, type AmazonTaxas } from "./amazon";
+import { calcularMagalu, MAGALU_TAXAS, type MagaluInput, type MagaluTaxas } from "./magalu";
+import { calcularTikTok, TIKTOK_TAXAS, type TikTokInput, type TikTokTaxas } from "./tiktok";
+import { calcularShein, SHEIN_TAXAS, type SheinInput, type SheinTaxas } from "./shein";
 
 export * from "./types";
 
@@ -66,3 +67,16 @@ export function calcular<K extends PlatformKey>(
   ) => PricingResult;
   return fn(input, taxas);
 }
+
+/**
+ * Tabelas que vivem no código. Servem de padrão e de rede de segurança: se o
+ * banco estiver indisponível ou sem versão ativa, o app calcula com estas.
+ */
+export const TAXAS_PADRAO: PlatformTaxasMap = {
+  shopee: SHOPEE_TAXAS,
+  mercadolivre: MERCADOLIVRE_TAXAS,
+  amazon: AMAZON_TAXAS,
+  magalu: MAGALU_TAXAS,
+  tiktok: TIKTOK_TAXAS,
+  shein: SHEIN_TAXAS,
+};

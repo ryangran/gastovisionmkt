@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useTaxas } from "@/components/layout/TaxasProvider";
 import { calcular, PLATFORM_KEYS, PLATFORM_LABELS, type PlatformKey } from "@/lib/pricing";
 import type { PricingResult } from "@/lib/pricing/types";
 import { AMAZON_TAXAS, type AmazonModelo, type AmazonDBAZona } from "@/lib/pricing/amazon";
@@ -35,6 +36,7 @@ interface Linha {
 }
 
 const Comparador = () => {
+  const taxas = useTaxas();
   // Entradas comuns às seis plataformas
   const [precoVenda, setPrecoVenda] = usePersistedState("comp_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("comp_custo", "");
@@ -81,7 +83,7 @@ const Comparador = () => {
         case "shopee":
           return {
             key,
-            resultado: calcular("shopee", { ...base, usarSubsidioPix: subsidioPix }),
+            resultado: calcular("shopee", { ...base, usarSubsidioPix: subsidioPix }, taxas.shopee),
             premissa: subsidioPix ? "Com subsídio Pix" : "Sem subsídio Pix",
             premissaIncerta: false,
           };
@@ -98,7 +100,7 @@ const Comparador = () => {
               ],
               pesoKg,
               usarFrete: mlFrete,
-            }),
+            }, taxas.mercadolivre),
             premissa:
               mlComissaoPerc > 0
                 ? `Comissão ${mlComissaoPerc}% (informada por você)`
@@ -118,7 +120,7 @@ const Comparador = () => {
               alturaCm: alt,
               larguraCm: larg,
               comprimentoCm: comp,
-            }),
+            }, taxas.amazon),
             premissa: `${amzCategoria} · ${amzModelo.toUpperCase().replace("_", " ")}`,
             premissaIncerta: false,
           };
@@ -135,7 +137,7 @@ const Comparador = () => {
               altura: alt,
               taxaFixa: 0,
               usarFrete: true,
-            }),
+            }, taxas.magalu),
             premissa: `${magTipo === "leves" ? "Leves" : "Pesados"} · sem taxa fixa`,
             premissaIncerta: false,
           };
@@ -146,7 +148,7 @@ const Comparador = () => {
               ...base,
               freteGratis: tkFreteGratis,
               incentivoComissao: tkIncentivo,
-            }),
+            }, taxas.tiktok),
             premissa: tkIncentivo ? "Com incentivo de comissão" : "Comissão padrão",
             premissaIncerta: false,
           };
@@ -159,7 +161,7 @@ const Comparador = () => {
               comprimento: comp,
               largura: larg,
               altura: alt,
-            }),
+            }, taxas.shein),
             premissa: pesoKg > 1.5 ? "Acima de 1,5 kg: frete estimado" : "Frete por faixa de peso",
             premissaIncerta: pesoKg > 1.5,
           };
@@ -168,6 +170,7 @@ const Comparador = () => {
 
     return PLATFORM_KEYS.map(construir).sort((a, b) => b.resultado.lucro - a.resultado.lucro);
   }, [
+    taxas,
     preco, custo, impostoPerc, pesoKg, comp, larg, alt,
     subsidioPix, mlComissaoPerc, mlFrete,
     amzCategoria, amzModelo, amzZona, magTipo, magDesconto,

@@ -8,11 +8,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Calculator, Package, TrendingUp, Percent, AlertTriangle } from "lucide-react";
+import { Calculator, Package, TrendingUp, Percent, AlertTriangle, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
+import { useState } from "react";
 import { useCarteira } from "@/hooks/useCarteira";
 import type { ProdutoSalvo } from "@/lib/carteira";
 
@@ -97,8 +98,17 @@ const EstadoVazio = () => {
   );
 };
 
+const CHAVE_AVISO = "vetrex_aviso_taxa_dispensado";
+
 const Dashboard = () => {
   const { produtos, resumo, carregando, erro } = useCarteira();
+  const [dispensado, setDispensado] = useState<string>(() => {
+    try {
+      return localStorage.getItem(CHAVE_AVISO) ?? "";
+    } catch {
+      return "";
+    }
+  });
 
   if (carregando) {
     return (
@@ -121,6 +131,30 @@ const Dashboard = () => {
   }
 
   const comEstoque = produtos.filter((p) => Number(p.stock_quantity) > 0);
+
+  // Produtos que o recálculo por mudança de taxa tocou e cuja margem de fato mudou.
+  const afetados = produtos.filter(
+    (p) =>
+      p.recalculated_at &&
+      p.previous_margin_percent !== null &&
+      p.previous_margin_percent !== undefined &&
+      Math.abs(Number(p.previous_margin_percent) - p.profit_margin_percent) >= 0.01,
+  );
+  const viraramPrejuizo = afetados.filter((p) => p.profit_margin_percent < 0);
+  // Marca de dispensa é o recálculo mais recente: taxa nova volta a avisar.
+  const ultimoAviso = afetados.reduce(
+    (max, p) => (p.recalculated_at! > max ? p.recalculated_at! : max),
+    "",
+  );
+  const avisoOculto = dispensado === ultimoAviso;
+  const ocultarAviso = () => {
+    setDispensado(ultimoAviso);
+    try {
+      localStorage.setItem(CHAVE_AVISO, ultimoAviso);
+    } catch {
+      /* modo privado bloqueia o storage; o aviso volta na próxima visita */
+    }
+  };
 
   // Pior margem primeiro: o problema tem que aparecer antes do que já vai bem.
   const dadosMargem = [...produtos]
@@ -146,6 +180,66 @@ const Dashboard = () => {
         <EstadoVazio />
       ) : (
         <div className="space-y-6">
+          {afetados.length > 0 && !avisoOculto && (
+            <Card className="border-warning/50 bg-card">
+              <CardContent className="flex items-start gap-3 py-4">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground">
+                    {afetados.length === 1
+                      ? "Um produto teve a margem alterada"
+                      : `${afetados.length} produtos tiveram a margem alterada`}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    A taxa do marketplace mudou e recalculamos sua carteira.
+                    {viraramPrejuizo.length > 0 && (
+                      <>
+                        {" "}
+                        <span className="text-destructive">
+                          {viraramPrejuizo.length}{" "}
+                          {viraramPrejuizo.length === 1
+                            ? "passou a vender no prejuízo"
+                            : "passaram a vender no prejuízo"}
+                          .
+                        </span>
+                      </>
+                    )}
+                  </p>
+                  <ul className="mt-3 space-y-1.5">
+                    {afetados.slice(0, 5).map((p) => (
+                      <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                        <span className="truncate text-foreground">{p.product_name}</span>
+                        <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+                          {Number(p.previous_margin_percent).toFixed(1)}%
+                          {" → "}
+                          <span
+                            className={
+                              p.profit_margin_percent < 0 ? "text-destructive" : "text-foreground"
+                            }
+                          >
+                            {p.profit_margin_percent.toFixed(1)}%
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {afetados.length > 5 && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      e mais {afetados.length - 5}.
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={ocultarAviso}
+                  aria-label="Dispensar aviso"
+                  className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Cartao
               titulo="Custo em estoque"

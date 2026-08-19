@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { GestaoTaxas } from "@/components/GestaoTaxas";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -555,6 +556,7 @@ const AdminPanel = () => {
             </Card>
           )}
         </div>
+        <GestaoTaxas />
       </main>
 
       {/* Edit Plan Dialog */}
