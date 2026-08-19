@@ -117,6 +117,12 @@ Cinzas são neutros puros (saturação 0%) — nada de warm charcoal.
 - ouro de troféu/vitalício em `AdsComparisonAnalyzer.tsx`, `UserProfileDialog.tsx`
 - paletas categóricas de gráfico/avatar em `Index.tsx`, `AdsAnalyzer.tsx`, `Reports.tsx`, `CRM.tsx`
 
+**Logos de marketplace:** sempre renderizar via `<MarketplaceLogo platform="shopee" className="h-4 w-auto max-w-12" />` (`src/components/MarketplaceLogo.tsx`), nunca importando o PNG direto. O componente faz a troca clara/escura.
+
+Amazon, Magalu, TikTok e Shein são desenhados para fundo branco (wordmark preto ou azul-marinho) e sumiriam no preto do tema escuro, então têm variante `*-logo-dark.png` clareada preservando a cor de marca. Shopee e Mercado Livre usam o mesmo arquivo nos dois temas.
+
+Os PNGs são recortados na arte (sem margem transparente). Ao adicionar um marketplace, recortar antes de commitar — os originais tinham até 94% de área vazia, o que fazia o logo renderizar minúsculo. Como as wordmarks (Magalu, Shein) são muito mais largas que os símbolos, limitar a largura com `max-w-*` em listas compactas.
+
 **Assets do logo** (`src/assets/`, fundo transparente):
 - `logo.png` — lockup branco (X + wordmark), para fundo escuro
 - `logo-light.png` — lockup preto, para fundo claro

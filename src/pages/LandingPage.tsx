@@ -1,13 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
+import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
-import shopeeLogo from "@/assets/shopee-logo.png";
-import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
-import amazonLogo from "@/assets/amazon-logo.png";
-import magaluLogo from "@/assets/magalu-logo.png";
-import tiktokLogo from "@/assets/tiktok-logo.png";
-import sheinLogo from "@/assets/shein-logo.png";
 import avatarAna from "@/assets/avatar-ana.jpg";
 import avatarMarcos from "@/assets/avatar-marcos.jpg";
 import avatarJuliana from "@/assets/avatar-juliana.jpg";
@@ -301,18 +296,18 @@ const LandingPage = () => {
             </h2>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
-            {[
-              { name: "Shopee", logo: shopeeLogo },
-              { name: "Mercado Livre", logo: mercadolivreLogo },
-              { name: "Amazon", logo: amazonLogo },
-              { name: "Magalu", logo: magaluLogo },
-              { name: "TikTok", logo: tiktokLogo },
-              { name: "Shein", logo: sheinLogo },
-            ].map((p) => (
+            {([
+              { name: "Shopee", platform: "shopee" },
+              { name: "Mercado Livre", platform: "mercadolivre" },
+              { name: "Amazon", platform: "amazon" },
+              { name: "Magalu", platform: "magalu" },
+              { name: "TikTok", platform: "tiktok" },
+              { name: "Shein", platform: "shein" },
+            ] as const).map((p) => (
               <div
                 key={p.name}
                 className="flex items-center gap-3 px-8 py-4 rounded-2xl border bg-card text-foreground font-semibold text-lg hover:border-primary/50 transition-colors">
-                <img src={p.logo} alt={p.name} className="h-8 w-8 object-contain" />
+                <MarketplaceLogo platform={p.platform} className="h-8 w-auto max-w-28" />
                 {p.name}
               </div>
             ))}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -7,12 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Trash2, Calculator, BookmarkPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import shopeeLogo from "@/assets/shopee-logo.png";
-import mercadolivreLogo from "@/assets/mercadolivre-logo.png";
-import amazonLogo from "@/assets/amazon-logo.png";
-import tiktokLogo from "@/assets/tiktok-logo.png";
-import sheinLogo from "@/assets/shein-logo.png";
-import magaluLogo from "@/assets/magalu-logo.png";
 
 interface SavedCalc {
   id: string;
@@ -26,13 +21,13 @@ interface SavedCalc {
 }
 
 const PLATFORMS = [
-  { key: "todos",          label: "Todos",         logo: null },
-  { key: "Shopee",         label: "Shopee",         logo: shopeeLogo },
-  { key: "Mercado Livre",  label: "Mercado Livre",  logo: mercadolivreLogo },
-  { key: "Amazon",         label: "Amazon",         logo: amazonLogo },
-  { key: "Magalu",         label: "Magalu",         logo: magaluLogo },
-  { key: "TikTok Shop",    label: "TikTok",         logo: tiktokLogo },
-  { key: "Shein",          label: "Shein",          logo: sheinLogo },
+  { key: "todos",          label: "Todos",          platform: null },
+  { key: "Shopee",         label: "Shopee",         platform: "shopee" },
+  { key: "Mercado Livre",  label: "Mercado Livre",  platform: "mercadolivre" },
+  { key: "Amazon",         label: "Amazon",         platform: "amazon" },
+  { key: "Magalu",         label: "Magalu",         platform: "magalu" },
+  { key: "TikTok Shop",    label: "TikTok",         platform: "tiktok" },
+  { key: "Shein",          label: "Shein",          platform: "shein" },
 ] as const;
 
 const PLATFORM_STYLE: Record<string, string> = {
@@ -262,7 +257,7 @@ const ProdutosSalvos = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Tabs header */}
           <TabsList className="flex flex-wrap gap-1 h-auto bg-transparent p-0 mb-4 w-full border-b border-border pb-3">
-            {PLATFORMS.map(({ key, label, logo }) => {
+            {PLATFORMS.map(({ key, label, platform }) => {
               const count = countOf(key);
               return (
                 <TabsTrigger
@@ -270,7 +265,7 @@ const ProdutosSalvos = () => {
                   value={key}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all"
                 >
-                  {logo && <img src={logo} alt={label} className="h-3.5 object-contain" />}
+                  {platform && <MarketplaceLogo platform={platform} className="h-3.5 w-auto max-w-11" />}
                   {label}
                   {count > 0 && (
                     <span className="ml-1 text-xs bg-muted data-[state=active]:bg-primary-foreground/20 rounded-full px-1.5 py-0.5 font-medium">
