@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Calculator,
+  GitCompareArrows,
   Bookmark,
   Shield,
 } from "lucide-react";
@@ -30,7 +31,10 @@ const GRUPOS: GrupoNav[] = [
   },
   {
     titulo: "Precificar",
-    itens: [{ to: "/calculadora", label: "Calculadora", icon: Calculator }],
+    itens: [
+      { to: "/calculadora", label: "Calculadora", icon: Calculator },
+      { to: "/comparador", label: "Comparador", icon: GitCompareArrows },
+    ],
   },
   {
     titulo: "Carteira",

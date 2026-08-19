@@ -10,6 +10,7 @@ import { AppShell } from "./components/layout/AppShell";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Comparador = lazy(() => import("./pages/Comparador"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ProdutosSalvos = lazy(() => import("./pages/ProdutosSalvos"));
@@ -37,6 +38,7 @@ const App = () => {
                 <Route element={<AppShell />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/calculadora" element={<Calculadora />} />
+                  <Route path="/comparador" element={<Comparador />} />
                   <Route path="/admin-panel" element={<AdminPanel />} />
                   <Route path="/produtos-salvos" element={<ProdutosSalvos />} />
                 </Route>
