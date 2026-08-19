@@ -2,18 +2,35 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface SaveCalcData {
+  /**
+   * Nome de exibição da plataforma ("Shopee", "Mercado Livre", "TikTok Shop").
+   * Não é a PlatformKey: os registros já gravados usam esse formato e a tela de
+   * produtos salvos filtra por ele.
+   */
   platform: string;
   product_name: string;
   sale_price: number;
   cost: number;
   profit_margin_percent: number;
   profit_margin_value: number;
+  /**
+   * Entradas completas da calculadora. Sem elas não há como recalcular o produto
+   * quando a taxa do marketplace mudar.
+   */
+  inputs: Record<string, unknown>;
+  /** Unidades em estoque, para o custo imobilizado no dashboard. */
+  stock_quantity: number;
 }
 
 export function useSavedCalculations() {
   const saveCalculation = async (data: SaveCalcData): Promise<boolean> => {
     if (!data.product_name.trim()) {
       toast.error("Informe o nome do produto antes de salvar.");
+      return false;
+    }
+
+    if (!Number.isInteger(data.stock_quantity) || data.stock_quantity < 0) {
+      toast.error("A quantidade em estoque deve ser um número inteiro igual ou maior que zero.");
       return false;
     }
 
@@ -32,6 +49,8 @@ export function useSavedCalculations() {
       cost: data.cost,
       profit_margin_percent: data.profit_margin_percent,
       profit_margin_value: data.profit_margin_value,
+      inputs: data.inputs,
+      stock_quantity: data.stock_quantity,
     });
 
     if (error) {
@@ -40,7 +59,7 @@ export function useSavedCalculations() {
       return false;
     }
 
-    toast.success(`"${data.product_name}" salvo com sucesso!`);
+    toast.success(`"${data.product_name}" salvo com sucesso.`);
     return true;
   };
 

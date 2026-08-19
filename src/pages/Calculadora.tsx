@@ -11,11 +11,11 @@ import { calcularMercadoLivre, custoFixoMercadoLivre, pesoIdx, faixaPrecoIdx,
 import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXAS,
          type MagaluTipoProduto, type MagaluDescontoFrete } from "@/lib/pricing/magalu";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
+import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { useSavedCalculations } from "@/hooks/useSavedCalculations";
 import { supabase } from "@/integrations/supabase/client";
 import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon, Shield, BookmarkPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -46,7 +46,6 @@ function parseNum(val: string): number {
 
 // ─── Calculadora Shopee ────────────────────────────────────────────────────────
 const ShopeeCalculadora = () => {
-  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]   = usePersistedState("calc_shopee_nome", "");
   const [precoVenda, setPrecoVenda]     = usePersistedState("calc_shopee_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_shopee_custo", "");
@@ -62,13 +61,14 @@ const ShopeeCalculadora = () => {
 
   const comissao = preco > 0 ? faixaShopee(preco) : null;
 
-  const resultado = calcularShopee({
+  const inputs = {
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
     marketingPercent: usarMarketing ? marketingPerc : 0,
     usarSubsidioPix,
-  });
+  };
+  const resultado = calcularShopee(inputs);
   const { valorComissao, valorImposto, valorMarketing, subsidio, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -319,10 +319,12 @@ const ShopeeCalculadora = () => {
                   {" · "}{formatCurrency(lucro)}
                 </p>
               </div>
-              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Shopee", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
-                <BookmarkPlus className="w-4 h-4" />
-                Salvar
-              </Button>
+              <SalvarProdutoDialog
+                platform="Shopee"
+                inputs={inputs}
+                resultado={resultado}
+                nomeInicial={nomeProduto}
+              />
             </CardContent>
           </Card>
         )}
@@ -405,7 +407,6 @@ const AMAZON_DBA_ZONAS: { value: AmazonDBAZona; label: string }[] = [
 ];
 
 const AmazonCalculadora = () => {
-  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_amazon_nome", "");
   const [categoriaNome, setCategoriaNome]   = usePersistedState("calc_amazon_cat", AMAZON_TAXAS.categorias[0].nome);
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_amazon_preco", "");
@@ -436,7 +437,7 @@ const AmazonCalculadora = () => {
   const fbaOnsiteInfo     = modelo === "fba_onsite" && pesoFinalFBA > 0 ? freteFBAOnsite(pesoFinalFBA) : null;
   const dbaFreteInfo      = modelo === "dba" && preco > 0 ? freteDBA(pesoFinalFBA, preco, dbaZona) : null;
 
-  const resultado = calcularAmazon({
+  const inputs = {
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -448,7 +449,8 @@ const AmazonCalculadora = () => {
     alturaCm: altCm,
     larguraCm: largCm,
     comprimentoCm: compCm,
-  });
+  };
+  const resultado = calcularAmazon(inputs);
   const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -801,10 +803,12 @@ const AmazonCalculadora = () => {
                   {" · "}{formatCurrency(lucro)}
                 </p>
               </div>
-              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Amazon", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
-                <BookmarkPlus className="w-4 h-4" />
-                Salvar
-              </Button>
+              <SalvarProdutoDialog
+                platform="Amazon"
+                inputs={inputs}
+                resultado={resultado}
+                nomeInicial={nomeProduto}
+              />
             </CardContent>
           </Card>
         )}
@@ -953,7 +957,6 @@ const AmazonCalculadora = () => {
 
 // ─── Calculadora Magalu ───────────────────────────────────────────────────────
 const MagaluCalculadora = () => {
-  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_magalu_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_magalu_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_magalu_custo", "");
@@ -985,7 +988,7 @@ const MagaluCalculadora = () => {
   const pesoFinal      = Math.max(pesoRealKg, pesoCubado);
   const valorTaxaFixa  = parseNum(taxaFixa);
 
-  const resultado = calcularMagalu({
+  const inputs = {
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -998,7 +1001,8 @@ const MagaluCalculadora = () => {
     altura: alturaCm,
     taxaFixa: valorTaxaFixa,
     usarFrete,
-  });
+  };
+  const resultado = calcularMagalu(inputs);
   const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -1294,10 +1298,12 @@ const MagaluCalculadora = () => {
                   {" · "}{formatCurrency(lucro)}
                 </p>
               </div>
-              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Magalu", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
-                <BookmarkPlus className="w-4 h-4" />
-                Salvar
-              </Button>
+              <SalvarProdutoDialog
+                platform="Magalu"
+                inputs={inputs}
+                resultado={resultado}
+                nomeInicial={nomeProduto}
+              />
             </CardContent>
           </Card>
         )}
@@ -1389,7 +1395,6 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
-  const { saveCalculation } = useSavedCalculations();
   const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
   const [nomeProduto, setNomeProduto] = usePersistedState("calc_ml_nome", "");
   const [produtoNome, setProdutoNome] = usePersistedState("calc_ml_produto", mlCategorias[0]?.nome || "");
@@ -1416,7 +1421,7 @@ const MercadoLivreCalculadora = () => {
   const pesoNum      = parseNum(peso);
 
   const comissaoPerc   = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
-  const resultado = calcularMercadoLivre({
+  const inputs = {
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -1426,7 +1431,8 @@ const MercadoLivreCalculadora = () => {
     categorias: mlCategorias,
     pesoKg: pesoNum,
     usarFrete,
-  });
+  };
+  const resultado = calcularMercadoLivre(inputs);
   const { valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -1800,10 +1806,12 @@ const MercadoLivreCalculadora = () => {
                   {" · "}{formatCurrency(lucro)}
                 </p>
               </div>
-              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Mercado Livre", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
-                <BookmarkPlus className="w-4 h-4" />
-                Salvar
-              </Button>
+              <SalvarProdutoDialog
+                platform="Mercado Livre"
+                inputs={inputs}
+                resultado={resultado}
+                nomeInicial={nomeProduto}
+              />
             </CardContent>
           </Card>
         )}
@@ -1923,7 +1931,6 @@ const MercadoLivreCalculadora = () => {
 // - Preço < R$50: comissão 10% + taxa fixa R$4,00
 // - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
 const TikTokCalculadora = () => {
-  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_tiktok_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_tiktok_custo", "");
@@ -1947,14 +1954,15 @@ const TikTokCalculadora = () => {
   const valorFreteGratis = preco > 0 ? preco * freteGratisPerc : 0;
   const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
 
-  const resultado = calcularTikTok({
+  const inputs = {
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
     marketingPercent: usarMarketing ? marketingPerc : 0,
     freteGratis: usarFreteGratis,
     incentivoComissao,
-  });
+  };
+  const resultado = calcularTikTok(inputs);
   const { valorImposto, valorMarketing, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -2153,10 +2161,12 @@ const TikTokCalculadora = () => {
                   {" · "}{formatCurrency(lucro)}
                 </p>
               </div>
-              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "TikTok Shop", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
-                <BookmarkPlus className="w-4 h-4" />
-                Salvar
-              </Button>
+              <SalvarProdutoDialog
+                platform="TikTok Shop"
+                inputs={inputs}
+                resultado={resultado}
+                nomeInicial={nomeProduto}
+              />
             </CardContent>
           </Card>
         )}
@@ -2210,7 +2220,6 @@ const TikTokCalculadora = () => {
 
 // ─── Calculadora Shein ─────────────────────────────────────────────────────────
 const SheinCalculadora = () => {
-  const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_shein_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_shein_custo", "");
@@ -2233,7 +2242,7 @@ const SheinCalculadora = () => {
 
   const freteInfo      = calcularFreteShein(pesoKg, comp, larg, alt);
 
-  const resultado = calcularShein({
+  const inputs = {
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -2242,7 +2251,8 @@ const SheinCalculadora = () => {
     comprimento: comp,
     largura: larg,
     altura: alt,
-  });
+  };
+  const resultado = calcularShein(inputs);
   const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
   const margemLucro = resultado.margemPercent;
   const isLucrativo = resultado.lucrativo;
@@ -2444,10 +2454,12 @@ const SheinCalculadora = () => {
                   {" · "}{formatCurrency(lucro)}
                 </p>
               </div>
-              <Button size="sm" className="gap-2 shrink-0" onClick={() => saveCalculation({ platform: "Shein", product_name: nomeProduto, sale_price: preco, cost: custo, profit_margin_percent: margemLucro, profit_margin_value: lucro })}>
-                <BookmarkPlus className="w-4 h-4" />
-                Salvar
-              </Button>
+              <SalvarProdutoDialog
+                platform="Shein"
+                inputs={inputs}
+                resultado={resultado}
+                nomeInicial={nomeProduto}
+              />
             </CardContent>
           </Card>
         )}
