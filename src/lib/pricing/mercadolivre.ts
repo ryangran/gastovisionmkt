@@ -103,13 +103,13 @@ export const MERCADOLIVRE_TAXAS: MercadoLivreTaxas = {
 };
 
 /** Encontra o índice da faixa de peso cujo limite comporta o peso informado. */
-function pesoIdx(peso: number, pesos: MercadoLivrePesoFaixa[]): number {
+export function pesoIdx(peso: number, pesos: MercadoLivrePesoFaixa[]): number {
   const idx = pesos.findIndex((p) => peso <= p.max);
   return idx === -1 ? pesos.length - 1 : idx;
 }
 
 /** Encontra o índice da faixa de preço cujo limite comporta o preço informado. */
-function faixaPrecoIdx(preco: number, faixas: MercadoLivreFaixaPreco[]): number {
+export function faixaPrecoIdx(preco: number, faixas: MercadoLivreFaixaPreco[]): number {
   const idx = faixas.findIndex((f) => preco <= f.max);
   return idx === -1 ? faixas.length - 1 : idx;
 }
@@ -122,7 +122,7 @@ function freteMercadoLivre(preco: number, peso: number, taxas: MercadoLivreTaxas
 }
 
 /** Custo fixo de venda cobrado pelo Mercado Livre, em função do preço. */
-function custoFixoMercadoLivre(preco: number, cfg: MercadoLivreCustoFixoConfig): number {
+export function custoFixoMercadoLivre(preco: number, cfg: MercadoLivreCustoFixoConfig): number {
   if (preco < cfg.limiar) return preco * cfg.percentualAbaixo;
   const faixa = cfg.faixas.find((f) => preco <= f.max);
   return faixa ? faixa.valor : 0;

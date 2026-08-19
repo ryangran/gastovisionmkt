@@ -3,6 +3,8 @@ import { useTheme } from "next-themes";
 import { calcularShopee, faixaShopee, SHOPEE_TAXAS } from "@/lib/pricing/shopee";
 import { calcularTikTok, faixaTiktok, TIKTOK_FRETE_GRATIS_PERCENTUAL } from "@/lib/pricing/tiktok";
 import { calcularShein, calcularFreteShein, SHEIN_TAXAS } from "@/lib/pricing/shein";
+import { calcularMercadoLivre, custoFixoMercadoLivre, pesoIdx, faixaPrecoIdx,
+         MERCADOLIVRE_TAXAS } from "@/lib/pricing/mercadolivre";
 import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXAS,
          type MagaluTipoProduto, type MagaluDescontoFrete } from "@/lib/pricing/magalu";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
@@ -1577,82 +1579,6 @@ type MLProduto = {
 
 const ML_PRODUTOS_DEFAULT: MLProduto[] = [];
 
-// Faixas de peso (kg) — limites superiores
-const ML_PESOS = [
-  { label: "Até 0,3 kg",       min: 0,    max: 0.3  },
-  { label: "De 0,3 a 0,5 kg",  min: 0.3,  max: 0.5  },
-  { label: "De 0,5 a 1 kg",    min: 0.5,  max: 1    },
-  { label: "De 1 a 1,5 kg",    min: 1,    max: 1.5  },
-  { label: "De 1,5 a 2 kg",    min: 1.5,  max: 2    },
-  { label: "De 2 a 3 kg",      min: 2,    max: 3    },
-  { label: "De 3 a 4 kg",      min: 3,    max: 4    },
-  { label: "De 4 a 5 kg",      min: 4,    max: 5    },
-  { label: "De 5 a 6 kg",      min: 5,    max: 6    },
-  { label: "De 6 a 7 kg",      min: 6,    max: 7    },
-  { label: "De 7 a 8 kg",      min: 7,    max: 8    },
-  { label: "De 8 a 9 kg",      min: 8,    max: 9    },
-  { label: "De 9 a 11 kg",     min: 9,    max: 11   },
-  { label: "De 11 a 13 kg",    min: 11,   max: 13   },
-  { label: "De 13 a 15 kg",    min: 13,   max: 15   },
-  { label: "De 15 a 17 kg",    min: 15,   max: 17   },
-  { label: "De 17 a 20 kg",    min: 17,   max: 20   },
-];
-
-// Tabela de frete por [pesoIdx][faixaPrecoIdx]
-// Faixas de preço: 0-18.99 | 19-48.99 | 49-78.99 | 79-99.99 | 100-119.99 | 120-149.99 | 150-199.99 | 200+
-const ML_FRETE_TABELA: number[][] = [
-  [5.65, 6.55, 7.75, 12.35, 14.35, 16.45, 18.45, 20.95],
-  [5.95, 6.65, 7.85, 13.25, 15.45, 17.65, 19.85, 22.55],
-  [6.05, 6.75, 7.95, 13.85, 16.15, 18.45, 20.75, 23.65],
-  [6.15, 6.85, 8.05, 14.15, 16.45, 18.85, 21.15, 24.65],
-  [6.25, 6.95, 8.15, 14.45, 16.85, 19.25, 21.65, 24.65],
-  [6.35, 7.95, 8.55, 15.75, 18.35, 21.05, 23.65, 26.25],
-  [6.45, 8.15, 8.95, 17.05, 19.85, 22.65, 25.55, 28.35],
-  [6.55, 8.35, 9.75, 18.45, 21.55, 24.65, 27.75, 30.75],
-  [6.65, 8.55, 9.95, 25.45, 28.55, 32.65, 35.75, 39.75],
-  [6.75, 8.75, 10.15, 27.05, 31.05, 36.05, 40.05, 44.05],
-  [6.85, 8.95, 10.35, 28.85, 33.65, 38.45, 43.25, 48.05],
-  [6.95, 9.15, 10.55, 29.65, 34.55, 39.55, 44.45, 49.35],
-  [7.05, 9.55, 10.95, 41.25, 48.05, 54.95, 61.75, 68.65],
-  [7.15, 9.95, 11.35, 42.15, 49.25, 56.25, 63.25, 70.25],
-  [7.25, 10.15, 11.55, 45.05, 52.45, 59.95, 67.45, 74.95],
-  [7.35, 10.35, 11.75, 48.55, 56.05, 63.55, 70.75, 78.65],
-  [7.45, 10.55, 11.95, 54.75, 63.85, 72.95, 82.05, 91.15],
-];
-
-function getMLFaixaPrecoIdx(preco: number): number {
-  if (preco <= 18.99) return 0;
-  if (preco <= 48.99) return 1;
-  if (preco <= 78.99) return 2;
-  if (preco <= 99.99) return 3;
-  if (preco <= 119.99) return 4;
-  if (preco <= 149.99) return 5;
-  if (preco <= 199.99) return 6;
-  return 7;
-}
-
-function getMLPesoIdx(peso: number): number {
-  for (let i = 0; i < ML_PESOS.length; i++) {
-    if (peso <= ML_PESOS[i].max) return i;
-  }
-  return ML_PESOS.length - 1;
-}
-
-function getMLFrete(preco: number, peso: number): number {
-  const pesoIdx = getMLPesoIdx(peso);
-  const precoIdx = getMLFaixaPrecoIdx(preco);
-  return ML_FRETE_TABELA[pesoIdx][precoIdx];
-}
-
-// Custo fixo ML por faixa de preço
-function getMLCustoFixo(preco: number): number {
-  if (preco < 12.50) return preco * 0.5; // metade do preço
-  if (preco <= 29) return 6.25;
-  if (preco <= 50) return 6.50;
-  if (preco <= 79) return 6.75;
-  return 0; // acima de R$79 não tem custo fixo
-}
-
 const ML_FAIXA_PRECO_LABELS = [
   "R$0–18,99", "R$19–48,99", "R$49–78,99", "R$79–99,99",
   "R$100–119,99", "R$120–149,99", "R$150–199,99", "A partir de R$200"
@@ -1686,16 +1612,24 @@ const MercadoLivreCalculadora = () => {
   const pesoNum      = parseNum(peso);
 
   const comissaoPerc   = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
-  const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
-  const valorImposto   = preco * (impostoPerc / 100);
-  const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
-  const valorFrete     = usarFrete && preco > 0 && pesoNum > 0 ? getMLFrete(preco, pesoNum) : 0;
-  const valorCustoFixo = preco > 0 ? getMLCustoFixo(preco) : 0;
-
-  const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete - valorCustoFixo;
-  const lucro          = receitaLiquida - custo;
-  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
-  const isLucrativo    = lucro > 0;
+  const resultado = calcularMercadoLivre({
+    precoVenda: preco,
+    custoProduto: custo,
+    impostoPercent: impostoPerc,
+    marketingPercent: usarMarketing ? marketingPerc : 0,
+    tipoAnuncio,
+    produto: produtoNome,
+    categorias: mlCategorias,
+    pesoKg: pesoNum,
+    usarFrete,
+  });
+  const { valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
+  const margemLucro = resultado.margemPercent;
+  const isLucrativo = resultado.lucrativo;
+  // A UI exibe comissão e custo fixo em linhas separadas; o módulo soma os dois
+  // em valorComissao, então o custo fixo é recuperado aqui para a exibição.
+  const valorCustoFixo = preco > 0 ? custoFixoMercadoLivre(preco, MERCADOLIVRE_TAXAS.custoFixo) : 0;
+  const valorComissao  = resultado.valorComissao - valorCustoFixo;
 
   const handleAddCategoria = () => {
     const nome = novaCategoriaNome.trim();
@@ -1906,7 +1840,7 @@ const MercadoLivreCalculadora = () => {
               />
               {pesoNum > 0 && preco > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Faixa: <span className="font-medium text-foreground">{ML_PESOS[getMLPesoIdx(pesoNum)].label}</span>
+                  Faixa: <span className="font-medium text-foreground">{MERCADOLIVRE_TAXAS.pesos[pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos)].label}</span>
                   {" "}· Frete: <span className="font-medium text-primary">{formatCurrency(valorFrete)}</span>
                 </p>
               )}
@@ -1961,7 +1895,7 @@ const MercadoLivreCalculadora = () => {
                   </p>
                 )}
                 {usarFrete && valorFrete > 0 && (
-                  <p>+ Frete ({ML_PESOS[getMLPesoIdx(pesoNum)].label}) = <span className="font-semibold text-foreground">{formatCurrency(valorFrete)}</span></p>
+                  <p>+ Frete ({MERCADOLIVRE_TAXAS.pesos[pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos)].label}) = <span className="font-semibold text-foreground">{formatCurrency(valorFrete)}</span></p>
                 )}
               </div>
             </CardContent>
@@ -2151,15 +2085,15 @@ const MercadoLivreCalculadora = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {ML_PESOS.map((p, pi) => {
-                      const pesoAtivo = pesoNum > 0 && getMLPesoIdx(pesoNum) === pi;
-                      const precoIdx = preco > 0 ? getMLFaixaPrecoIdx(preco) : -1;
+                    {MERCADOLIVRE_TAXAS.pesos.map((p, pi) => {
+                      const pesoAtivo = pesoNum > 0 && pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos) === pi;
+                      const precoIdx = preco > 0 ? faixaPrecoIdx(preco, MERCADOLIVRE_TAXAS.faixasPreco) : -1;
                       return (
                         <tr key={pi} className={`border-b border-border last:border-0 ${pesoAtivo ? "bg-primary/5" : ""}`}>
                           <td className={`px-2 py-1.5 whitespace-nowrap ${pesoAtivo ? "text-primary font-semibold" : "text-foreground"}`}>
                             {p.label}
                           </td>
-                          {ML_FRETE_TABELA[pi].map((val, fi) => {
+                          {MERCADOLIVRE_TAXAS.freteTabela[pi].map((val, fi) => {
                             const celAtiva = pesoAtivo && fi === precoIdx;
                             return (
                               <td key={fi} className={`px-2 py-1.5 text-center font-mono ${celAtiva ? "text-primary font-bold bg-primary/10 rounded" : "text-muted-foreground"}`}>
