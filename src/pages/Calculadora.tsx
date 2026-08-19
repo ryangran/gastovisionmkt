@@ -3,6 +3,8 @@ import { useTheme } from "next-themes";
 import { calcularShopee, faixaShopee, SHOPEE_TAXAS } from "@/lib/pricing/shopee";
 import { calcularTikTok, faixaTiktok, TIKTOK_FRETE_GRATIS_PERCENTUAL } from "@/lib/pricing/tiktok";
 import { calcularShein, calcularFreteShein, SHEIN_TAXAS } from "@/lib/pricing/shein";
+import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXAS,
+         type MagaluTipoProduto, type MagaluDescontoFrete } from "@/lib/pricing/magalu";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
@@ -1144,62 +1146,6 @@ const AmazonCalculadora = () => {
 };
 
 // ─── Calculadora Magalu ───────────────────────────────────────────────────────
-const MAGALU_COMISSAO = 0.18; // 18% fixo
-
-// Tabela de frete Magalu Preço Certo
-type MagaluFreteFaixa = {
-  label: string;
-  maxKg: number;
-  semDesconto: number;
-  desconto25: number;
-  desconto50: number;
-  desconto75: number;
-};
-
-const MAGALU_FRETE_TABELA: MagaluFreteFaixa[] = [
-  { label: "Até 500g",           maxKg: 0.5,   semDesconto: 35.90, desconto25: 26.93, desconto50: 17.95, desconto75: 8.98 },
-  { label: "De 500g a 1kg",      maxKg: 1,     semDesconto: 40.80, desconto25: 30.68, desconto50: 20.45, desconto75: 10.20 },
-  { label: "De 1kg a 2kg",       maxKg: 2,     semDesconto: 42.90, desconto25: 32.18, desconto50: 21.45, desconto75: 10.73 },
-  { label: "De 2kg a 5kg",       maxKg: 5,     semDesconto: 50.90, desconto25: 38.18, desconto50: 25.45, desconto75: 12.73 },
-  { label: "De 5kg a 9kg",       maxKg: 9,     semDesconto: 77.90, desconto25: 58.43, desconto50: 38.95, desconto75: 19.48 },
-  { label: "De 9kg a 13kg",      maxKg: 13,    semDesconto: 98.00, desconto25: 74.18, desconto50: 49.45, desconto75: 24.50 },
-  { label: "De 13kg a 17kg",     maxKg: 17,    semDesconto: 111.90, desconto25: 83.93, desconto50: 55.95, desconto75: 27.98 },
-  { label: "De 17kg a 23kg",     maxKg: 23,    semDesconto: 134.90, desconto25: 101.18, desconto50: 67.45, desconto75: 33.73 },
-  { label: "De 23kg a 30kg",     maxKg: 30,    semDesconto: 148.90, desconto25: 111.68, desconto50: 74.45, desconto75: 37.23 },
-  { label: "De 30kg a 40kg",     maxKg: 40,    semDesconto: 179.90, desconto25: 134.93, desconto50: 89.95, desconto75: 44.98 },
-  { label: "De 40kg a 50kg",     maxKg: 50,    semDesconto: 189.90, desconto25: 142.43, desconto50: 94.95, desconto75: 47.48 },
-  { label: "De 50kg a 60kg",     maxKg: 60,    semDesconto: 199.90, desconto25: 149.93, desconto50: 99.95, desconto75: 49.98 },
-  { label: "De 60kg a 70kg",     maxKg: 70,    semDesconto: 209.90, desconto25: 157.43, desconto50: 104.95, desconto75: 52.48 },
-  { label: "De 70kg a 80kg",     maxKg: 80,    semDesconto: 219.90, desconto25: 164.93, desconto50: 109.95, desconto75: 54.98 },
-  { label: "De 80kg a 90kg",     maxKg: 90,    semDesconto: 229.90, desconto25: 172.43, desconto50: 114.95, desconto75: 57.48 },
-  { label: "De 90kg a 100kg",    maxKg: 100,   semDesconto: 239.90, desconto25: 179.93, desconto50: 119.95, desconto75: 59.98 },
-  { label: "De 100kg a 110kg",   maxKg: 110,   semDesconto: 249.90, desconto25: 187.43, desconto50: 124.95, desconto75: 62.48 },
-  { label: "De 110kg a 120kg",   maxKg: 120,   semDesconto: 259.90, desconto25: 194.93, desconto50: 129.95, desconto75: 64.98 },
-  { label: "De 120kg a 130kg",   maxKg: 130,   semDesconto: 269.90, desconto25: 202.43, desconto50: 134.95, desconto75: 67.48 },
-  { label: "De 130kg a 140kg",   maxKg: 140,   semDesconto: 279.90, desconto25: 209.93, desconto50: 139.95, desconto75: 69.98 },
-  { label: "De 140kg a 150kg",   maxKg: 150,   semDesconto: 289.90, desconto25: 217.43, desconto50: 144.95, desconto75: 72.48 },
-  { label: "De 150kg a 160kg",   maxKg: 160,   semDesconto: 299.90, desconto25: 224.93, desconto50: 149.95, desconto75: 74.98 },
-  { label: "De 160kg a 170kg",   maxKg: 170,   semDesconto: 309.90, desconto25: 232.43, desconto50: 154.95, desconto75: 77.48 },
-  { label: "De 170kg a 180kg",   maxKg: 180,   semDesconto: 319.90, desconto25: 239.93, desconto50: 159.95, desconto75: 79.98 },
-  { label: "De 180kg a 190kg",   maxKg: 190,   semDesconto: 329.90, desconto25: 247.43, desconto50: 164.95, desconto75: 82.48 },
-  { label: "De 190kg a 200kg",   maxKg: 200,   semDesconto: 339.90, desconto25: 254.93, desconto50: 169.95, desconto75: 84.98 },
-  { label: "Acima de 200kg",     maxKg: Infinity, semDesconto: 349.90, desconto25: 262.43, desconto50: 174.95, desconto75: 87.48 },
-];
-
-type MagaluDescontoFrete = "sem_desconto" | "desconto_25" | "desconto_50" | "desconto_75";
-type MagaluTipoProduto = "leves" | "pesados";
-
-function calcularPesoCubado(alturaM: number, larguraM: number, comprimentoM: number, tipo: MagaluTipoProduto): number {
-  const fator = tipo === "leves" ? 167 : 300;
-  return alturaM * larguraM * comprimentoM * fator;
-}
-
-function getMagaluFrete(pesoKg: number, desconto: MagaluDescontoFrete): { faixa: MagaluFreteFaixa; valor: number } {
-  const faixa = MAGALU_FRETE_TABELA.find(f => pesoKg <= f.maxKg) ?? MAGALU_FRETE_TABELA[MAGALU_FRETE_TABELA.length - 1];
-  const valor = desconto === "desconto_75" ? faixa.desconto75 : desconto === "desconto_50" ? faixa.desconto50 : desconto === "desconto_25" ? faixa.desconto25 : faixa.semDesconto;
-  return { faixa, valor };
-}
-
 const MagaluCalculadora = () => {
   const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_magalu_nome", "");
@@ -1229,20 +1175,30 @@ const MagaluCalculadora = () => {
   const larguraM       = larguraCm / 100;
   const comprimentoM   = comprimentoCm / 100;
 
-  const pesoCubado     = (alturaM > 0 && larguraM > 0 && comprimentoM > 0) ? calcularPesoCubado(alturaM, larguraM, comprimentoM, tipoProduto) : 0;
+  const pesoCubado     = (alturaM > 0 && larguraM > 0 && comprimentoM > 0) ? calcularPesoCubadoMagalu(alturaM, larguraM, comprimentoM, tipoProduto) : 0;
   const pesoFinal      = Math.max(pesoRealKg, pesoCubado);
-  const freteInfo      = usarFrete && pesoFinal > 0 ? getMagaluFrete(pesoFinal, descontoFrete) : null;
-  const valorFrete     = freteInfo ? freteInfo.valor : 0;
+  const valorTaxaFixa  = parseNum(taxaFixa);
 
-  const valorComissao       = preco > 0 ? preco * MAGALU_COMISSAO : 0;
-  const valorTaxaFixa       = parseNum(taxaFixa);
-  const valorImposto        = preco * (impostoPerc / 100);
-  const valorMarketing      = usarMarketing ? preco * (marketingPerc / 100) : 0;
-
-  const receitaLiquida = preco - valorComissao - valorTaxaFixa - valorImposto - valorMarketing - valorFrete;
-  const lucro          = receitaLiquida - custo;
-  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
-  const isLucrativo    = lucro > 0;
+  const resultado = calcularMagalu({
+    precoVenda: preco,
+    custoProduto: custo,
+    impostoPercent: impostoPerc,
+    marketingPercent: usarMarketing ? marketingPerc : 0,
+    tipoProduto,
+    descontoFrete,
+    pesoKg: pesoRealKg,
+    comprimento: comprimentoCm,
+    largura: larguraCm,
+    altura: alturaCm,
+    taxaFixa: valorTaxaFixa,
+    usarFrete,
+  });
+  const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
+  const margemLucro = resultado.margemPercent;
+  const isLucrativo = resultado.lucrativo;
+  const freteInfo = usarFrete && pesoFinal > 0
+    ? { faixa: faixaFreteMagalu(pesoFinal), valor: valorFrete }
+    : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1569,7 +1525,7 @@ const MagaluCalculadora = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {MAGALU_FRETE_TABELA.map((faixa) => {
+                  {MAGALU_TAXAS.freteTabela.map((faixa) => {
                     const ativa = freteInfo?.faixa === faixa;
                     return (
                       <tr key={faixa.label} className={`border-b border-border last:border-0 transition-colors ${ativa ? "bg-primary/10" : "hover:bg-muted/30"}`}>
