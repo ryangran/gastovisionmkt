@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "next-themes";
 import { calcularShopee, faixaShopee, SHOPEE_TAXAS } from "@/lib/pricing/shopee";
+import { calcularTikTok, faixaTiktok, TIKTOK_FRETE_GRATIS_PERCENTUAL } from "@/lib/pricing/tiktok";
+import { calcularShein, calcularFreteShein, SHEIN_TAXAS } from "@/lib/pricing/shein";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
@@ -2226,11 +2228,6 @@ const MercadoLivreCalculadora = () => {
 // Novas taxas vigentes a partir de 15/07/2026:
 // - Preço < R$50: comissão 10% + taxa fixa R$4,00
 // - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
-const getTiktokFees = (preco: number) => {
-  if (preco < 50) return { comissao: 0.10, taxaFixa: 4.00 };
-  return { comissao: 0.06, taxaFixa: 6.00 };
-};
-
 const TikTokCalculadora = () => {
   const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
@@ -2247,21 +2244,26 @@ const TikTokCalculadora = () => {
   const impostoPerc    = parseNum(imposto);
   const marketingPerc  = parseNum(marketing);
 
-  const { comissao: TIKTOK_COMISSAO, taxaFixa: TIKTOK_TAXA_FIXA } = getTiktokFees(preco);
-  const TIKTOK_FRETE_GRATIS_TAXA = 0.06; // +6%
+  const faixaTk = faixaTiktok(preco);
+  const TIKTOK_COMISSAO = faixaTk.comissao;
+  const TIKTOK_TAXA_FIXA = faixaTk.taxaFixa;
   const comissaoPerc   = incentivoComissao ? 0 : TIKTOK_COMISSAO;
-  const freteGratisPerc = usarFreteGratis ? TIKTOK_FRETE_GRATIS_TAXA : 0;
+  const freteGratisPerc = usarFreteGratis ? TIKTOK_FRETE_GRATIS_PERCENTUAL : 0;
   const valorComissao  = preco > 0 ? preco * comissaoPerc : 0;
   const valorFreteGratis = preco > 0 ? preco * freteGratisPerc : 0;
   const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
 
-  const valorImposto   = preco * (impostoPerc / 100);
-  const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
-
-  const receitaLiquida = preco - valorComissao - valorFreteGratis - valorTaxaFixa - valorImposto - valorMarketing;
-  const lucro          = receitaLiquida - custo;
-  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
-  const isLucrativo    = lucro > 0;
+  const resultado = calcularTikTok({
+    precoVenda: preco,
+    custoProduto: custo,
+    impostoPercent: impostoPerc,
+    marketingPercent: usarMarketing ? marketingPerc : 0,
+    freteGratis: usarFreteGratis,
+    incentivoComissao,
+  });
+  const { valorImposto, valorMarketing, receitaLiquida, lucro } = resultado;
+  const margemLucro = resultado.margemPercent;
+  const isLucrativo = resultado.lucrativo;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -2513,25 +2515,6 @@ const TikTokCalculadora = () => {
 
 
 // ─── Calculadora Shein ─────────────────────────────────────────────────────────
-const SHEIN_COMISSAO = 0.16;
-
-type SheinFreteFaixa = { label: string; maxKg: number; valor: number };
-
-const SHEIN_FRETE_TABELA: SheinFreteFaixa[] = [
-  { label: "Até 600g",        maxKg: 0.6, valor: 4 },
-  { label: "600g a 900g",     maxKg: 0.9, valor: 6 },
-  { label: "900g a 1,2kg",    maxKg: 1.2, valor: 8 },
-  { label: "1,2kg a 1,5kg",   maxKg: 1.5, valor: 10 },
-];
-
-function calcularFreteShein(pesoRealKg: number, comprimento: number, largura: number, altura: number): { faixa: SheinFreteFaixa | null; valor: number; pesoCubico: number; pesoUsado: number } {
-  const pesoCubico = (comprimento * largura * altura) / 6000;
-  const pesoUsado = Math.max(pesoRealKg, pesoCubico);
-  const faixa = SHEIN_FRETE_TABELA.find(f => pesoUsado <= f.maxKg) || null;
-  const valor = faixa ? faixa.valor : SHEIN_FRETE_TABELA[SHEIN_FRETE_TABELA.length - 1].valor;
-  return { faixa, valor, pesoCubico, pesoUsado };
-}
-
 const SheinCalculadora = () => {
   const { saveCalculation } = useSavedCalculations();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
@@ -2555,16 +2538,20 @@ const SheinCalculadora = () => {
   const alt            = parseNum(altura);
 
   const freteInfo      = calcularFreteShein(pesoKg, comp, larg, alt);
-  const valorFrete     = (pesoKg > 0 || (comp > 0 && larg > 0 && alt > 0)) ? freteInfo.valor : 0;
 
-  const valorComissao  = preco > 0 ? preco * SHEIN_COMISSAO : 0;
-  const valorImposto   = preco * (impostoPerc / 100);
-  const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
-
-  const receitaLiquida = preco - valorComissao - valorFrete - valorImposto - valorMarketing;
-  const lucro          = receitaLiquida - custo;
-  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
-  const isLucrativo    = lucro > 0;
+  const resultado = calcularShein({
+    precoVenda: preco,
+    custoProduto: custo,
+    impostoPercent: impostoPerc,
+    marketingPercent: usarMarketing ? marketingPerc : 0,
+    pesoKg,
+    comprimento: comp,
+    largura: larg,
+    altura: alt,
+  });
+  const { valorComissao, valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
+  const margemLucro = resultado.margemPercent;
+  const isLucrativo = resultado.lucrativo;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -2796,7 +2783,7 @@ const SheinCalculadora = () => {
                 </tr>
               </thead>
               <tbody>
-                {SHEIN_FRETE_TABELA.map((f, idx) => {
+                {SHEIN_TAXAS.frete.map((f, idx) => {
                   const ativa = freteInfo.faixa === f && valorFrete > 0;
                   return (
                     <tr key={idx} className={`border-b border-border last:border-0 transition-colors ${ativa ? "bg-primary/10" : "hover:bg-muted/30"}`}>

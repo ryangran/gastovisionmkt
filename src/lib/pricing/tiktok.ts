@@ -20,7 +20,7 @@ export const TIKTOK_TAXAS: TikTokTaxas = [
 ];
 
 /** Taxa adicional cobrada sobre o preço de venda quando o frete grátis está ativo (+6%). */
-const TIKTOK_FRETE_GRATIS_PERCENTUAL = 0.06;
+export const TIKTOK_FRETE_GRATIS_PERCENTUAL = 0.06;
 
 export function faixaTiktok(preco: number, taxas: TikTokTaxas = TIKTOK_TAXAS): TikTokFaixa {
   return taxas.find((f) => preco < f.limite) ?? taxas[taxas.length - 1];
