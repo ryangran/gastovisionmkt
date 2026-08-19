@@ -355,6 +355,36 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_fees: {
+        Row: {
+          active: boolean
+          config: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          platform: string
+          version: string
+        }
+        Insert: {
+          active?: boolean
+          config: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          platform: string
+          version: string
+        }
+        Update: {
+          active?: boolean
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          platform?: string
+          version?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           barcode: string | null
@@ -498,9 +528,11 @@ export type Database = {
           id: string
           inputs: Json
           platform: string
+          previous_margin_percent: number | null
           product_name: string
           profit_margin_percent: number
           profit_margin_value: number
+          recalculated_at: string | null
           sale_price: number
           stock_quantity: number
           updated_at: string
@@ -513,9 +545,11 @@ export type Database = {
           id?: string
           inputs?: Json
           platform: string
+          previous_margin_percent?: number | null
           product_name: string
           profit_margin_percent: number
           profit_margin_value: number
+          recalculated_at?: string | null
           sale_price: number
           stock_quantity?: number
           updated_at?: string
@@ -528,9 +562,11 @@ export type Database = {
           id?: string
           inputs?: Json
           platform?: string
+          previous_margin_percent?: number | null
           product_name?: string
           profit_margin_percent?: number
           profit_margin_value?: number
+          recalculated_at?: string | null
           sale_price?: number
           stock_quantity?: number
           updated_at?: string
