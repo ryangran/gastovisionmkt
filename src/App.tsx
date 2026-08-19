@@ -6,8 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { lazy, Suspense } from "react";
 import LandingPage from "./pages/LandingPage";
+import { AppShell } from "./components/layout/AppShell";
 
 const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ProdutosSalvos = lazy(() => import("./pages/ProdutosSalvos"));
@@ -32,9 +34,12 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/calculadora" element={<Calculadora />} />
-                <Route path="/admin-panel" element={<AdminPanel />} />
-                <Route path="/produtos-salvos" element={<ProdutosSalvos />} />
+                <Route element={<AppShell />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/calculadora" element={<Calculadora />} />
+                  <Route path="/admin-panel" element={<AdminPanel />} />
+                  <Route path="/produtos-salvos" element={<ProdutosSalvos />} />
+                </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>

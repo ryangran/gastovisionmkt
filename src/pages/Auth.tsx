@@ -45,7 +45,7 @@ const Auth = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/calculadora");
+        navigate("/dashboard");
       }
     });
   }, [navigate]);
@@ -149,7 +149,7 @@ const Auth = () => {
       }
 
       toast.success("Bem-vindo de volta!");
-      navigate("/calculadora");
+      navigate("/dashboard");
     } catch {
       toast.error("Erro na autenticação. Tente novamente.");
     } finally {
