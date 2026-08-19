@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "next-themes";
+import { calcularShopee, faixaShopee, SHOPEE_TAXAS } from "@/lib/pricing/shopee";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
@@ -22,33 +23,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 
 // Tabela de comissões Shopee (baseada na imagem enviada)
-type ShopeeComissao = {
-  max: number;
-  percentual: number;
-  fixo: number;
-  /** Taxa fixa calculada como % do valor do item (usado na faixa abaixo de R$8) */
-  fixoPercentual?: number;
-  subsidioPix: number;
-};
-
-const SHOPEE_COMISSOES: ShopeeComissao[] = [
-  { max: 7.99,     percentual: 0.20, fixo: 0,  fixoPercentual: 0.5, subsidioPix: 0 },
-  { max: 79.99,    percentual: 0.20, fixo: 4,  subsidioPix: 0    },
-  { max: 99.99,    percentual: 0.14, fixo: 16, subsidioPix: 0.05 },
-  { max: 199.99,   percentual: 0.14, fixo: 20, subsidioPix: 0.05 },
-  { max: 499.99,   percentual: 0.14, fixo: 26, subsidioPix: 0.05 },
-  { max: Infinity, percentual: 0.14, fixo: 26, subsidioPix: 0.08 },
-];
-
-function getShopeeComissao(preco: number): ShopeeComissao {
-  return SHOPEE_COMISSOES.find((c) => preco <= c.max) ?? SHOPEE_COMISSOES[SHOPEE_COMISSOES.length - 1];
-}
-
-function getShopeeTaxaFixa(comissao: ShopeeComissao, preco: number): number {
-  return comissao.fixoPercentual ? preco * comissao.fixoPercentual : comissao.fixo;
-}
-
-
 function formatCurrency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -77,17 +51,18 @@ const ShopeeCalculadora = () => {
   const impostoPerc   = parseNum(imposto);
   const marketingPerc = parseNum(marketing);
 
-  const comissao = preco > 0 ? getShopeeComissao(preco) : null;
+  const comissao = preco > 0 ? faixaShopee(preco) : null;
 
-  const valorComissao  = comissao ? preco * comissao.percentual + getShopeeTaxaFixa(comissao, preco) : 0;
-  const valorImposto   = preco * (impostoPerc / 100);
-  const valorMarketing = usarMarketing ? preco * (marketingPerc / 100) : 0;
-  const subsidio       = comissao && usarSubsidioPix ? preco * comissao.subsidioPix : 0;
-
-  const receitaLiquida = preco + subsidio - valorComissao - valorImposto - valorMarketing;
-  const lucro          = receitaLiquida - custo;
-  const margemLucro    = preco > 0 ? (lucro / preco) * 100 : 0;
-  const isLucrativo    = lucro > 0;
+  const resultado = calcularShopee({
+    precoVenda: preco,
+    custoProduto: custo,
+    impostoPercent: impostoPerc,
+    marketingPercent: usarMarketing ? marketingPerc : 0,
+    usarSubsidioPix,
+  });
+  const { valorComissao, valorImposto, valorMarketing, subsidio, receitaLiquida, lucro } = resultado;
+  const margemLucro = resultado.margemPercent;
+  const isLucrativo = resultado.lucrativo;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -377,7 +352,7 @@ const ShopeeCalculadora = () => {
                   { label: "R$200 – R$499,99",     comissao: "14% + R$26", pix: "5%", idx: 4 },
                   { label: "Acima de R$500",       comissao: "14% + R$26", pix: "8%", idx: 5 },
                 ].map((row) => {
-                  const faixaAtiva = comissao && preco > 0 && SHOPEE_COMISSOES[row.idx] === comissao;
+                  const faixaAtiva = comissao && preco > 0 && SHOPEE_TAXAS[row.idx] === comissao;
                   return (
                     <tr
                       key={row.idx}
