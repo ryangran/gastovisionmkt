@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Calculator,
   GitCompareArrows,
+  Megaphone,
   Bookmark,
   Shield,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const GRUPOS: GrupoNav[] = [
     itens: [
       { to: "/calculadora", label: "Calculadora", icon: Calculator },
       { to: "/comparador", label: "Comparador", icon: GitCompareArrows },
+      { to: "/ads", label: "Calculadora de Ads", icon: Megaphone },
     ],
   },
   {
