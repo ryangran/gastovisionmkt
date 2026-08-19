@@ -494,34 +494,46 @@ export type Database = {
         Row: {
           cost: number
           created_at: string
+          fee_version: string | null
           id: string
+          inputs: Json
           platform: string
           product_name: string
           profit_margin_percent: number
           profit_margin_value: number
           sale_price: number
+          stock_quantity: number
+          updated_at: string
           user_email: string
         }
         Insert: {
           cost: number
           created_at?: string
+          fee_version?: string | null
           id?: string
+          inputs?: Json
           platform: string
           product_name: string
           profit_margin_percent: number
           profit_margin_value: number
           sale_price: number
+          stock_quantity?: number
+          updated_at?: string
           user_email: string
         }
         Update: {
           cost?: number
           created_at?: string
+          fee_version?: string | null
           id?: string
+          inputs?: Json
           platform?: string
           product_name?: string
           profit_margin_percent?: number
           profit_margin_value?: number
           sale_price?: number
+          stock_quantity?: number
+          updated_at?: string
           user_email?: string
         }
         Relationships: []
