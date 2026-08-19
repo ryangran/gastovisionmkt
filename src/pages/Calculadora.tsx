@@ -558,10 +558,16 @@ const AmazonCalculadora = () => {
                       <p>Peso considerado: <span className="font-semibold text-primary">{pesoFinalFBA.toFixed(2)} kg</span></p>
                     </div>
                   )}
-                  {dbaFreteInfo && dbaFreteInfo.valor > 0 && (
+                  {dbaFreteInfo && (
                     <div className="text-xs bg-muted/30 rounded p-2">
                       <p>{dbaFreteInfo.tipo}</p>
-                      <p>Frete DBA: <span className="font-semibold text-primary">{formatCurrency(dbaFreteInfo.valor)}</span></p>
+                      {dbaFreteInfo.valor > 0 ? (
+                        <p>Frete DBA: <span className="font-semibold text-primary">{formatCurrency(dbaFreteInfo.valor)}</span></p>
+                      ) : (
+                        <p className="text-warning">
+                          Sem o peso o frete entra como zero e o lucro acima fica maior do que o real.
+                        </p>
+                      )}
                     </div>
                   )}
                 </>
