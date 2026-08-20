@@ -15,13 +15,28 @@ export const AppShell = () => {
   return (
     <TaxasProvider>
     <PerfilProvider>
-    <div className="flex min-h-screen bg-background">
+    <div className="relative flex min-h-screen bg-background">
+      {/* Degradê vermelho da marca, em todas as abas do app.
+          Fica aqui no AppShell para qualquer página nova já nascer com ele. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-primary/[0.07] via-primary/[0.02] to-primary/[0.06]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(1100px 700px at 85% 12%, hsl(var(--primary) / 0.08), transparent 65%), radial-gradient(900px 600px at 10% 78%, hsl(var(--primary) / 0.06), transparent 65%)",
+        }}
+      />
+
       {/* Desktop: sidebar fixa */}
-      <aside className="hidden md:block sticky top-0 h-screen shrink-0">
+      <aside className="relative z-10 hidden md:block sticky top-0 h-screen shrink-0">
         <AppSidebar />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {/* Mobile: barra com o menu em drawer */}
         <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 md:hidden">
           <Sheet open={drawerAberto} onOpenChange={setDrawerAberto}>
