@@ -4,6 +4,9 @@
 .env.production
 .env.staging
 
+# Config de servidores MCP: guarda chave de API em texto puro
+.mcp.json
+
 # Logs
 logs
 *.log
