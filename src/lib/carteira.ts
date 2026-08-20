@@ -28,6 +28,8 @@ export interface ResumoCarteira {
   custoTotalEstoque: number;
   /** Quanto o estoque vale se vender tudo pelo preço cadastrado. */
   valorVendaEstoque: number;
+  /** Total de unidades em estoque, somando todos os produtos. */
+  unidadesEmEstoque: number;
   lucroPotencial: number;
   /** Margem ponderada pelo valor de venda em estoque, em pontos percentuais. */
   margemMedia: number;
@@ -45,6 +47,7 @@ export function agregarCarteira(produtos: ProdutoSalvo[]): ResumoCarteira {
   let custoTotalEstoque = 0;
   let valorVendaEstoque = 0;
   let lucroPotencial = 0;
+  let unidadesEmEstoque = 0;
   const porPlataforma = new Map<string, ResumoPlataforma>();
   const produtosNoPrejuizo: ProdutoSalvo[] = [];
 
@@ -53,6 +56,7 @@ export function agregarCarteira(produtos: ProdutoSalvo[]): ResumoCarteira {
     custoTotalEstoque += p.cost * qtd;
     valorVendaEstoque += p.sale_price * qtd;
     lucroPotencial += p.profit_margin_value * qtd;
+    unidadesEmEstoque += qtd;
 
     if (p.profit_margin_value < 0) produtosNoPrejuizo.push(p);
 
@@ -76,6 +80,7 @@ export function agregarCarteira(produtos: ProdutoSalvo[]): ResumoCarteira {
     totalProdutos: produtos.length,
     custoTotalEstoque,
     valorVendaEstoque,
+    unidadesEmEstoque,
     lucroPotencial,
     margemMedia,
     porPlataforma: [...porPlataforma.values()].sort((a, b) => b.custoEstoque - a.custoEstoque),

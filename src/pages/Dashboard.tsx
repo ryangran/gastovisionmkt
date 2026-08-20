@@ -8,7 +8,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Calculator, Package, TrendingUp, Percent, AlertTriangle, X } from "lucide-react";
+import {
+  Calculator,
+  Package,
+  ShoppingCart,
+  TrendingUp,
+  Percent,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,15 +27,6 @@ import type { ProdutoSalvo } from "@/lib/carteira";
 
 function formatCurrency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function formatCompact(value: number): string {
-  return value.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    notation: "compact",
-    maximumFractionDigits: 1,
-  });
 }
 
 /** O banco grava o nome de exibição; o componente de logo usa a chave. */
@@ -240,17 +239,23 @@ const Dashboard = () => {
             </Card>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <Cartao
               titulo="Custo em estoque"
               valor={formatCurrency(resumo.custoTotalEstoque)}
-              apoio={`${comEstoque.length} de ${resumo.totalProdutos} produtos com estoque`}
+              apoio="Só o custo dos produtos, sem embalagem"
               icone={Package}
+            />
+            <Cartao
+              titulo="Venda potencial"
+              valor={formatCurrency(resumo.valorVendaEstoque)}
+              apoio={`${resumo.unidadesEmEstoque} ${resumo.unidadesEmEstoque === 1 ? "unidade" : "unidades"} em ${comEstoque.length} de ${resumo.totalProdutos} produtos`}
+              icone={ShoppingCart}
             />
             <Cartao
               titulo="Lucro potencial"
               valor={formatCurrency(resumo.lucroPotencial)}
-              apoio={`Se vender todo o estoque por ${formatCompact(resumo.valorVendaEstoque)}`}
+              apoio="Se vender todo o estoque pelo preço atual"
               icone={TrendingUp}
             />
             <Cartao

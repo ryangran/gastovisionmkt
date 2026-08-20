@@ -32,6 +32,15 @@ describe("agregarCarteira", () => {
     expect(r.lucroPotencial).toBeCloseTo(88, 2); // 26*3 + 5*2
   });
 
+  it("soma as unidades em estoque de todos os produtos", () => {
+    const r = agregarCarteira([
+      produto({ stock_quantity: 3 }),
+      produto({ id: "2", stock_quantity: 5 }),
+      produto({ id: "3", stock_quantity: 0 }),
+    ]);
+    expect(r.unidadesEmEstoque).toBe(8);
+  });
+
   it("não conta no custo imobilizado o produto sem estoque, mas o conta no total", () => {
     const r = agregarCarteira([produto({ stock_quantity: 0 })]);
     expect(r.custoTotalEstoque).toBe(0);
@@ -76,6 +85,7 @@ describe("agregarCarteira", () => {
     expect(Number.isNaN(r.margemMedia)).toBe(false);
     expect(r.custoTotalEstoque).toBe(0);
     expect(r.totalProdutos).toBe(0);
+    expect(r.unidadesEmEstoque).toBe(0);
     expect(r.porPlataforma).toEqual([]);
   });
 

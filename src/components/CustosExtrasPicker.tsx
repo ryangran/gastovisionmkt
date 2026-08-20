@@ -23,21 +23,20 @@ function parseNum(val: string): number {
 interface CustosExtrasPickerProps {
   /** Prefixo das chaves de sessão, para cada calculadora lembrar a própria escolha. */
   chave: string;
-  /** Recebe o total selecionado, já somado com o valor avulso. */
+  /** Recebe a soma dos custos marcados. */
   onChange: (total: number) => void;
 }
 
 export const CustosExtrasPicker = ({ chave, onChange }: CustosExtrasPickerProps) => {
   const { custos, carregando, criar, remover } = useCustosExtras();
   const [marcados, setMarcados] = usePersistedState<string[]>(`${chave}_ids`, []);
-  const [avulso, setAvulso] = usePersistedState(`${chave}_avulso`, "");
   const [aberto, setAberto] = useState(false);
   const [novoNome, setNovoNome] = useState("");
   const [novoValor, setNovoValor] = useState("");
   const [salvando, setSalvando] = useState(false);
 
   const selecionados = custos.filter((c) => marcados.includes(c.id));
-  const total = selecionados.reduce((s, c) => s + c.valor, 0) + parseNum(avulso);
+  const total = selecionados.reduce((s, c) => s + c.valor, 0);
 
   // Avisa o pai sempre que o total muda, inclusive quando a lista termina de
   // carregar e os itens marcados passam a ter valor.
@@ -159,19 +158,6 @@ export const CustosExtrasPicker = ({ chave, onChange }: CustosExtrasPickerProps)
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="mt-3 space-y-1.5">
-        <Label htmlFor={`${chave}-avulso`} className="text-xs">
-          Outro custo, só para este produto (R$)
-        </Label>
-        <Input
-          id={`${chave}-avulso`}
-          inputMode="decimal"
-          value={avulso}
-          onChange={(e) => setAvulso(e.target.value)}
-          placeholder="0,00"
-          className="h-9"
-        />
-      </div>
     </div>
   );
 };
