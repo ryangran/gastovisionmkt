@@ -373,13 +373,14 @@ const ProdutosSalvos = () => {
                 ) : (
                   <div className="space-y-2">
                     {isAll && (
-                      <div className="hidden md:grid md:grid-cols-[1fr_120px_105px_105px_85px_105px_70px_36px] gap-3 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+                      <div className="hidden md:grid md:grid-cols-[1fr_120px_105px_105px_85px_105px_90px_70px_72px] gap-3 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
                         <span>Produto</span>
                         <span>Plataforma</span>
                         <span className="text-right">Preço venda</span>
                         <span className="text-right">Custo</span>
                         <span className="text-right">Margem</span>
                         <span className="text-right">Lucro</span>
+                        <span className="text-right">Estoque</span>
                         <span className="text-right">Data</span>
                         <span />
                       </div>
