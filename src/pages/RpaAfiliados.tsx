@@ -42,6 +42,12 @@ const RpaAfiliados = () => {
     {},
   );
   const [salvando, setSalvando] = useState(false);
+  /**
+   * O que está digitado no campo de ISS. Fica separado do número porque um
+   * campo controlado pelo valor numérico apaga a vírgula no meio da digitação:
+   * "3,96" vira 396, e o seller reteria 396% em vez de 3,96%.
+   */
+  const [issTexto, setIssTexto] = useState<string | null>(null);
 
   const [cabecalhos, setCabecalhos] = useState<string[]>([]);
   const [linhas, setLinhas] = useState<Array<Record<string, unknown>>>([]);
@@ -55,6 +61,14 @@ const RpaAfiliados = () => {
   const empresa = rascunho[String(slot)] ?? salva ?? EMPRESA_VAZIA;
   const temRascunho = Boolean(rascunho[String(slot)]);
 
+  const issExibido =
+    issTexto ?? (empresa.issPercent ? String(empresa.issPercent).replace(".", ",") : "");
+
+  const trocarSlot = (s: SlotEmpresa) => {
+    setSlot(s);
+    setIssTexto(null);
+  };
+
   const editar = (mudanca: Partial<EmpresaRpa>) => {
     setRascunho((prev) => ({
       ...prev,
@@ -67,6 +81,7 @@ const RpaAfiliados = () => {
     const ok = await salvar(slot, empresa);
     setSalvando(false);
     if (ok) {
+      setIssTexto(null);
       setRascunho((prev) => {
         const copia = { ...prev };
         delete copia[String(slot)];
@@ -163,7 +178,7 @@ const RpaAfiliados = () => {
                 {([1, 2] as SlotEmpresa[]).map((s) => (
                   <button
                     key={s}
-                    onClick={() => setSlot(s)}
+                    onClick={() => trocarSlot(s)}
                     className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
                       slot === s
                         ? "bg-primary text-primary-foreground font-medium"
@@ -265,10 +280,13 @@ const RpaAfiliados = () => {
                       <Input
                         className="mt-2 h-8"
                         inputMode="decimal"
-                        value={String(empresa.issPercent)}
-                        onChange={(e) =>
-                          editar({ issPercent: parseFloat(e.target.value.replace(",", ".")) || 0 })
-                        }
+                        value={issExibido}
+                        onChange={(e) => {
+                          const texto = e.target.value.replace(/[^\d,.]/g, "");
+                          setIssTexto(texto);
+                          editar({ issPercent: parseFloat(texto.replace(",", ".")) || 0 });
+                        }}
+                        placeholder="Ex.: 3,96"
                         disabled={!empresa.reterIss}
                         aria-label="Alíquota de ISS em porcentagem"
                       />
