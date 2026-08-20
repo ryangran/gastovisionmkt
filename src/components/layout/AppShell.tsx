@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { Button } from "@/components/ui/button";
 import { AppSidebar } from "./AppSidebar";
 import { TaxasProvider } from "./TaxasProvider";
+import { PerfilProvider } from "./PerfilProvider";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 
@@ -13,6 +14,7 @@ export const AppShell = () => {
 
   return (
     <TaxasProvider>
+    <PerfilProvider>
     <div className="flex min-h-screen bg-background">
       {/* Desktop: sidebar fixa */}
       <aside className="hidden md:block sticky top-0 h-screen shrink-0">
@@ -43,6 +45,7 @@ export const AppShell = () => {
         </main>
       </div>
     </div>
+    </PerfilProvider>
     </TaxasProvider>
   );
 };

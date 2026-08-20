@@ -13,6 +13,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Comparador = lazy(() => import("./pages/Comparador"));
 const CalculadoraAds = lazy(() => import("./pages/CalculadoraAds"));
 const RpaAfiliados = lazy(() => import("./pages/RpaAfiliados"));
+const Perfil = lazy(() => import("./pages/Perfil"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ProdutosSalvos = lazy(() => import("./pages/ProdutosSalvos"));
@@ -43,6 +44,7 @@ const App = () => {
                   <Route path="/comparador" element={<Comparador />} />
                   <Route path="/ads" element={<CalculadoraAds />} />
                   <Route path="/rpa-afiliados" element={<RpaAfiliados />} />
+                  <Route path="/perfil" element={<Perfil />} />
                   <Route path="/admin-panel" element={<AdminPanel />} />
                   <Route path="/produtos-salvos" element={<ProdutosSalvos />} />
                 </Route>

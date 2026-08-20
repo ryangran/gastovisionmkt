@@ -17,6 +17,7 @@ import { CustosExtrasPicker } from "@/components/CustosExtrasPicker";
 import { aplicarCustosExtras } from "@/lib/custosExtras";
 import { SeletorProdutoSalvo } from "@/components/SeletorProdutoSalvo";
 import { useTaxas } from "@/components/layout/TaxasProvider";
+import { useImpostoDoPerfil } from "@/components/layout/PerfilProvider";
 import { CHAVE_PLATAFORMA } from "@/lib/transferirProduto";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
@@ -60,6 +61,7 @@ const ShopeeCalculadora = () => {
   const [precoVenda, setPrecoVenda]     = usePersistedState("calc_shopee_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_shopee_custo", "");
   const [imposto, setImposto]           = usePersistedState("calc_shopee_imposto", "");
+  useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]       = usePersistedState("calc_shopee_marketing", "");
   const [usarMarketing, setUsarMarketing]     = usePersistedState("calc_shopee_usarMkt", false);
   const [usarSubsidioPix, setUsarSubsidioPix] = usePersistedState("calc_shopee_subsidioPix", false);
@@ -445,6 +447,7 @@ const AmazonCalculadora = () => {
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_amazon_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_amazon_custo", "");
   const [imposto, setImposto]               = usePersistedState("calc_amazon_imposto", "");
+  useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]           = usePersistedState("calc_amazon_marketing", "");
   const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_amazon_usarMkt", false);
   const [modelo, setModelo]                 = usePersistedState<AmazonModelo>("calc_amazon_modelo", "dba");
@@ -1022,6 +1025,7 @@ const MagaluCalculadora = () => {
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_magalu_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_magalu_custo", "");
   const [imposto, setImposto]               = usePersistedState("calc_magalu_imposto", "");
+  useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]           = usePersistedState("calc_magalu_marketing", "");
   const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_magalu_usarMkt", false);
   const [usarFrete, setUsarFrete]           = usePersistedState("calc_magalu_usarFrete", false);
@@ -1486,6 +1490,7 @@ const MercadoLivreCalculadora = () => {
   const [precoVenda, setPrecoVenda]   = usePersistedState("calc_ml_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("calc_ml_custo", "");
   const [imposto, setImposto]         = usePersistedState("calc_ml_imposto", "");
+  useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]     = usePersistedState("calc_ml_marketing", "");
   const [usarMarketing, setUsarMarketing] = usePersistedState("calc_ml_usarMkt", false);
   const [usarFrete, setUsarFrete]     = usePersistedState("calc_ml_usarFrete", false);
@@ -2042,6 +2047,7 @@ const TikTokCalculadora = () => {
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_tiktok_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_tiktok_custo", "");
   const [imposto, setImposto]               = usePersistedState("calc_tiktok_imposto", "");
+  useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]           = usePersistedState("calc_tiktok_marketing", "");
   const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_tiktok_usarMkt", false);
   const [incentivoComissao, setIncentivoComissao] = usePersistedState("calc_tiktok_incentivo", false);
@@ -2359,6 +2365,7 @@ const SheinCalculadora = () => {
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_shein_preco", "");
   const [custoProduto, setCustoProduto]     = usePersistedState("calc_shein_custo", "");
   const [imposto, setImposto]               = usePersistedState("calc_shein_imposto", "");
+  useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]           = usePersistedState("calc_shein_marketing", "");
   const [usarMarketing, setUsarMarketing]   = usePersistedState("calc_shein_usarMkt", false);
   const [pesoGramas, setPesoGramas]         = usePersistedState("calc_shein_peso", "");

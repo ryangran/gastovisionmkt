@@ -7,6 +7,7 @@ import {
   Megaphone,
   Bookmark,
   Receipt,
+  UserRound,
   Shield,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -46,6 +47,10 @@ const GRUPOS: GrupoNav[] = [
   {
     titulo: "Afiliados",
     itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt }],
+  },
+  {
+    titulo: "Conta",
+    itens: [{ to: "/perfil", label: "Meu perfil", icon: UserRound }],
   },
 ];
 
