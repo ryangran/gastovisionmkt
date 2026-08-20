@@ -53,7 +53,8 @@ const RpaAfiliados = () => {
   const [gerando, setGerando] = useState(false);
   const inputArquivo = useRef<HTMLInputElement>(null);
 
-  const empresa = rascunho ?? salva ?? EMPRESA_VAZIA;
+  // Rascunhos antigos no storage podem não ter todos os campos: sempre completar.
+  const empresa: EmpresaRpa = { ...EMPRESA_VAZIA, ...(salva ?? {}), ...(rascunho ?? {}) };
   const temRascunho = rascunho !== null;
 
   const issExibido =
