@@ -71,6 +71,20 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen overflow-hidden bg-background">
+      {/* Degradê vermelho sutil, atravessando a página inteira */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-primary/[0.07] via-primary/[0.02] to-primary/[0.06]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(1100px 700px at 85% 12%, hsl(var(--primary) / 0.08), transparent 65%), radial-gradient(900px 600px at 10% 78%, hsl(var(--primary) / 0.06), transparent 65%)",
+        }}
+      />
+
       {/* Textura de grão, para o preto não ficar chapado */}
       <div
         aria-hidden
@@ -83,7 +97,7 @@ const LandingPage = () => {
 
       <div className="relative z-10">
         <ResponsiveHeroBanner
-          logoUrl={logo}
+          logoUrl="/logo-hero.png"
           backgroundImageUrl="/hero-bg.jpg"
           navLinks={[
             { label: "Como funciona", href: "#como", isActive: true },
@@ -313,28 +327,73 @@ const LandingPage = () => {
 
         {/* PREÇO */}
         <section id="preco" className="container mx-auto px-4 py-20">
-          <div className="mx-auto max-w-lg">
-            <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-card">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+              Escolha como quer usar
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Os dois planos dão acesso a tudo. Muda só a forma de pagar.
+            </p>
+          </div>
+
+          <div className="mx-auto grid max-w-3xl items-start gap-5 md:grid-cols-2">
+            {/* Mensal */}
+            <div className="rounded-2xl border border-border bg-card p-7">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Mensal
+              </p>
+              <div className="mt-4 flex items-end gap-1">
+                <span className="font-display text-4xl font-bold leading-none text-foreground">
+                  R$19,90
+                </span>
+                <span className="pb-1 text-sm text-muted-foreground">/mês</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">Cancele quando quiser.</p>
+
+              <ul className="mt-6 space-y-2.5">
+                {INCLUSO.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="mt-7 w-full py-6 text-base"
+                onClick={() => navigate("/auth")}
+              >
+                Assinar mensal
+              </Button>
+            </div>
+
+            {/* Vitalício */}
+            <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-card p-7">
               <div
                 aria-hidden
                 className="pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
               />
-              <div className="relative p-8">
-                <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
-                  Acesso completo
-                </p>
+              <div className="relative">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
+                    Vitalício
+                  </p>
+                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-medium text-primary-foreground">
+                    Mais escolhido
+                  </span>
+                </div>
 
-                <div className="mt-5 flex items-end gap-3">
+                <div className="mt-4 flex items-end gap-3">
                   <span className="text-sm text-muted-foreground line-through">R$197,00</span>
-                  <span className="font-display text-5xl font-bold leading-none text-foreground">
+                  <span className="font-display text-4xl font-bold leading-none text-foreground">
                     R$97
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-primary">
-                  Pagamento único. Sem mensalidade.
-                </p>
+                <p className="mt-2 text-sm text-primary">Pagamento único. Sem mensalidade.</p>
 
-                <ul className="mt-7 space-y-2.5">
+                <ul className="mt-6 space-y-2.5">
                   {INCLUSO.map((item) => (
                     <li key={item} className="flex items-start gap-2.5 text-sm text-foreground">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -345,23 +404,23 @@ const LandingPage = () => {
 
                 <Button
                   size="lg"
-                  className="mt-8 w-full gap-2 py-6 text-base"
+                  className="mt-7 w-full gap-2 py-6 text-base"
                   onClick={() => navigate("/auth")}
                 >
-                  Quero ver onde meu produto lucra mais
+                  Quero o vitalício
                   <ArrowRight className="h-5 w-5" />
                 </Button>
-
-                <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    <span className="text-foreground">Garantia de 7 dias.</span> Entra, calcula
-                    seus produtos, e se não encontrar dinheiro que estava escapando, devolvemos.
-                    Sem burocracia.
-                  </p>
-                </div>
               </div>
             </div>
+          </div>
+
+          <div className="mx-auto mt-6 flex max-w-3xl items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              <span className="text-foreground">Garantia de 7 dias nos dois planos.</span> Entra,
+              calcula seus produtos, e se não encontrar dinheiro que estava escapando,
+              devolvemos. Sem burocracia.
+            </p>
           </div>
         </section>
 
