@@ -53,7 +53,8 @@ const RpaAfiliados = () => {
   const [gerando, setGerando] = useState(false);
   const inputArquivo = useRef<HTMLInputElement>(null);
 
-  const empresa = rascunho ?? salva ?? EMPRESA_VAZIA;
+  // Rascunhos antigos no storage podem não ter todos os campos: sempre completar.
+  const empresa: EmpresaRpa = { ...EMPRESA_VAZIA, ...(salva ?? {}), ...(rascunho ?? {}) };
   const temRascunho = rascunho !== null;
 
   const issExibido =
@@ -99,7 +100,7 @@ const RpaAfiliados = () => {
   const afiliados: Afiliado[] = resultado.afiliados;
 
   const faltando = CAMPOS_RPA.filter((c) => c.obrigatorio && !mapa[c.chave]);
-  const empresaPronta = Boolean(empresa.razaoSocial.trim() && empresa.cnpj.trim());
+  const empresaPronta = Boolean(empresa.razaoSocial?.trim() && empresa.cnpj?.trim());
   const podeGerar =
     afiliados.length > 0 && faltando.length === 0 && empresaPronta && !gerando;
 
