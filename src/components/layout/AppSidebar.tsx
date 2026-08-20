@@ -6,6 +6,7 @@ import {
   GitCompareArrows,
   Megaphone,
   Bookmark,
+  Receipt,
   Shield,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -41,6 +42,10 @@ const GRUPOS: GrupoNav[] = [
   {
     titulo: "Carteira",
     itens: [{ to: "/produtos-salvos", label: "Produtos salvos", icon: Bookmark }],
+  },
+  {
+    titulo: "Afiliados",
+    itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt }],
   },
 ];
 
