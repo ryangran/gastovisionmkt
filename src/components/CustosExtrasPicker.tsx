@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/collapsible";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useCustosExtras } from "@/hooks/useCustosExtras";
+import { chaveIdsCustosExtras } from "@/lib/custosExtras";
 
 function formatCurrency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -23,13 +24,15 @@ function parseNum(val: string): number {
 interface CustosExtrasPickerProps {
   /** Prefixo das chaves de sessão, para cada calculadora lembrar a própria escolha. */
   chave: string;
-  /** Recebe a soma dos custos marcados. */
-  onChange: (total: number) => void;
+  /** Recebe a soma e quais custos estão marcados. Os ids são guardados junto do
+   *  produto, para ele carregar com a mesma embalagem em outra plataforma. */
+  onChange: (total: number, ids: string[]) => void;
 }
+
 
 export const CustosExtrasPicker = ({ chave, onChange }: CustosExtrasPickerProps) => {
   const { custos, carregando, criar, remover } = useCustosExtras();
-  const [marcados, setMarcados] = usePersistedState<string[]>(`${chave}_ids`, []);
+  const [marcados, setMarcados] = usePersistedState<string[]>(chaveIdsCustosExtras(chave), []);
   const [aberto, setAberto] = useState(false);
   const [novoNome, setNovoNome] = useState("");
   const [novoValor, setNovoValor] = useState("");
@@ -41,8 +44,8 @@ export const CustosExtrasPicker = ({ chave, onChange }: CustosExtrasPickerProps)
   // Avisa o pai sempre que o total muda, inclusive quando a lista termina de
   // carregar e os itens marcados passam a ter valor.
   useEffect(() => {
-    onChange(total);
-  }, [total, onChange]);
+    onChange(total, marcados);
+  }, [total, marcados, onChange]);
 
   const alternar = (id: string, marcado: boolean) => {
     setMarcados((prev) => (marcado ? [...prev, id] : prev.filter((x) => x !== id)));

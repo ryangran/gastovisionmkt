@@ -14,6 +14,8 @@ import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import { MargemSlider } from "@/components/MargemSlider";
 import { CustosExtrasPicker } from "@/components/CustosExtrasPicker";
+import { aplicarCustosExtras } from "@/lib/custosExtras";
+import { SeletorProdutoSalvo } from "@/components/SeletorProdutoSalvo";
 import { useTaxas } from "@/components/layout/TaxasProvider";
 import { CHAVE_PLATAFORMA } from "@/lib/transferirProduto";
 import logoHorizontal from "@/assets/logo-horizontal.png";
@@ -50,6 +52,8 @@ function parseNum(val: string): number {
 
 // ─── Calculadora Shopee ────────────────────────────────────────────────────────
 const ShopeeCalculadora = () => {
+  const [custosExtrasIds, setCustosExtrasIds] = useState<string[]>([]);
+  const [versaoCarga, setVersaoCarga] = useState(0);
   const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]   = usePersistedState("calc_shopee_nome", "");
@@ -69,6 +73,7 @@ const ShopeeCalculadora = () => {
 
   const inputs = {
     custosExtras,
+    custosExtrasIds,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -93,11 +98,16 @@ const ShopeeCalculadora = () => {
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Nome do Produto</Label>
-            <Input
-              type="text"
-              placeholder="Ex: Protetor de tomada"
-              value={nomeProduto}
-              onChange={(e) => setNomeProduto(e.target.value)}
+            <SeletorProdutoSalvo
+              nome={nomeProduto}
+              onNome={setNomeProduto}
+              onCarregar={(c) => {
+                setNomeProduto(c.nome);
+                setPrecoVenda(String(c.precoVenda));
+                setCustoProduto(String(c.custo));
+                aplicarCustosExtras("calc_shopee_extras", c.custosExtrasIds);
+                setVersaoCarga((v) => v + 1);
+              }}
             />
           </div>
 
@@ -118,7 +128,11 @@ const ShopeeCalculadora = () => {
             onPreco={(p) => setPrecoVenda(String(p))}
           />
 
-          <CustosExtrasPicker chave="calc_shopee_extras" onChange={setCustosExtras} />
+          <CustosExtrasPicker
+            key={versaoCarga}
+            chave="calc_shopee_extras"
+            onChange={(total, ids) => { setCustosExtras(total); setCustosExtrasIds(ids); }}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -422,6 +436,8 @@ const AMAZON_DBA_ZONAS: { value: AmazonDBAZona; label: string }[] = [
 ];
 
 const AmazonCalculadora = () => {
+  const [custosExtrasIds, setCustosExtrasIds] = useState<string[]>([]);
+  const [versaoCarga, setVersaoCarga] = useState(0);
   const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_amazon_nome", "");
@@ -456,6 +472,7 @@ const AmazonCalculadora = () => {
 
   const inputs = {
     custosExtras,
+    custosExtrasIds,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -486,12 +503,16 @@ const AmazonCalculadora = () => {
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Nome do Produto</Label>
-            <input
-              type="text"
-              placeholder="Ex: Protetor de tomada"
-              value={nomeProduto}
-              onChange={(e) => setNomeProduto(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            <SeletorProdutoSalvo
+              nome={nomeProduto}
+              onNome={setNomeProduto}
+              onCarregar={(c) => {
+                setNomeProduto(c.nome);
+                setPrecoVenda(String(c.precoVenda));
+                setCustoProduto(String(c.custo));
+                aplicarCustosExtras("calc_amazon_extras", c.custosExtrasIds);
+                setVersaoCarga((v) => v + 1);
+              }}
             />
           </div>
 
@@ -654,7 +675,11 @@ const AmazonCalculadora = () => {
             onPreco={(p) => setPrecoVenda(String(p))}
           />
 
-          <CustosExtrasPicker chave="calc_amazon_extras" onChange={setCustosExtras} />
+          <CustosExtrasPicker
+            key={versaoCarga}
+            chave="calc_amazon_extras"
+            onChange={(total, ids) => { setCustosExtras(total); setCustosExtrasIds(ids); }}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -989,6 +1014,8 @@ const AmazonCalculadora = () => {
 
 // ─── Calculadora Magalu ───────────────────────────────────────────────────────
 const MagaluCalculadora = () => {
+  const [custosExtrasIds, setCustosExtrasIds] = useState<string[]>([]);
+  const [versaoCarga, setVersaoCarga] = useState(0);
   const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_magalu_nome", "");
@@ -1024,6 +1051,7 @@ const MagaluCalculadora = () => {
 
   const inputs = {
     custosExtras,
+    custosExtrasIds,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -1058,11 +1086,16 @@ const MagaluCalculadora = () => {
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Nome do Produto</Label>
-            <Input
-              type="text"
-              placeholder="Ex: Protetor de tomada"
-              value={nomeProduto}
-              onChange={(e) => setNomeProduto(e.target.value)}
+            <SeletorProdutoSalvo
+              nome={nomeProduto}
+              onNome={setNomeProduto}
+              onCarregar={(c) => {
+                setNomeProduto(c.nome);
+                setPrecoVenda(String(c.precoVenda));
+                setCustoProduto(String(c.custo));
+                aplicarCustosExtras("calc_magalu_extras", c.custosExtrasIds);
+                setVersaoCarga((v) => v + 1);
+              }}
             />
           </div>
 
@@ -1083,7 +1116,11 @@ const MagaluCalculadora = () => {
             onPreco={(p) => setPrecoVenda(String(p))}
           />
 
-          <CustosExtrasPicker chave="calc_magalu_extras" onChange={setCustosExtras} />
+          <CustosExtrasPicker
+            key={versaoCarga}
+            chave="calc_magalu_extras"
+            onChange={(total, ids) => { setCustosExtras(total); setCustosExtrasIds(ids); }}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -1438,6 +1475,8 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
+  const [custosExtrasIds, setCustosExtrasIds] = useState<string[]>([]);
+  const [versaoCarga, setVersaoCarga] = useState(0);
   const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
@@ -1468,6 +1507,7 @@ const MercadoLivreCalculadora = () => {
   const comissaoPerc   = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
   const inputs = {
     custosExtras,
+    custosExtrasIds,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -1575,11 +1615,16 @@ const MercadoLivreCalculadora = () => {
           {/* Nome do produto */}
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Nome do Produto</Label>
-            <Input
-              type="text"
-              placeholder="Ex: Protetor de tomada"
-              value={nomeProduto}
-              onChange={(e) => setNomeProduto(e.target.value)}
+            <SeletorProdutoSalvo
+              nome={nomeProduto}
+              onNome={setNomeProduto}
+              onCarregar={(c) => {
+                setNomeProduto(c.nome);
+                setPrecoVenda(String(c.precoVenda));
+                setCustoProduto(String(c.custo));
+                aplicarCustosExtras("calc_ml_extras", c.custosExtrasIds);
+                setVersaoCarga((v) => v + 1);
+              }}
             />
           </div>
 
@@ -1658,7 +1703,11 @@ const MercadoLivreCalculadora = () => {
             onPreco={(p) => setPrecoVenda(String(p))}
           />
 
-          <CustosExtrasPicker chave="calc_ml_extras" onChange={setCustosExtras} />
+          <CustosExtrasPicker
+            key={versaoCarga}
+            chave="calc_ml_extras"
+            onChange={(total, ids) => { setCustosExtras(total); setCustosExtrasIds(ids); }}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -1985,6 +2034,8 @@ const MercadoLivreCalculadora = () => {
 // - Preço < R$50: comissão 10% + taxa fixa R$4,00
 // - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
 const TikTokCalculadora = () => {
+  const [custosExtrasIds, setCustosExtrasIds] = useState<string[]>([]);
+  const [versaoCarga, setVersaoCarga] = useState(0);
   const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
@@ -2012,6 +2063,7 @@ const TikTokCalculadora = () => {
 
   const inputs = {
     custosExtras,
+    custosExtrasIds,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -2036,7 +2088,17 @@ const TikTokCalculadora = () => {
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Nome do Produto</Label>
-            <Input type="text" placeholder="Ex: Protetor de tomada" value={nomeProduto} onChange={(e) => setNomeProduto(e.target.value)} />
+            <SeletorProdutoSalvo
+              nome={nomeProduto}
+              onNome={setNomeProduto}
+              onCarregar={(c) => {
+                setNomeProduto(c.nome);
+                setPrecoVenda(String(c.precoVenda));
+                setCustoProduto(String(c.custo));
+                aplicarCustosExtras("calc_tiktok_extras", c.custosExtrasIds);
+                setVersaoCarga((v) => v + 1);
+              }}
+            />
           </div>
 
           <div className="space-y-2">
@@ -2050,7 +2112,11 @@ const TikTokCalculadora = () => {
             onPreco={(p) => setPrecoVenda(String(p))}
           />
 
-          <CustosExtrasPicker chave="calc_tiktok_extras" onChange={setCustosExtras} />
+          <CustosExtrasPicker
+            key={versaoCarga}
+            chave="calc_tiktok_extras"
+            onChange={(total, ids) => { setCustosExtras(total); setCustosExtrasIds(ids); }}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -2285,6 +2351,8 @@ const TikTokCalculadora = () => {
 
 // ─── Calculadora Shein ─────────────────────────────────────────────────────────
 const SheinCalculadora = () => {
+  const [custosExtrasIds, setCustosExtrasIds] = useState<string[]>([]);
+  const [versaoCarga, setVersaoCarga] = useState(0);
   const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
@@ -2311,6 +2379,7 @@ const SheinCalculadora = () => {
 
   const inputs = {
     custosExtras,
+    custosExtrasIds,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -2337,7 +2406,17 @@ const SheinCalculadora = () => {
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Nome do Produto</Label>
-            <Input type="text" placeholder="Ex: Camiseta básica" value={nomeProduto} onChange={(e) => setNomeProduto(e.target.value)} />
+            <SeletorProdutoSalvo
+              nome={nomeProduto}
+              onNome={setNomeProduto}
+              onCarregar={(c) => {
+                setNomeProduto(c.nome);
+                setPrecoVenda(String(c.precoVenda));
+                setCustoProduto(String(c.custo));
+                aplicarCustosExtras("calc_shein_extras", c.custosExtrasIds);
+                setVersaoCarga((v) => v + 1);
+              }}
+            />
           </div>
 
           <div className="space-y-2">
@@ -2351,7 +2430,11 @@ const SheinCalculadora = () => {
             onPreco={(p) => setPrecoVenda(String(p))}
           />
 
-          <CustosExtrasPicker chave="calc_shein_extras" onChange={setCustosExtras} />
+          <CustosExtrasPicker
+            key={versaoCarga}
+            chave="calc_shein_extras"
+            onChange={(total, ids) => { setCustosExtras(total); setCustosExtrasIds(ids); }}
+          />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
