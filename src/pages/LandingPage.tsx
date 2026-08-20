@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
-import { FichaComparativa } from "@/components/landing/FichaComparativa";
+import { FichaMargem } from "@/components/landing/FichaMargem";
 import { VideoFeature } from "@/components/landing/VideoFeature";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
@@ -82,60 +82,114 @@ const LandingPage = () => {
       />
 
       <div className="relative z-10">
-        <nav className="container mx-auto flex items-center justify-between px-4 py-6">
-          <img src={logo} alt="Vetrex" className="hidden h-9 w-auto dark:block" />
-          <img src={logoLight} alt="Vetrex" className="block h-9 w-auto dark:hidden" />
-          <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
-            Já sou aluno
-          </Button>
-        </nav>
+        {/* NAV em pill flutuante */}
+        <header className="relative z-20">
+          <div className="container mx-auto flex items-center justify-between px-4 pt-5">
+            <a href="/" aria-label="Vetrex">
+              <img src={logo} alt="Vetrex" className="hidden h-8 w-auto dark:block" />
+              <img src={logoLight} alt="Vetrex" className="block h-8 w-auto dark:hidden" />
+            </a>
 
-        {/* HERO */}
-        <header className="relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]"
-          />
-          <div className="container relative mx-auto px-4 pb-20 pt-10 lg:pt-16">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55 }}
+            <div className="flex items-center gap-1 rounded-full border border-border bg-card/70 p-1 backdrop-blur">
+              <button
+                onClick={irParaPreco}
+                className="rounded-full px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Badge className="mb-6 border-primary/25 bg-primary/10 text-primary hover:bg-primary/15">
-                  <Zap className="mr-1 h-3 w-3" />
-                  Para quem vende em marketplace
-                </Badge>
-
-                <h1 className="font-display text-3xl font-bold leading-[1.1] text-foreground sm:text-4xl lg:text-[3.25rem]">
-                  O mesmo produto rende{" "}
-                  <span className="text-primary">R$52 na TikTok</span> e{" "}
-                  <span className="text-destructive">R$3 no Magalu</span>.
-                  <br className="hidden sm:block" /> Você sabe em qual está vendendo?
-                </h1>
-
-                <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
-                  Comissão, frete, imposto e taxa fixa mudam em cada plataforma. O Vetrex
-                  calcula os seis lado a lado e mostra onde sobra dinheiro, antes de você
-                  anunciar.
-                </p>
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Button size="lg" onClick={irParaPreco} className="gap-2 px-7 py-6 text-base">
-                    Quero ver onde meu produto lucra mais
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </div>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Leva menos de um minuto para calcular o primeiro produto.
-                </p>
-              </motion.div>
-
-              <FichaComparativa />
+                Preço
+              </button>
+              <button
+                onClick={() => navigate("/auth")}
+                className="rounded-full bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Já sou aluno
+              </button>
             </div>
           </div>
         </header>
+
+        {/* HERO */}
+        <section className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-primary/10 blur-[130px]"
+          />
+          <div className="container relative mx-auto px-4 pb-20 pt-16 lg:pt-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-border bg-card/70 px-2.5 py-1.5 backdrop-blur"
+              >
+                <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
+                  Vetrex
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  A plataforma de quem vende em marketplace
+                </span>
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.08 }}
+                className="font-display text-4xl font-bold leading-[1.08] text-foreground sm:text-5xl lg:text-6xl"
+              >
+                Entre o preço que você cobra
+                <br className="hidden sm:block" /> e o dinheiro que{" "}
+                <span className="text-primary">chega na sua conta</span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.16 }}
+                className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
+              >
+                Tem comissão, frete, imposto, anúncio e embalagem. Cada um cobra de um jeito, e
+                muda por plataforma, por peso e por faixa de preço. A Vetrex controla todos eles
+                num lugar só.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.24 }}
+                className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+              >
+                <Button size="lg" onClick={irParaPreco} className="gap-2 rounded-full px-6 py-6 text-base">
+                  Quero ver quanto sobra pra mim
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+                <button
+                  onClick={() => document.getElementById("como")?.scrollIntoView({ behavior: "smooth" })}
+                  className="rounded-full px-5 py-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Ver como funciona
+                </button>
+              </motion.div>
+            </div>
+
+            <div className="mx-auto mt-14 max-w-xl">
+              <FichaMargem />
+            </div>
+
+            <div className="mx-auto mt-16 max-w-4xl">
+              <p className="text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                Calcula para
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+                {PLATAFORMAS.map((p) => (
+                  <MarketplaceLogo
+                    key={p.key}
+                    platform={p.key}
+                    className="h-6 w-auto max-w-24 opacity-70 transition-opacity hover:opacity-100"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* PROBLEMA */}
         <section className="border-y border-border bg-card/40">
@@ -166,7 +220,7 @@ const LandingPage = () => {
         </section>
 
         {/* FUNCIONALIDADES COM VÍDEO */}
-        <section className="container mx-auto px-4 py-20">
+        <section id="como" className="container mx-auto px-4 py-20">
           <div className="mb-14 max-w-2xl">
             <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
               O que você faz dentro do Vetrex
@@ -297,24 +351,6 @@ const LandingPage = () => {
                 margem de antes e a de depois. Você fica sabendo antes do repasse, não depois.
               </p>
             </div>
-          </div>
-        </section>
-
-        {/* PLATAFORMAS */}
-        <section className="container mx-auto px-4 py-16">
-          <p className="mb-8 text-center font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
-            Funciona em
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {PLATAFORMAS.map((p) => (
-              <div
-                key={p.key}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card px-6 py-4 transition-colors hover:border-primary/40"
-              >
-                <MarketplaceLogo platform={p.key} className="h-6 w-auto max-w-20" />
-                <span className="text-sm font-medium text-foreground">{p.nome}</span>
-              </div>
-            ))}
           </div>
         </section>
 
