@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 import { usePerfil, type Perfil } from "@/hooks/usePerfil";
+import { impostoParaPreencher } from "@/lib/perfil/impostoPadrao";
 
 interface ContextoPerfil {
   perfil: Perfil | null;
@@ -23,10 +24,9 @@ export function usePerfilAtual(): ContextoPerfil {
 /**
  * Preenche o campo de imposto da calculadora com o percentual do perfil.
  *
- * Só age uma vez e só se o campo estiver vazio: quem já digitou um imposto para
- * aquele produto não pode ver o número mudar sozinho enquanto trabalha. Campo
- * com "0" também é resposta — é o caso do MEI — e por isso não é considerado
- * vazio.
+ * Só age uma vez por montagem: quem já digitou um imposto para aquele produto
+ * não pode ver o número mudar sozinho enquanto trabalha. A regra do que
+ * preencher vive em impostoParaPreencher, que é testada.
  */
 export function useImpostoDoPerfil(
   valorAtual: string,
@@ -36,15 +36,16 @@ export function useImpostoDoPerfil(
   const jaAplicou = useRef(false);
 
   useEffect(() => {
-    if (jaAplicou.current || carregando || !perfil) return;
-    if (valorAtual !== "") {
-      // Já havia valor: nada a preencher, e não tentamos de novo.
-      jaAplicou.current = true;
+    if (jaAplicou.current || carregando) return;
+
+    const valor = impostoParaPreencher(valorAtual, perfil);
+    if (valor === null) {
+      // Sem nada a preencher: se o perfil já chegou, não tenta de novo.
+      if (perfil) jaAplicou.current = true;
       return;
     }
-    if (perfil.regime === "nao_informado") return;
 
     jaAplicou.current = true;
-    definir(String(perfil.impostoPercent).replace(".", ","));
+    definir(valor);
   }, [perfil, carregando, valorAtual, definir]);
 }
