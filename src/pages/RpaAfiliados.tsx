@@ -27,6 +27,7 @@ import {
   type MapaColunas,
 } from "@/lib/rpa/planilha";
 import { gerarPdfIndividual, nomeArquivo, type EmpresaRpa } from "@/lib/rpa/pdf";
+import { migrarRascunho } from "@/lib/rpa/rascunho";
 
 function formatCurrency(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -36,7 +37,7 @@ const SEM_COLUNA = "__nenhuma__";
 
 const RpaAfiliados = () => {
   const { empresa: salva, carregando, salvar } = useRpaEmpresa();
-  const [rascunho, setRascunho] = usePersistedState<EmpresaRpa | null>("rpa_rascunho", null);
+  const [rascunho, setRascunho] = usePersistedState<unknown>("rpa_rascunho", null);
   const [salvando, setSalvando] = useState(false);
   /**
    * O que está digitado no campo de ISS. Fica separado do número porque um
@@ -53,9 +54,15 @@ const RpaAfiliados = () => {
   const [gerando, setGerando] = useState(false);
   const inputArquivo = useRef<HTMLInputElement>(null);
 
-  // Rascunhos antigos no storage podem não ter todos os campos: sempre completar.
-  const empresa: EmpresaRpa = { ...EMPRESA_VAZIA, ...(salva ?? {}), ...(rascunho ?? {}) };
-  const temRascunho = rascunho !== null;
+  const rascunhoAtual = migrarRascunho(rascunho);
+  // Espalhar sobre EMPRESA_VAZIA garante todo campo presente, mesmo em rascunho
+  // gravado por uma versão anterior do formulário.
+  const empresa: EmpresaRpa = {
+    ...EMPRESA_VAZIA,
+    ...(salva ?? {}),
+    ...(rascunhoAtual ?? {}),
+  };
+  const temRascunho = rascunhoAtual !== null;
 
   const issExibido =
     issTexto ?? (empresa.issPercent ? String(empresa.issPercent).replace(".", ",") : "");
