@@ -14,6 +14,7 @@ import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import { MargemSlider } from "@/components/MargemSlider";
 import { useTaxas } from "@/components/layout/TaxasProvider";
+import { CHAVE_PLATAFORMA } from "@/lib/transferirProduto";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 import { useNavigate } from "react-router-dom";
@@ -2591,7 +2592,7 @@ const Calculadora = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState("shopee");
+  const [selectedPlatform, setSelectedPlatform] = usePersistedState(CHAVE_PLATAFORMA, "shopee");
   const [isAdminUser, setIsAdminUser] = useState(false);
 
   useEffect(() => {

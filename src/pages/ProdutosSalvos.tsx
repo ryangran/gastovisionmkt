@@ -6,7 +6,18 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Trash2, Calculator, BookmarkPlus } from "lucide-react";
+import { ArrowLeft, Trash2, Calculator, BookmarkPlus, ArrowLeftRight } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { PLATFORM_KEYS, PLATFORM_LABELS } from "@/lib/pricing";
+import type { PlatformKey } from "@/lib/pricing/types";
+import { chaveDaPlataforma } from "@/lib/pricing/recalcular";
+import { aplicarNaSessao, extrairMedidas } from "@/lib/transferirProduto";
 import { Badge } from "@/components/ui/badge";
 
 interface SavedCalc {
@@ -17,6 +28,8 @@ interface SavedCalc {
   cost: number;
   profit_margin_percent: number;
   profit_margin_value: number;
+  stock_quantity: number | null;
+  inputs: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -50,16 +63,64 @@ function formatDate(iso: string): string {
 }
 
 const TableHeader = () => (
-  <div className="hidden md:grid md:grid-cols-[1fr_105px_105px_85px_105px_70px_36px] gap-3 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+  <div className="hidden md:grid md:grid-cols-[1fr_105px_105px_85px_105px_90px_70px_72px] gap-3 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
     <span>Produto</span>
     <span className="text-right">Preço venda</span>
     <span className="text-right">Custo</span>
     <span className="text-right">Margem</span>
     <span className="text-right">Lucro</span>
+    <span className="text-right">Estoque</span>
     <span className="text-right">Data</span>
     <span />
   </div>
 );
+
+/** Leva o produto para a calculadora de outra plataforma, já preenchida. */
+const ReprecificarMenu = ({ p }: { p: SavedCalc }) => {
+  const navigate = useNavigate();
+  const origem = chaveDaPlataforma(p.platform);
+
+  const abrir = (destino: PlatformKey) => {
+    const medidas = extrairMedidas(p.inputs);
+    const imposto = Number((p.inputs as Record<string, unknown> | null)?.impostoPercent);
+    aplicarNaSessao(destino, {
+      nome: p.product_name,
+      precoVenda: p.sale_price,
+      custo: p.cost,
+      impostoPercent: Number.isFinite(imposto) ? imposto : undefined,
+      ...medidas,
+    });
+    navigate("/calculadora");
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-muted-foreground hover:text-primary"
+          aria-label="Calcular este produto em outra plataforma"
+          title="Calcular em outra plataforma"
+        >
+          <ArrowLeftRight className="w-3.5 h-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Calcular em</DropdownMenuLabel>
+        {PLATFORM_KEYS.map((k) => (
+          <DropdownMenuItem key={k} onClick={() => abrir(k)} disabled={k === origem}>
+            <MarketplaceLogo platform={k} className="mr-2 h-3.5 w-auto max-w-10" />
+            {PLATFORM_LABELS[k]}
+            {k === origem && (
+              <span className="ml-auto pl-2 text-xs text-muted-foreground">atual</span>
+            )}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 const ProductRow = ({
   p,
@@ -76,8 +137,8 @@ const ProductRow = ({
       <div
         className={`hidden md:grid gap-3 items-center ${
           showPlatform
-            ? "md:grid-cols-[1fr_120px_105px_105px_85px_105px_70px_36px]"
-            : "md:grid-cols-[1fr_105px_105px_85px_105px_70px_36px]"
+            ? "md:grid-cols-[1fr_120px_105px_105px_85px_105px_90px_70px_72px]"
+            : "md:grid-cols-[1fr_105px_105px_85px_105px_90px_70px_72px]"
         }`}
       >
         <span className="font-medium text-foreground truncate text-sm">
@@ -114,17 +175,32 @@ const ProductRow = ({
         >
           {formatCurrency(p.profit_margin_value)}
         </span>
+        <span className="text-right text-sm text-foreground tabular-nums">
+          {Number(p.stock_quantity) > 0 ? (
+            <>
+              {p.stock_quantity}
+              <span className="block text-[11px] text-muted-foreground">
+                {formatCurrency(Number(p.stock_quantity) * p.cost)}
+              </span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </span>
         <span className="text-right text-xs text-muted-foreground">
           {formatDate(p.created_at)}
         </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-destructive"
-          onClick={() => onDelete(p.id)}
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </Button>
+        <span className="flex items-center justify-end gap-0.5">
+          <ReprecificarMenu p={p} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete(p.id)}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </span>
       </div>
 
       {/* Mobile */}
@@ -154,16 +230,25 @@ const ProductRow = ({
             <span className={`font-semibold ${p.profit_margin_value > 0 ? "text-success" : "text-destructive"}`}>
               Lucro: {formatCurrency(p.profit_margin_value)}
             </span>
+            {Number(p.stock_quantity) > 0 && (
+              <span className="text-xs text-muted-foreground">
+                Estoque: {p.stock_quantity} ·{" "}
+                {formatCurrency(Number(p.stock_quantity) * p.cost)}
+              </span>
+            )}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-          onClick={() => onDelete(p.id)}
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-0.5">
+          <ReprecificarMenu p={p} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete(p.id)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </CardContent>
   </Card>
