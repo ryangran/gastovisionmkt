@@ -11,7 +11,21 @@ troca do espaço reservado para o player sozinho, sem precisar mexer no código.
   perfil.mp4                 bloco 06, regime tributário
   rpa.mp4                    bloco 07, RPA de afiliados
 
+Os sete estão preenchidos. Também existe aqui produtos-salvos.mp4, gravado mas
+sem bloco na página, esperando decisão sobre onde entrar.
+
 Recomendações:
   formato .mp4 (H.264), proporção 16:9
   sem áudio, porque o vídeo toca mudo ao entrar na tela
   até uns 15 segundos e 3 MB por arquivo, para a página não pesar
+
+Para trocar um vídeo, grave a tela e comprima antes de commitar. As gravações
+saem com 20 a 45 MB e caem para menos de meio MB com:
+
+  ffmpeg -y -i entrada.mp4 -an -vf "scale=1280:-2,fps=30" \
+    -c:v libx264 -preset veryfast -crf 30 -profile:v high \
+    -pix_fmt yuv420p -movflags +faststart public/videos/nome.mp4
+
+O -an tira o áudio, o faststart faz o player começar antes de baixar o arquivo
+inteiro e o crf 30 é o que dá a economia. Se algum ficar borrado demais, baixe
+o crf para 26.
