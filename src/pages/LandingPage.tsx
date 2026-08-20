@@ -1,512 +1,438 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
-import { MarketplaceLogo } from "@/components/MarketplaceLogo";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Check,
+  ShieldCheck,
+  Star,
+  TrendingDown,
+  Zap,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
+import { FichaComparativa } from "@/components/landing/FichaComparativa";
+import { VideoFeature } from "@/components/landing/VideoFeature";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
 import avatarAna from "@/assets/avatar-ana.jpg";
 import avatarMarcos from "@/assets/avatar-marcos.jpg";
 import avatarJuliana from "@/assets/avatar-juliana.jpg";
-import avatarRicardo from "@/assets/avatar-ricardo.jpg";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
-import {
-  ShoppingCart,
-  TrendingUp,
-  DollarSign,
-  CheckCircle2,
-  ArrowRight,
-  Zap,
-  Shield,
-  BarChart3,
-  Star,
-  Quote,
-  Users,
-  Clock,
-  Play,
-  ShieldCheck } from
-"lucide-react";
 
-const CHECKOUT_URL_MONTHLY = "https://pay.cakto.com.br/vgi2b7q";
-const CHECKOUT_URL_LIFETIME = "https://pay.cakto.com.br/6m7kaiz_785267";
+const PLATAFORMAS: { key: MarketplaceKey; nome: string }[] = [
+  { key: "shopee", nome: "Shopee" },
+  { key: "mercadolivre", nome: "Mercado Livre" },
+  { key: "amazon", nome: "Amazon" },
+  { key: "magalu", nome: "Magalu" },
+  { key: "tiktok", nome: "TikTok Shop" },
+  { key: "shein", nome: "Shein" },
+];
 
-const features = [
-{
-  icon: ShoppingCart,
-  title: "Multi-plataforma",
-  desc: "Shopee, Mercado Livre, Amazon, Magalu e TikTok em um só lugar"
-},
-{
-  icon: TrendingUp,
-  title: "Margens Precisas",
-  desc: "Cálculo automático com comissões, frete, impostos e marketing"
-},
-{
-  icon: DollarSign,
-  title: "Lucro Real",
-  desc: "Saiba exatamente quanto vai lucrar antes de anunciar"
-},
-{
-  icon: Shield,
-  title: "Sempre Atualizado",
-  desc: "Tabelas de comissão atualizadas conforme as plataformas mudam"
-}];
+const DEPOIMENTOS = [
+  {
+    nome: "Ana Paula S.",
+    papel: "Vendedora na Shopee há 2 anos",
+    texto:
+      "Antes eu chutava o preço e vivia no prejuízo sem saber. Com o Vetrex descobri que estava perdendo R$3 em cada venda. Corrigi em 1 dia.",
+    avatar: avatarAna,
+  },
+  {
+    nome: "Marcos R.",
+    papel: "Seller no Mercado Livre",
+    texto:
+      "Ferramenta simples e certeira. Já calculei mais de 200 produtos e nunca mais tive surpresa com as comissões da plataforma.",
+    avatar: avatarMarcos,
+  },
+  {
+    nome: "Juliana T.",
+    papel: "Loja no TikTok Shop e Amazon",
+    texto:
+      "O que mais gosto é ter tudo em um lugar só. Comparo os lucros lado a lado antes de decidir onde anunciar.",
+    avatar: avatarJuliana,
+  },
+];
 
-
-const testimonials = [
-{
-  name: "Ana Paula S.",
-  role: "Vendedora na Shopee há 2 anos",
-  text: "Antes eu chutava o preço e vivia no prejuízo sem saber. Com o Vetrex descobri que estava perdendo R$3 em cada venda. Corrigi em 1 dia.",
-  rating: 5,
-  avatar: avatarAna
-},
-{
-  name: "Marcos R.",
-  role: "Seller no Mercado Livre",
-  text: "Ferramenta simples e certeira. Já calculei mais de 200 produtos e nunca mais tive surpresa com as comissões da plataforma.",
-  rating: 5,
-  avatar: avatarMarcos
-},
-{
-  name: "Juliana T.",
-  role: "Loja no TikTok Shop e Amazon",
-  text: "O que mais gosto é ter tudo em um lugar só. Shopee, ML, Amazon — comparo os lucros lado a lado antes de decidir onde anunciar.",
-  rating: 5,
-  avatar: avatarJuliana
-},
-{
-  name: "Ricardo L.",
-  role: "Seller na Shopee e Magalu",
-  text: "Eu perdia tempo toda semana atualizando planilha. Agora em 2 minutos sei a margem exata de cada produto em cada plataforma. Indispensável.",
-  rating: 5,
-  avatar: avatarRicardo
-}];
-
-
-const stats = [
-{ value: "500+", label: "Sellers ativos", icon: Users },
-{ value: "R$2M+", label: "Em vendas calculadas", icon: DollarSign },
-{ value: "4.9/5", label: "Avaliação média", icon: Star },
-{ value: "1 min", label: "Para precificar", icon: Clock }];
-
-
-const benefits = [
-"Calculadoras específicas para cada marketplace",
-"Compare o lucro entre plataformas na mesma tela",
-"Inclua impostos e custos de marketing",
-"Tabelas completas de comissão sempre atualizadas",
-"Frete e taxas fixas inclusos no cálculo",
-"Histórico de precificações salvo"];
-
+const INCLUSO = [
+  "Seis calculadoras, uma por marketplace",
+  "Comparador entre as seis",
+  "Precificação reversa por margem",
+  "Calculadora de anúncios com ROAS de equilíbrio",
+  "Painel de estoque e margem da carteira",
+  "Cadastro de embalagem e etiqueta reutilizável",
+  "RPA de afiliados da Shopee em massa",
+  "Perfil com regime tributário",
+  "Atualizações vitalícias, incluindo as taxas",
+];
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(() => {
-    const saved = localStorage.getItem("gv_timer");
-    if (saved) {
-      const remaining = Math.max(0, parseInt(saved, 10) - Math.floor(Date.now() / 1000));
-      return remaining > 0 ? remaining : 0;
-    }
-    const end = Math.floor(Date.now() / 1000) + 300;
-    localStorage.setItem("gv_timer", String(end));
-    return 300;
-  });
-
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const id = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) { clearInterval(id); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [timeLeft > 0]);
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  const timerExpired = timeLeft <= 0;
+  const irParaPreco = () =>
+    document.getElementById("preco")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* Hero */}
-      <section className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="container mx-auto px-4 pt-16 pb-20 relative">
-          {/* Nav */}
-          <nav className="flex justify-center mb-20">
-            <img src={logo} alt="Vetrex" className="h-20 md:h-24 hidden dark:block" />
-            <img src={logoLight} alt="Vetrex" className="h-20 md:h-24 block dark:hidden" />
-          </nav>
+    <div className="min-h-screen overflow-hidden bg-background">
+      {/* Textura de grão, para o preto não ficar chapado */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.035] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        }}
+      />
 
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}>
-              
-              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
-                <Zap className="w-3 h-3 mr-1" />
-                Ferramenta #1 para sellers
-              </Badge>
+      <div className="relative z-10">
+        <nav className="container mx-auto flex items-center justify-between px-4 py-6">
+          <img src={logo} alt="Vetrex" className="hidden h-9 w-auto dark:block" />
+          <img src={logoLight} alt="Vetrex" className="block h-9 w-auto dark:hidden" />
+          <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+            Já sou aluno
+          </Button>
+        </nav>
 
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[2.5rem] font-extrabold text-foreground leading-snug mb-6 max-w-3xl mx-auto">
-                Antes de colocar qualquer produto à venda no marketplace, você precisa saber{" "}
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  exatamente quanto vai lucrar
-                </span>{" "}
-                ou vai trabalhar de graça
-              </h1>
+        {/* HERO */}
+        <header className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]"
+          />
+          <div className="container relative mx-auto px-4 pb-20 pt-10 lg:pt-16">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55 }}
+              >
+                <Badge className="mb-6 border-primary/25 bg-primary/10 text-primary hover:bg-primary/15">
+                  <Zap className="mr-1 h-3 w-3" />
+                  Para quem vende em marketplace
+                </Badge>
 
-              <p className="text-sm md:text-base text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-                Vender no marketplace parece simples. Mas entre o preço que você cobra e o que chega na sua conta, a plataforma desconta comissão, frete, imposto e taxas — cada uma do seu jeito, com regras que mudam o tempo todo.
-              </p>
+                <h1 className="font-display text-3xl font-bold leading-[1.1] text-foreground sm:text-4xl lg:text-[3.25rem]">
+                  O mesmo produto rende{" "}
+                  <span className="text-primary">R$52 na TikTok</span> e{" "}
+                  <span className="text-destructive">R$3 no Magalu</span>.
+                  <br className="hidden sm:block" /> Você sabe em qual está vendendo?
+                </h1>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="text-base md:text-lg px-8 py-6 gap-2 shadow-lg shadow-primary/20"
-                  onClick={() =>
-                  document.
-                  getElementById("pricing")?.
-                  scrollIntoView({ behavior: "smooth" })
-                  }>
-                  
-                  Quero Calcular Meu Lucro Agora
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base md:text-lg px-8 py-6"
-                  onClick={() => navigate("/auth")}>
-                  
-                  Já sou aluno
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+                <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
+                  Comissão, frete, imposto e taxa fixa mudam em cada plataforma. O Vetrex
+                  calcula os seis lado a lado e mostra onde sobra dinheiro, antes de você
+                  anunciar.
+                </p>
 
-      {/* Video Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              Veja como funciona em 1 minuto
-            </h2>
-          </div>
-          <div className="max-w-[800px] mx-auto">
-            <video
-              className="w-full aspect-video rounded-2xl border bg-card"
-              controls
-              preload="metadata"
-              poster=""
-            >
-              <source src="/demo-video.mp4" type="video/mp4" />
-            </video>
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              Precifique qualquer produto em menos de 60 segundos
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-y bg-card/50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, i) =>
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="flex flex-col items-center gap-2 p-6 rounded-2xl bg-card border">
-              
-                <stat.icon className="w-6 h-6 text-primary mb-1" />
-                <span className="text-3xl md:text-4xl font-extrabold text-foreground">{stat.value}</span>
-                <span className="text-sm text-muted-foreground font-medium">{stat.label}</span>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Button size="lg" onClick={irParaPreco} className="gap-2 px-7 py-6 text-base">
+                    Quero ver onde meu produto lucra mais
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Leva menos de um minuto para calcular o primeiro produto.
+                </p>
               </motion.div>
-            )}
-          </div>
-        </div>
-      </section>
 
-      {/* Problem Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              O erro que faz sellers{" "}
-              <span className="text-primary">perderem dinheiro</span> sem saber
-            </h2>
-            <div className="text-muted-foreground text-left space-y-4 text-base leading-relaxed">
-              <p>Não importa se você está colocando seu primeiro produto à venda ou se já tem centenas de SKUs rodando: precificar no chute é o caminho mais curto para trabalhar de graça.</p>
-              <p>Cada marketplace tem sua própria fórmula de cobrança. A Shopee cobra diferente da Magalu. A Amazon cobra diferente do TikTok. E as tabelas mudam — às vezes sem aviso prévio.</p>
-              <p>Uma planilha genérica não sabe que a Shopee mudou a comissão da sua categoria. Ela não calcula o subsídio de frete do Mercado Livre. Ela não desconta o custo de anúncio interno da Amazon.</p>
-              <p>Em vez de uma fórmula genérica, cada calculadora do Vetrex foi construída para uma plataforma específica — com as taxas reais e atualizadas. Você entra com preço de venda, custo do produto e imposto. Em 60 segundos sabe exatamente quanto vai lucrar — antes de anunciar.</p>
+              <FichaComparativa />
             </div>
           </div>
-        </div>
-      </section>
+        </header>
 
-      {/* Features */}
-      <section id="features" className="py-20 bg-card/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Tudo que você precisa para{" "}
-              <span className="text-primary">precificar com lucro</span>
+        {/* PROBLEMA */}
+        <section className="border-y border-border bg-card/40">
+          <div className="container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:py-20">
+            <div>
+              <h2 className="font-display text-2xl font-bold leading-tight text-foreground sm:text-3xl">
+                O problema não é falta de conta.
+                <br />É falta de tabela.
+              </h2>
+            </div>
+            <div className="space-y-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p>
+                Quase todo seller já montou uma planilha. O problema não é a matemática, é a
+                fonte dos números.
+              </p>
+              <p>
+                A comissão da Shopee muda por faixa de preço. O frete do Magalu muda por faixa
+                de peso e por nível de desconto. A Amazon cobra por categoria, e o frete depende
+                de FBA, FBA Onsite ou DBA, e ainda da zona de entrega. O Mercado Livre tem custo
+                fixo que some acima de R$79. A Shein cobra por peso cubado, que não é o peso da
+                balança.
+              </p>
+              <p className="border-l-2 border-primary pl-4 text-foreground">
+                Sua planilha tem um número. A plataforma tem uma tabela.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FUNCIONALIDADES COM VÍDEO */}
+        <section className="container mx-auto px-4 py-20">
+          <div className="mb-14 max-w-2xl">
+            <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+              O que você faz dentro do Vetrex
             </h2>
+            <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+              Cada bloco abaixo mostra a tela funcionando de verdade.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) =>
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow">
-              
-                <div className="p-3 rounded-xl bg-primary/10 w-fit mb-4">
-                  <f.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {f.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">{f.desc}</p>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </section>
+          <div className="space-y-20 lg:space-y-24">
+            <VideoFeature
+              numero="01"
+              titulo="Uma calculadora por marketplace, com a regra daquele marketplace"
+              descricao={
+                <p>
+                  Shopee, Mercado Livre, Amazon, Magalu, TikTok Shop e Shein. Cada uma com as
+                  faixas de comissão, tabela de frete e taxa fixa que a plataforma usa de
+                  verdade. Você entra com custo, preço e peso. Em segundos sabe o que sobra.
+                </p>
+              }
+              video="/videos/calculadora.mp4"
+            />
 
-      {/* Platforms */}
-      <section className="py-20 bg-card/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Plataformas Suportadas
-            </h2>
+            <VideoFeature
+              numero="02"
+              titulo="O comparador"
+              invertido
+              descricao={
+                <p>
+                  Um formulário, seis resultados lado a lado, ordenados por lucro. Cada linha
+                  mostra a premissa usada, porque comparação que esconde a premissa engana. Foi
+                  assim que apareceu a diferença do começo desta página.
+                </p>
+              }
+              destaque="R$49 de diferença por unidade no mesmo produto."
+              video="/videos/comparador.mp4"
+            />
+
+            <VideoFeature
+              numero="03"
+              titulo="Precificação reversa"
+              descricao={
+                <>
+                  <p>
+                    Você não chuta mais. Arrasta a barra até a margem que quer, de 0 a 50%, e o
+                    preço aparece.
+                  </p>
+                  <p>
+                    Com custo de R$40 na Shopee, 15% de margem dá R$77,20. E 20% dá R$96,56,
+                    porque entre R$80 e R$96 a comissão muda de faixa e não existe preço nesse
+                    intervalo que entregue 20%. Uma planilha comum não enxerga esse degrau.
+                  </p>
+                </>
+              }
+              video="/videos/precificacao-reversa.mp4"
+            />
+
+            <VideoFeature
+              numero="04"
+              titulo="Calculadora de anúncios"
+              invertido
+              descricao={
+                <p>
+                  Margem de 20% significa ROAS de equilíbrio 5. Abaixo disso o anúncio come o
+                  lucro inteiro. O Vetrex mostra o teto de ACOS do produto, pergunta se você
+                  quer girar estoque ou lucrar mais, e diz o ROAS para mirar em cada caso.
+                </p>
+              }
+              destaque="Campanha em ROAS 4,1 com margem de 20% tira 4,39 pontos do seu bolso por venda."
+              video="/videos/ads.mp4"
+            />
+
+            <VideoFeature
+              numero="05"
+              titulo="Painel do seu estoque"
+              descricao={
+                <p>
+                  Cada produto salvo guarda a quantidade em estoque. O painel soma quanto
+                  dinheiro está parado, quanto vale se vender tudo e quanto sobra de lucro. Os
+                  produtos aparecem ordenados do pior para o melhor, para o problema aparecer
+                  primeiro.
+                </p>
+              }
+              video="/videos/dashboard.mp4"
+            />
+
+            <VideoFeature
+              numero="06"
+              titulo="Imposto do seu regime, não um chute"
+              invertido
+              descricao={
+                <p>
+                  Você escolhe entre MEI, Simples Nacional, Lucro Presumido ou pessoa física. No
+                  Simples, informa o anexo e o faturamento de 12 meses e o sistema calcula a
+                  alíquota efetiva pela fórmula oficial.
+                </p>
+              }
+              destaque="Com R$300 mil no Anexo I dá 5,32%, não os 7,3% da tabela."
+              video="/videos/perfil.mp4"
+            />
+
+            <VideoFeature
+              numero="07"
+              titulo="RPA de afiliados da Shopee"
+              descricao={
+                <p>
+                  Sobe o relatório mensal, sai um recibo por afiliado em PDF, com INSS e IRRF
+                  calculados. Quem trabalha com o Programa de Afiliados sabe o tempo que isso
+                  toma na mão.
+                </p>
+              }
+              video="/videos/rpa.mp4"
+            />
           </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            {([
-              { name: "Shopee", platform: "shopee" },
-              { name: "Mercado Livre", platform: "mercadolivre" },
-              { name: "Amazon", platform: "amazon" },
-              { name: "Magalu", platform: "magalu" },
-              { name: "TikTok", platform: "tiktok" },
-              { name: "Shein", platform: "shein" },
-            ] as const).map((p) => (
+        </section>
+
+        {/* TAXA MUDA */}
+        <section className="border-y border-border bg-card/40">
+          <div className="container mx-auto px-4 py-16 lg:py-20">
+            <div className="mx-auto max-w-3xl text-center">
+              <TrendingDown className="mx-auto mb-5 h-8 w-8 text-primary" />
+              <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+                Quando a taxa muda, seus produtos mudam junto
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                As taxas ficam no sistema, não no seu arquivo. Quando um marketplace altera uma
+                regra, os produtos que você salvou são recalculados e você recebe o aviso com a
+                margem de antes e a de depois. Você fica sabendo antes do repasse, não depois.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* PLATAFORMAS */}
+        <section className="container mx-auto px-4 py-16">
+          <p className="mb-8 text-center font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            Funciona em
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {PLATAFORMAS.map((p) => (
               <div
-                key={p.name}
-                className="flex items-center gap-3 px-8 py-4 rounded-2xl border bg-card text-foreground font-semibold text-lg hover:border-primary/50 transition-colors">
-                <MarketplaceLogo platform={p.platform} className="h-8 w-auto max-w-28" />
-                {p.name}
+                key={p.key}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card px-6 py-4 transition-colors hover:border-primary/40"
+              >
+                <MarketplaceLogo platform={p.key} className="h-6 w-auto max-w-20" />
+                <span className="text-sm font-medium text-foreground">{p.nome}</span>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Testimonials */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              O que nossos <span className="text-primary">sellers dizem</span>
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Iniciantes e experientes usando o Vetrex para nunca mais precificar no chute
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {testimonials.map((t, i) =>
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="relative p-6 rounded-2xl border bg-card hover:shadow-lg transition-shadow">
-              
-                <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
-                <div className="flex gap-1 mb-3">
-                  {[...Array(t.rating)].map((_, j) =>
-                <Star key={j} className="w-4 h-4 text-primary fill-primary" />
-                )}
+        {/* DEPOIMENTOS */}
+        <section className="container mx-auto px-4 py-16">
+          <div className="grid gap-5 md:grid-cols-3">
+            {DEPOIMENTOS.map((d, i) => (
+              <motion.figure
+                key={d.nome}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: i * 0.1 }}
+                className="rounded-xl border border-border bg-card p-6"
+              >
+                <div className="mb-3 flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <Star key={s} className="h-3.5 w-3.5 fill-primary text-primary" />
+                  ))}
                 </div>
-                <p className="text-foreground mb-4 text-sm leading-relaxed">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover" loading="lazy" width={40} height={40} />
-                  <div>
-                    <p className="text-foreground font-semibold text-sm">{t.name}</p>
-                    <p className="text-muted-foreground text-xs">{t.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                <blockquote className="text-sm leading-relaxed text-foreground">
+                  {d.texto}
+                </blockquote>
+                <figcaption className="mt-5 flex items-center gap-3">
+                  <img src={d.avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium text-foreground">
+                      {d.nome}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {d.papel}
+                    </span>
+                  </span>
+                </figcaption>
+              </motion.figure>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Benefits */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                O que está incluso
-              </h2>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {benefits.map((b) =>
+        {/* PREÇO */}
+        <section id="preco" className="container mx-auto px-4 py-20">
+          <div className="mx-auto max-w-lg">
+            <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-card">
               <div
-                key={b}
-                className="flex items-center gap-3 p-4 rounded-xl border bg-card">
-                
-                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
-                  <span className="text-foreground font-medium">{b}</span>
+                aria-hidden
+                className="pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
+              />
+              <div className="relative p-8">
+                <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
+                  Acesso completo
+                </p>
+
+                <div className="mt-5 flex items-end gap-3">
+                  <span className="text-sm text-muted-foreground line-through">R$197,00</span>
+                  <span className="font-display text-5xl font-bold leading-none text-foreground">
+                    R$97
+                  </span>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+                <p className="mt-2 text-sm text-primary">
+                  Pagamento único. Sem mensalidade.
+                </p>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Escolha seu plano
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Descubra o lucro real de cada produto antes de anunciar
-            </p>
+                <ul className="mt-7 space-y-2.5">
+                  {INCLUSO.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
 
-            {/* Countdown Timer */}
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="w-full flex items-center justify-center gap-4 md:gap-6 px-4 py-4 rounded-2xl border border-destructive/30 bg-destructive/5 mb-10"
-          >
-            <p className="text-sm font-semibold text-destructive flex items-center gap-2 shrink-0">
-              <Zap className="w-4 h-4" />
-              {timerExpired ? "O tempo acabou! Mas ainda dá tempo..." : "🔥 Oferta expira em:"}
-            </p>
-            <div className="flex items-center gap-1">
-              <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
-                {String(minutes).padStart(2, "0")}
-              </span>
-              <span className="text-xl font-bold text-muted-foreground">:</span>
-              <span className={`text-3xl md:text-4xl font-mono font-extrabold tabular-nums ${timerExpired ? "text-muted-foreground" : timeLeft < 60 ? "text-destructive animate-pulse" : "text-foreground"}`}>
-                {String(seconds).padStart(2, "0")}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground shrink-0 hidden sm:block">
-              {timerExpired ? "Garanta seu acesso agora antes que o preço suba" : "Garanta o melhor preço antes que acabe"}
-            </p>
-          </motion.div>
+                <Button
+                  size="lg"
+                  className="mt-8 w-full gap-2 py-6 text-base"
+                  onClick={() => navigate("/auth")}
+                >
+                  Quero ver onde meu produto lucra mais
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Mensal */}
-            <div className="p-8 rounded-3xl border bg-card text-center">
-              <h3 className="text-lg font-semibold text-foreground mb-1">Mensal</h3>
-              <p className="text-sm text-muted-foreground mb-6">Cancele quando quiser</p>
-              <div className="mb-6">
-                <div className="text-4xl font-extrabold text-foreground">
-                  R$<span className="text-primary">19</span>
-                  <span className="text-lg font-normal text-muted-foreground">,90/mês</span>
+                <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    <span className="text-foreground">Garantia de 7 dias.</span> Entra, calcula
+                    seus produtos, e se não encontrar dinheiro que estava escapando, devolvemos.
+                    Sem burocracia.
+                  </p>
                 </div>
               </div>
-              <ul className="text-sm text-muted-foreground space-y-3 mb-8 text-left">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Todas as calculadoras</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Atualizações inclusas</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Suporte por email</li>
-              </ul>
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full text-base py-6"
-                onClick={() => window.open(CHECKOUT_URL_MONTHLY, "_blank")}>
-                
-                Assinar Mensal
-              </Button>
-            </div>
-
-            {/* Vitalício - Destaque */}
-            <div className="relative p-8 rounded-3xl border-2 border-primary bg-gradient-to-br from-primary/5 via-card to-accent/5 text-center shadow-lg shadow-primary/10">
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground border-0 px-4 py-1">
-                ⭐ Mais Popular
-              </Badge>
-              <h3 className="text-lg font-semibold text-foreground mb-1">Vitalício</h3>
-              <p className="text-sm text-muted-foreground mb-6">Pague uma vez, use para sempre</p>
-              <div className="mb-6">
-                <div className="text-sm text-muted-foreground line-through">De R$197,00</div>
-                <div className="text-5xl font-extrabold text-foreground">
-                  R$<span className="text-primary">97</span>
-                  <span className="text-lg font-normal text-muted-foreground">,00</span>
-                </div>
-                <p className="text-sm font-semibold mt-1 text-primary">⚡ Oferta por tempo limitado</p>
-                <div className="text-sm text-primary font-medium mt-1">Pagamento único</div>
-              </div>
-              <ul className="text-sm text-muted-foreground space-y-3 mb-8 text-left">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Todas as calculadoras</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Atualizações vitalícias</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Suporte prioritário</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Economia de R$141/ano</li>
-              </ul>
-              <Button
-                size="lg"
-                className="w-full text-base py-6 gap-2 shadow-lg shadow-primary/20"
-                onClick={() => window.open(CHECKOUT_URL_LIFETIME, "_blank")}>
-                
-                Garantir Acesso Vitalício
-                <ArrowRight className="w-5 h-5" />
-              </Button>
             </div>
           </div>
+        </section>
 
-          <p className="text-xs text-muted-foreground text-center mt-6">
-            Pagamento seguro via Cakto • Acesso imediato após confirmação
-          </p>
+        {/* P.S. */}
+        <section className="border-t border-border">
+          <div className="container mx-auto max-w-3xl px-4 py-14">
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              <span className="text-foreground">P.S.</span> Se você está começando, o Vetrex
+              evita o erro que a maioria comete na primeira semana: colocar preço olhando o
+              concorrente, sem saber o que a plataforma desconta. Se você já vende, ele confirma
+              se o que você calcula está certo, e mostra os produtos da sua lista que estão
+              saindo no prejuízo agora.
+            </p>
+          </div>
+        </section>
 
-          <div className="flex items-center justify-center gap-2 mt-6">
-            <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+        <footer className="border-t border-border">
+          <div className="container mx-auto flex flex-col items-center gap-3 px-4 py-8 text-center">
+            <img src={logo} alt="Vetrex" className="hidden h-7 w-auto dark:block" />
+            <img src={logoLight} alt="Vetrex" className="block h-7 w-auto dark:hidden" />
             <p className="text-xs text-muted-foreground">
-              Garantia de 7 dias — Se não gostar, devolvemos 100% do valor. Sem perguntas.
+              © {new Date().getFullYear()} Vetrex. Todos os direitos reservados.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* P.S. Section */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-            P.S. — Se você está começando, o Vetrex evita o erro que a maioria dos sellers comete na primeira semana. Se você já vende, ele confirma se o que você está calculando está certo. De qualquer forma, o teste é sem risco: 7 dias de garantia, sem burocracia.
-          </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Vetrex. Todos os direitos reservados.</p>
-        </div>
-      </footer>
-    </div>);
-
+        </footer>
+      </div>
+    </div>
+  );
 };
 
 export default LandingPage;

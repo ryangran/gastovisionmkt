@@ -1,0 +1,17 @@
+Vídeos de demonstração da landing page.
+
+Solte os arquivos aqui com estes nomes exatos. O bloco correspondente na página
+troca do espaço reservado para o player sozinho, sem precisar mexer no código.
+
+  calculadora.mp4            bloco 01, uma calculadora por marketplace
+  comparador.mp4             bloco 02, o comparador
+  precificacao-reversa.mp4   bloco 03, slider de margem
+  ads.mp4                    bloco 04, ROAS de equilíbrio
+  dashboard.mp4              bloco 05, painel de estoque
+  perfil.mp4                 bloco 06, regime tributário
+  rpa.mp4                    bloco 07, RPA de afiliados
+
+Recomendações:
+  formato .mp4 (H.264), proporção 16:9
+  sem áudio, porque o vídeo toca mudo ao entrar na tela
+  até uns 15 segundos e 3 MB por arquivo, para a página não pesar
