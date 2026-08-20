@@ -3,7 +3,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { EmpresaRpa } from "@/lib/rpa/pdf";
 
-export type SlotEmpresa = 1 | 2;
+/**
+ * A tabela guarda um `slot` por questão de histórico; o sistema usa sempre o 1.
+ * Cada usuário tem uma empresa, garantida pelo índice único (user_email, slot).
+ */
+const SLOT = 1;
 
 export const EMPRESA_VAZIA: EmpresaRpa = {
   razaoSocial: "",
@@ -21,10 +25,10 @@ export const EMPRESA_VAZIA: EmpresaRpa = {
   issPercent: 0,
 };
 
-interface EstadoEmpresas {
-  empresas: Record<SlotEmpresa, EmpresaRpa | null>;
+interface EstadoEmpresa {
+  empresa: EmpresaRpa | null;
   carregando: boolean;
-  salvar: (slot: SlotEmpresa, empresa: EmpresaRpa) => Promise<boolean>;
+  salvar: (empresa: EmpresaRpa) => Promise<boolean>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,11 +49,8 @@ function daLinha(l: any): EmpresaRpa {
   };
 }
 
-export function useRpaEmpresas(): EstadoEmpresas {
-  const [empresas, setEmpresas] = useState<Record<SlotEmpresa, EmpresaRpa | null>>({
-    1: null,
-    2: null,
-  });
+export function useRpaEmpresa(): EstadoEmpresa {
+  const [empresa, setEmpresa] = useState<EmpresaRpa | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   const buscar = useCallback(async () => {
@@ -63,17 +64,14 @@ export function useRpaEmpresas(): EstadoEmpresas {
     const { data, error } = await (supabase as any)
       .from("rpa_empresas")
       .select("*")
-      .eq("user_email", session.user.email);
+      .eq("user_email", session.user.email)
+      .eq("slot", SLOT)
+      .maybeSingle();
 
     if (error) {
       console.error("Erro ao carregar dados da empresa:", error);
-    } else {
-      const novas: Record<SlotEmpresa, EmpresaRpa | null> = { 1: null, 2: null };
-      for (const linha of (data ?? []) as Array<Record<string, unknown>>) {
-        const slot = Number(linha.slot) === 2 ? 2 : 1;
-        novas[slot] = daLinha(linha);
-      }
-      setEmpresas(novas);
+    } else if (data) {
+      setEmpresa(daLinha(data));
     }
     setCarregando(false);
   }, []);
@@ -82,8 +80,8 @@ export function useRpaEmpresas(): EstadoEmpresas {
     void buscar();
   }, [buscar]);
 
-  const salvar = async (slot: SlotEmpresa, empresa: EmpresaRpa): Promise<boolean> => {
-    if (!empresa.razaoSocial.trim() || !empresa.cnpj.trim()) {
+  const salvar = async (dados: EmpresaRpa): Promise<boolean> => {
+    if (!dados.razaoSocial.trim() || !dados.cnpj.trim()) {
       toast.error("Razão social e CNPJ são obrigatórios.");
       return false;
     }
@@ -98,19 +96,19 @@ export function useRpaEmpresas(): EstadoEmpresas {
     const { error } = await (supabase as any).from("rpa_empresas").upsert(
       {
         user_email: session.user.email,
-        slot,
-        razao_social: empresa.razaoSocial.trim(),
-        cnpj: empresa.cnpj.trim(),
-        endereco: empresa.endereco.trim(),
-        municipio: empresa.municipio.trim(),
-        uf: empresa.uf.trim().toUpperCase(),
-        cep: empresa.cep.trim(),
-        inscricao_estadual: empresa.inscricaoEstadual.trim(),
-        descricao_servico: empresa.descricaoServico.trim(),
-        reter_inss: empresa.reterInss,
-        reter_irrf: empresa.reterIrrf,
-        reter_iss: empresa.reterIss,
-        iss_percent: empresa.issPercent,
+        slot: SLOT,
+        razao_social: dados.razaoSocial.trim(),
+        cnpj: dados.cnpj.trim(),
+        endereco: dados.endereco.trim(),
+        municipio: dados.municipio.trim(),
+        uf: dados.uf.trim().toUpperCase(),
+        cep: dados.cep.trim(),
+        inscricao_estadual: dados.inscricaoEstadual.trim(),
+        descricao_servico: dados.descricaoServico.trim(),
+        reter_inss: dados.reterInss,
+        reter_irrf: dados.reterIrrf,
+        reter_iss: dados.reterIss,
+        iss_percent: dados.issPercent,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_email,slot" },
@@ -122,10 +120,10 @@ export function useRpaEmpresas(): EstadoEmpresas {
       return false;
     }
 
-    setEmpresas((prev) => ({ ...prev, [slot]: empresa }));
-    toast.success(`Dados da Empresa ${slot} salvos.`);
+    setEmpresa(dados);
+    toast.success("Dados da empresa salvos.");
     return true;
   };
 
-  return { empresas, carregando, salvar };
+  return { empresa, carregando, salvar };
 }

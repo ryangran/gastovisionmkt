@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { useRpaEmpresas, EMPRESA_VAZIA, type SlotEmpresa } from "@/hooks/useRpaEmpresas";
+import { useRpaEmpresa, EMPRESA_VAZIA } from "@/hooks/useRpaEmpresas";
 import { INSS_TETO, TABELA_VIGENCIA } from "@/lib/rpa/impostos";
 import {
   CAMPOS_RPA,
@@ -35,12 +35,8 @@ function formatCurrency(value: number): string {
 const SEM_COLUNA = "__nenhuma__";
 
 const RpaAfiliados = () => {
-  const { empresas, carregando, salvar } = useRpaEmpresas();
-  const [slot, setSlot] = usePersistedState<SlotEmpresa>("rpa_slot", 1);
-  const [rascunho, setRascunho] = usePersistedState<Record<string, EmpresaRpa>>(
-    "rpa_rascunho",
-    {},
-  );
+  const { empresa: salva, carregando, salvar } = useRpaEmpresa();
+  const [rascunho, setRascunho] = usePersistedState<EmpresaRpa | null>("rpa_rascunho", null);
   const [salvando, setSalvando] = useState(false);
   /**
    * O que está digitado no campo de ISS. Fica separado do número porque um
@@ -57,36 +53,23 @@ const RpaAfiliados = () => {
   const [gerando, setGerando] = useState(false);
   const inputArquivo = useRef<HTMLInputElement>(null);
 
-  const salva = empresas[slot];
-  const empresa = rascunho[String(slot)] ?? salva ?? EMPRESA_VAZIA;
-  const temRascunho = Boolean(rascunho[String(slot)]);
+  const empresa = rascunho ?? salva ?? EMPRESA_VAZIA;
+  const temRascunho = rascunho !== null;
 
   const issExibido =
     issTexto ?? (empresa.issPercent ? String(empresa.issPercent).replace(".", ",") : "");
 
-  const trocarSlot = (s: SlotEmpresa) => {
-    setSlot(s);
-    setIssTexto(null);
-  };
-
   const editar = (mudanca: Partial<EmpresaRpa>) => {
-    setRascunho((prev) => ({
-      ...prev,
-      [String(slot)]: { ...empresa, ...mudanca },
-    }));
+    setRascunho({ ...empresa, ...mudanca });
   };
 
   const gravar = async () => {
     setSalvando(true);
-    const ok = await salvar(slot, empresa);
+    const ok = await salvar(empresa);
     setSalvando(false);
     if (ok) {
       setIssTexto(null);
-      setRascunho((prev) => {
-        const copia = { ...prev };
-        delete copia[String(slot)];
-        return copia;
-      });
+      setRascunho(null);
     }
   };
 
@@ -169,27 +152,10 @@ const RpaAfiliados = () => {
       <div className="space-y-6">
         <Card className="border-border bg-card">
           <CardHeader>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Building2 className="h-4 w-4 text-primary" />
-                1. Dados da empresa (tomador dos serviços)
-              </CardTitle>
-              <div className="flex rounded-lg border border-border p-0.5">
-                {([1, 2] as SlotEmpresa[]).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => trocarSlot(s)}
-                    className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-                      slot === s
-                        ? "bg-primary text-primary-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Empresa {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Building2 className="h-4 w-4 text-primary" />
+              1. Dados da empresa (tomador dos serviços)
+            </CardTitle>
             <p className="text-xs text-muted-foreground">
               Ficam salvos no seu perfil e são reutilizados nas próximas gerações.
             </p>
