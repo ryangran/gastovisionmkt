@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
+import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useTaxas } from "@/components/layout/TaxasProvider";
 import { calcular, PLATFORM_KEYS, PLATFORM_LABELS, type PlatformKey } from "@/lib/pricing";
@@ -30,6 +31,8 @@ function parseNum(val: string): number {
 interface Linha {
   key: PlatformKey;
   resultado: PricingResult;
+  /** As entradas exatas usadas, guardadas junto do produto ao salvar. */
+  inputs: Record<string, unknown>;
   premissa: string;
   /** true quando a linha depende de um número que o lojista ainda não confirmou. */
   premissaIncerta: boolean;
@@ -38,6 +41,7 @@ interface Linha {
 const Comparador = () => {
   const taxas = useTaxas();
   // Entradas comuns às seis plataformas
+  const [nomeProduto, setNomeProduto] = usePersistedState("comp_nome", "");
   const [precoVenda, setPrecoVenda] = usePersistedState("comp_preco", "");
   const [custoProduto, setCustoProduto] = usePersistedState("comp_custo", "");
   const [imposto, setImposto] = usePersistedState("comp_imposto", "");
@@ -80,27 +84,30 @@ const Comparador = () => {
 
     const construir = (key: PlatformKey): Linha => {
       switch (key) {
-        case "shopee":
+        case "shopee": {
+          const inputs = { ...base, usarSubsidioPix: subsidioPix };
           return {
             key,
-            resultado: calcular("shopee", { ...base, usarSubsidioPix: subsidioPix }, taxas.shopee),
+            inputs,
+            resultado: calcular("shopee", inputs, taxas.shopee),
             premissa: subsidioPix ? "Com subsídio Pix" : "Sem subsídio Pix",
             premissaIncerta: false,
           };
+        }
         case "mercadolivre": {
           const frac = mlComissaoPerc / 100;
+          const inputs = {
+            ...base,
+            tipoAnuncio: "classico" as const,
+            produto: "Comparador",
+            categorias: [{ nome: "Comparador", classicoPerc: frac, premiumPerc: frac }],
+            pesoKg,
+            usarFrete: mlFrete,
+          };
           return {
             key,
-            resultado: calcular("mercadolivre", {
-              ...base,
-              tipoAnuncio: "classico",
-              produto: "Comparador",
-              categorias: [
-                { nome: "Comparador", classicoPerc: frac, premiumPerc: frac },
-              ],
-              pesoKg,
-              usarFrete: mlFrete,
-            }, taxas.mercadolivre),
+            inputs,
+            resultado: calcular("mercadolivre", inputs, taxas.mercadolivre),
             premissa:
               mlComissaoPerc > 0
                 ? `Comissão ${mlComissaoPerc}% (informada por você)`
@@ -108,63 +115,69 @@ const Comparador = () => {
             premissaIncerta: mlComissaoPerc <= 0,
           };
         }
-        case "amazon":
+        case "amazon": {
+          const inputs = {
+            ...base,
+            categoria: amzCategoria,
+            modelo: amzModelo,
+            dbaZona: amzZona,
+            pesoKg,
+            alturaCm: alt,
+            larguraCm: larg,
+            comprimentoCm: comp,
+          };
           return {
             key,
-            resultado: calcular("amazon", {
-              ...base,
-              categoria: amzCategoria,
-              modelo: amzModelo,
-              dbaZona: amzZona,
-              pesoKg,
-              alturaCm: alt,
-              larguraCm: larg,
-              comprimentoCm: comp,
-            }, taxas.amazon),
+            inputs,
+            resultado: calcular("amazon", inputs, taxas.amazon),
             premissa: `${amzCategoria} · ${amzModelo.toUpperCase().replace("_", " ")}`,
             premissaIncerta: false,
           };
-        case "magalu":
+        }
+        case "magalu": {
+          const inputs = {
+            ...base,
+            tipoProduto: magTipo,
+            descontoFrete: magDesconto,
+            pesoKg,
+            comprimento: comp,
+            largura: larg,
+            altura: alt,
+            taxaFixa: 0,
+            usarFrete: true,
+          };
           return {
             key,
-            resultado: calcular("magalu", {
-              ...base,
-              tipoProduto: magTipo,
-              descontoFrete: magDesconto,
-              pesoKg,
-              comprimento: comp,
-              largura: larg,
-              altura: alt,
-              taxaFixa: 0,
-              usarFrete: true,
-            }, taxas.magalu),
+            inputs,
+            resultado: calcular("magalu", inputs, taxas.magalu),
             premissa: `${magTipo === "leves" ? "Leves" : "Pesados"} · sem taxa fixa`,
             premissaIncerta: false,
           };
-        case "tiktok":
+        }
+        case "tiktok": {
+          const inputs = {
+            ...base,
+            freteGratis: tkFreteGratis,
+            incentivoComissao: tkIncentivo,
+          };
           return {
             key,
-            resultado: calcular("tiktok", {
-              ...base,
-              freteGratis: tkFreteGratis,
-              incentivoComissao: tkIncentivo,
-            }, taxas.tiktok),
+            inputs,
+            resultado: calcular("tiktok", inputs, taxas.tiktok),
             premissa: tkIncentivo ? "Com incentivo de comissão" : "Comissão padrão",
             premissaIncerta: false,
           };
-        case "shein":
+        }
+        case "shein": {
+          const inputs = { ...base, pesoKg, comprimento: comp, largura: larg, altura: alt };
           return {
             key,
-            resultado: calcular("shein", {
-              ...base,
-              pesoKg,
-              comprimento: comp,
-              largura: larg,
-              altura: alt,
-            }, taxas.shein),
+            inputs,
+            resultado: calcular("shein", inputs, taxas.shein),
             premissa: pesoKg > 1.5 ? "Acima de 1,5 kg: frete estimado" : "Frete por faixa de peso",
             premissaIncerta: pesoKg > 1.5,
           };
+        }
       }
     };
 
@@ -196,6 +209,12 @@ const Comparador = () => {
               <CardTitle className="text-base">Produto</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="comp-nome">Nome do produto</Label>
+                <Input id="comp-nome" value={nomeProduto}
+                  onChange={(e) => setNomeProduto(e.target.value)}
+                  placeholder="Ex.: Fone Bluetooth TWS" />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="comp-preco">Preço de venda (R$)</Label>
@@ -375,12 +394,15 @@ const Comparador = () => {
                   <thead>
                     <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                       <th className="px-2 py-2.5 text-left font-medium">Marketplace</th>
-                      <th className="px-2 py-2.5 text-right font-medium">Comissão</th>
-                      <th className="px-2 py-2.5 text-right font-medium">Frete</th>
-                      <th className="px-2 py-2.5 text-right font-medium">Imposto</th>
-                      <th className="px-2 py-2.5 text-right font-medium">Receita líq.</th>
-                      <th className="px-2 py-2.5 text-right font-medium">Lucro</th>
-                      <th className="px-2 py-2.5 text-right font-medium">Margem</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">Comissão</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">Frete</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">Imposto</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">Receita líq.</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">Lucro</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">Margem</th>
+                      <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">
+                        <span className="sr-only">Salvar</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -412,23 +434,32 @@ const Comparador = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-2 py-3 text-right font-mono text-muted-foreground">
+                          <td className="whitespace-nowrap px-2 py-3 text-right font-mono text-muted-foreground">
                             {formatCurrency(r.valorComissao)}
                           </td>
-                          <td className="px-2 py-3 text-right font-mono text-muted-foreground">
+                          <td className="whitespace-nowrap px-2 py-3 text-right font-mono text-muted-foreground">
                             {formatCurrency(r.valorFrete)}
                           </td>
-                          <td className="px-2 py-3 text-right font-mono text-muted-foreground">
+                          <td className="whitespace-nowrap px-2 py-3 text-right font-mono text-muted-foreground">
                             {formatCurrency(r.valorImposto)}
                           </td>
-                          <td className="px-2 py-3 text-right font-mono text-foreground">
+                          <td className="whitespace-nowrap px-2 py-3 text-right font-mono text-foreground">
                             {formatCurrency(r.receitaLiquida)}
                           </td>
-                          <td className={`px-2 py-3 text-right font-mono font-semibold ${cor}`}>
+                          <td className={`whitespace-nowrap px-2 py-3 text-right font-mono font-semibold ${cor}`}>
                             {formatCurrency(r.lucro)}
                           </td>
-                          <td className={`px-2 py-3 text-right font-mono ${cor}`}>
+                          <td className={`whitespace-nowrap px-2 py-3 text-right font-mono ${cor}`}>
                             {r.margemPercent.toFixed(1)}%
+                          </td>
+                          <td className="px-2 py-3 text-right">
+                            <SalvarProdutoDialog
+                              compacto
+                              platform={PLATFORM_LABELS[l.key]}
+                              inputs={l.inputs}
+                              resultado={r}
+                              nomeInicial={nomeProduto}
+                            />
                           </td>
                         </tr>
                       );
@@ -439,6 +470,7 @@ const Comparador = () => {
                 <p className="mt-4 text-xs text-muted-foreground">
                   A coluna abaixo de cada marketplace mostra a premissa usada. Marketplaces
                   cobram por regras diferentes, então comparação sem premissa explícita engana.
+                  Use o ícone à direita para salvar o produto na plataforma que compensar.
                 </p>
               </div>
             )}

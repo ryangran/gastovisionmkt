@@ -27,6 +27,8 @@ interface SalvarProdutoDialogProps {
   resultado: PricingResult;
   nomeInicial: string;
   disabled?: boolean;
+  /** Só o ícone, para caber numa linha de tabela. */
+  compacto?: boolean;
 }
 
 export const SalvarProdutoDialog = ({
@@ -35,6 +37,7 @@ export const SalvarProdutoDialog = ({
   resultado,
   nomeInicial,
   disabled,
+  compacto,
 }: SalvarProdutoDialogProps) => {
   const { saveCalculation } = useSavedCalculations();
   const [aberto, setAberto] = useState(false);
@@ -74,10 +77,23 @@ export const SalvarProdutoDialog = ({
   return (
     <Dialog open={aberto} onOpenChange={abrir}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2 shrink-0" disabled={disabled}>
-          <BookmarkPlus className="w-4 h-4" />
-          Salvar produto
-        </Button>
+        {compacto ? (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+            disabled={disabled}
+            aria-label={`Salvar este produto em ${platform}`}
+            title={`Salvar em ${platform}`}
+          >
+            <BookmarkPlus className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button size="sm" className="gap-2 shrink-0" disabled={disabled}>
+            <BookmarkPlus className="w-4 h-4" />
+            Salvar produto
+          </Button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
