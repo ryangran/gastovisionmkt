@@ -99,7 +99,7 @@ const RpaAfiliados = () => {
   const afiliados: Afiliado[] = resultado.afiliados;
 
   const faltando = CAMPOS_RPA.filter((c) => c.obrigatorio && !mapa[c.chave]);
-  const empresaPronta = Boolean(empresa.razaoSocial.trim() && empresa.cnpj.trim());
+  const empresaPronta = Boolean(empresa.razaoSocial?.trim() && empresa.cnpj?.trim());
   const podeGerar =
     afiliados.length > 0 && faltando.length === 0 && empresaPronta && !gerando;
 
