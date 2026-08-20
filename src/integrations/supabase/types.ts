@@ -313,6 +313,45 @@ export type Database = {
           },
         ]
       }
+      perfis: {
+        Row: {
+          foto_url: string | null
+          imposto_percent: number
+          nome: string
+          nome_loja: string
+          regime_tributario: string
+          simples_anexo: string | null
+          simples_rbt12: number | null
+          telefone: string
+          updated_at: string
+          user_email: string
+        }
+        Insert: {
+          foto_url?: string | null
+          imposto_percent?: number
+          nome?: string
+          nome_loja?: string
+          regime_tributario?: string
+          simples_anexo?: string | null
+          simples_rbt12?: number | null
+          telefone?: string
+          updated_at?: string
+          user_email: string
+        }
+        Update: {
+          foto_url?: string | null
+          imposto_percent?: number
+          nome?: string
+          nome_loja?: string
+          regime_tributario?: string
+          simples_anexo?: string | null
+          simples_rbt12?: number | null
+          telefone?: string
+          updated_at?: string
+          user_email?: string
+        }
+        Relationships: []
+      }
       platform_costs: {
         Row: {
           ad_type: string | null
