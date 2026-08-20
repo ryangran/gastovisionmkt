@@ -89,7 +89,9 @@ export function calcularRpa({
   const baseIrrf = centavos(valorBruto - inss);
   const irrf = reterIrrf ? calcularIrrf(baseIrrf) : 0;
 
-  const aliquotaIss = Number.isFinite(issPercent) && issPercent > 0 ? issPercent : 0;
+  // Number(): o valor pode chegar como texto vindo do banco ou do formulário.
+  const issInformado = Number(issPercent);
+  const aliquotaIss = Number.isFinite(issInformado) && issInformado > 0 ? issInformado : 0;
   const iss = centavos(valorBruto * (aliquotaIss / 100));
 
   const liquido = Math.max(0, centavos(valorBruto - inss - irrf - iss));

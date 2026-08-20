@@ -24,6 +24,20 @@ export interface LinhaValor {
   total?: boolean;
 }
 
+/**
+ * Formata percentual no padrão brasileiro.
+ *
+ * O Number() não é redundante: o tipo diz number, mas o valor pode chegar como
+ * texto (o Supabase devolve NUMERIC como string). E String.toLocaleString
+ * devolve a string intocada, o que imprimia "3.96%" num documento fiscal.
+ */
+function percentual(valor: number): string {
+  const n = Number(valor);
+  return `${(Number.isFinite(n) ? n : 0).toLocaleString("pt-BR", {
+    maximumFractionDigits: 4,
+  })}%`;
+}
+
 function moeda(valor: number): string {
   return `R$ ${valor.toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
@@ -54,10 +68,10 @@ export function montarLinhasValores(r: ResultadoRpa, empresa: EmpresaRpa): Linha
       valor: r.irrf,
     });
   }
-  if (empresa.reterIss && empresa.issPercent > 0) {
+  if (empresa.reterIss && Number(empresa.issPercent) > 0) {
     linhas.push({
       descricao: "(-) ISS",
-      aliquota: `${empresa.issPercent.toLocaleString("pt-BR")}%`,
+      aliquota: percentual(empresa.issPercent),
       valor: r.iss,
     });
   }

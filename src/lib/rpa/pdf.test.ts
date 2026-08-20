@@ -54,6 +54,32 @@ describe("montarLinhasValores", () => {
   });
 });
 
+describe("formato da alíquota de ISS", () => {
+  it("usa vírgula decimal, como manda documento fiscal brasileiro", () => {
+    const comIss = { ...empresa, reterIss: true, issPercent: 3.96 };
+    const r = calcularRpa({ bruto: 0.53, reterInss: true, reterIrrf: true, issPercent: 3.96 });
+    const iss = montarLinhasValores(r, comIss).find((l) => l.descricao === "(-) ISS");
+    expect(iss?.aliquota).toBe("3,96%");
+  });
+
+  it("formata certo mesmo quando o valor chega como texto do banco", () => {
+    // NUMERIC do Postgres volta como string em alguns casos, e
+    // String.toLocaleString devolveria "3.96" sem formatar.
+    const comIss = { ...empresa, reterIss: true, issPercent: "3.96" as unknown as number };
+    const r = calcularRpa({ bruto: 0.53, reterInss: true, reterIrrf: true, issPercent: 3.96 });
+    const iss = montarLinhasValores(r, comIss).find((l) => l.descricao === "(-) ISS");
+    expect(iss?.aliquota).toBe("3,96%");
+  });
+
+  it("reproduz o recibo de R$0,53 com ISS de 3,96%", () => {
+    const r = calcularRpa({ bruto: 0.53, reterInss: true, reterIrrf: true, issPercent: 3.96 });
+    expect(r.inss).toBeCloseTo(0.06, 2);
+    expect(r.irrf).toBe(0);
+    expect(r.iss).toBeCloseTo(0.02, 2);
+    expect(r.liquido).toBeCloseTo(0.45, 2);
+  });
+});
+
 describe("numeroRecibo", () => {
   it("é estável para o mesmo afiliado no mesmo mês", () => {
     expect(numeroRecibo(agnes, "Julho de 2026")).toBe(numeroRecibo(agnes, "Julho de 2026"));
