@@ -15,6 +15,8 @@ export default {
     extend: {
       fontFamily: {
         display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],
+        // Usada pelo responsive-hero-banner
+        "instrument-serif": ['"Instrument Serif"', "Georgia", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -70,6 +72,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        // Do CSS que acompanha o responsive-hero-banner
+        fadeSlideIn: {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
         "accordion-down": {
           from: {
             height: "0",
@@ -106,6 +113,10 @@ export default {
         },
       },
       animation: {
+        "fade-slide-in-1": "fadeSlideIn 0.6s ease-out 0.05s both",
+        "fade-slide-in-2": "fadeSlideIn 0.6s ease-out 0.15s both",
+        "fade-slide-in-3": "fadeSlideIn 0.6s ease-out 0.25s both",
+        "fade-slide-in-4": "fadeSlideIn 0.6s ease-out 0.35s both",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "spin-slow": "spin-slow 20s linear infinite",

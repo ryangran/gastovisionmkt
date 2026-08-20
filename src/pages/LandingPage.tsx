@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
-import { FichaMargem } from "@/components/landing/FichaMargem";
+import ResponsiveHeroBanner from "@/components/ui/responsive-hero-banner";
 import { VideoFeature } from "@/components/landing/VideoFeature";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
@@ -82,114 +82,35 @@ const LandingPage = () => {
       />
 
       <div className="relative z-10">
-        {/* NAV em pill flutuante */}
-        <header className="relative z-20">
-          <div className="container mx-auto flex items-center justify-between px-4 pt-5">
-            <a href="/" aria-label="Vetrex">
-              <img src={logo} alt="Vetrex" className="hidden h-8 w-auto dark:block" />
-              <img src={logoLight} alt="Vetrex" className="block h-8 w-auto dark:hidden" />
-            </a>
-
-            <div className="flex items-center gap-1 rounded-full border border-border bg-card/70 p-1 backdrop-blur">
-              <button
-                onClick={irParaPreco}
-                className="rounded-full px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Preço
-              </button>
-              <button
-                onClick={() => navigate("/auth")}
-                className="rounded-full bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                Já sou aluno
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* HERO */}
-        <section className="relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-primary/10 blur-[130px]"
-          />
-          <div className="container relative mx-auto px-4 pb-20 pt-16 lg:pt-24">
-            <div className="mx-auto max-w-3xl text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-border bg-card/70 px-2.5 py-1.5 backdrop-blur"
-              >
-                <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
-                  Vetrex
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  A plataforma de quem vende em marketplace
-                </span>
-              </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.08 }}
-                className="font-display text-4xl font-bold leading-[1.08] text-foreground sm:text-5xl lg:text-6xl"
-              >
-                Entre o preço que você cobra
-                <br className="hidden sm:block" /> e o dinheiro que{" "}
-                <span className="text-primary">chega na sua conta</span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.16 }}
-                className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
-              >
-                Tem comissão, frete, imposto, anúncio e embalagem. Cada um cobra de um jeito, e
-                muda por plataforma, por peso e por faixa de preço. A Vetrex controla todos eles
-                num lugar só.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.24 }}
-                className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
-              >
-                <Button size="lg" onClick={irParaPreco} className="gap-2 rounded-full px-6 py-6 text-base">
-                  Quero ver quanto sobra pra mim
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-                <button
-                  onClick={() => document.getElementById("como")?.scrollIntoView({ behavior: "smooth" })}
-                  className="rounded-full px-5 py-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Ver como funciona
-                </button>
-              </motion.div>
-            </div>
-
-            <div className="mx-auto mt-14 max-w-xl">
-              <FichaMargem />
-            </div>
-
-            <div className="mx-auto mt-16 max-w-4xl">
-              <p className="text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-                Calcula para
-              </p>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
-                {PLATAFORMAS.map((p) => (
-                  <MarketplaceLogo
-                    key={p.key}
-                    platform={p.key}
-                    className="h-6 w-auto max-w-24 opacity-70 transition-opacity hover:opacity-100"
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <ResponsiveHeroBanner
+          logoUrl={logo}
+          backgroundImageUrl="/hero-bg.jpg"
+          navLinks={[
+            { label: "Como funciona", href: "#como", isActive: true },
+            { label: "Marketplaces", href: "#como" },
+            { label: "Depoimentos", href: "#depoimentos" },
+            { label: "Preço", href: "#preco" },
+          ]}
+          ctaButtonText="Já sou aluno"
+          ctaButtonHref="/auth"
+          badgeLabel="Vetrex"
+          badgeText="A plataforma de quem vende em marketplace"
+          title="Entre o preço que você cobra"
+          titleLine2="e o dinheiro que chega na sua conta"
+          description="Tem comissão, frete, imposto, anúncio e embalagem. Cada um cobra de um jeito, e muda por plataforma, por peso e por faixa de preço. A Vetrex controla todos eles num lugar só."
+          primaryButtonText="Quero ver quanto sobra pra mim"
+          primaryButtonHref="#preco"
+          secondaryButtonText="Ver como funciona"
+          secondaryButtonHref="#como"
+          partnersTitle="Calcula com as taxas reais de cada plataforma"
+          partners={[
+            { logoUrl: "/marketplaces/shopee.png", href: "#como" },
+            { logoUrl: "/marketplaces/mercadolivre.png", href: "#como" },
+            { logoUrl: "/marketplaces/amazon.png", href: "#como" },
+            { logoUrl: "/marketplaces/magalu.png", href: "#como" },
+            { logoUrl: "/marketplaces/tiktok.png", href: "#como" },
+          ]}
+        />
 
         {/* PROBLEMA */}
         <section className="border-y border-border bg-card/40">
@@ -355,7 +276,7 @@ const LandingPage = () => {
         </section>
 
         {/* DEPOIMENTOS */}
-        <section className="container mx-auto px-4 py-16">
+        <section id="depoimentos" className="container mx-auto px-4 py-16">
           <div className="grid gap-5 md:grid-cols-3">
             {DEPOIMENTOS.map((d, i) => (
               <motion.figure
