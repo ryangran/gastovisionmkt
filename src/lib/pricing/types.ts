@@ -29,6 +29,12 @@ export interface BaseInput {
   custoProduto: number;
   impostoPercent: number;
   marketingPercent: number;
+  /**
+   * Embalagem, etiqueta e afins. Entra como linha própria no resultado, e não
+   * somado ao custo do produto, para o lojista enxergar quanto a embalagem
+   * consome da margem.
+   */
+  custosExtras?: number;
 }
 
 export interface PricingResult {
@@ -38,6 +44,7 @@ export interface PricingResult {
   valorImposto: number;
   valorMarketing: number;
   valorFrete: number;
+  custosExtras: number;
   subsidio: number;
   receitaLiquida: number;
   lucro: number;
@@ -55,6 +62,7 @@ export const RESULTADO_VAZIO: PricingResult = {
   valorImposto: 0,
   valorMarketing: 0,
   valorFrete: 0,
+  custosExtras: 0,
   subsidio: 0,
   receitaLiquida: 0,
   lucro: 0,

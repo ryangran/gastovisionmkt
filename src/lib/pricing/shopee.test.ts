@@ -61,6 +61,29 @@ describe("calcularShopee", () => {
     expect(r.lucro).toBeLessThan(0);
   });
 
+  it("desconta embalagem e etiqueta sem misturar com o custo do produto", () => {
+    const semExtras = calcularShopee({ ...base, precoVenda: 100 });
+    const comExtras = calcularShopee({ ...base, precoVenda: 100, custosExtras: 2.5 });
+
+    expect(comExtras.custosExtras).toBeCloseTo(2.5, 2);
+    // O custo do produto segue sendo só o produto: a embalagem é linha à parte.
+    expect(comExtras.custoProduto).toBeCloseTo(semExtras.custoProduto, 2);
+    expect(comExtras.lucro).toBeCloseTo(semExtras.lucro - 2.5, 2);
+    expect(comExtras.margemPercent).toBeCloseTo(semExtras.margemPercent - 2.5, 2);
+  });
+
+  it("mostra a embalagem como linha própria no detalhamento", () => {
+    const r = calcularShopee({ ...base, precoVenda: 100, custosExtras: 2.5 });
+    const linha = r.detalhes.find((l) => l.label === "Embalagem e etiqueta");
+    expect(linha?.valor).toBeCloseTo(2.5, 2);
+  });
+
+  it("omite a linha de embalagem quando não há custo extra", () => {
+    const r = calcularShopee({ ...base, precoVenda: 100 });
+    expect(r.detalhes.some((l) => l.label === "Embalagem e etiqueta")).toBe(false);
+    expect(r.custosExtras).toBe(0);
+  });
+
   it("devolve resultado zerado quando o preço é zero", () => {
     const r = calcularShopee({ ...base, precoVenda: 0, custoProduto: 0 });
     expect(r.margemPercent).toBe(0);

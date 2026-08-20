@@ -40,6 +40,8 @@ export function calcularShopee(
   const { precoVenda: preco, custoProduto: custo, impostoPercent, marketingPercent } = input;
   if (preco <= 0) return { ...RESULTADO_VAZIO, custoProduto: custo };
 
+  const extras = input.custosExtras ?? 0;
+
   const faixa = faixaShopee(preco, taxas);
   const valorComissao = preco * faixa.percentual + taxaFixaShopee(faixa, preco);
   const valorImposto = preco * (impostoPercent / 100);
@@ -47,7 +49,7 @@ export function calcularShopee(
   const subsidio = input.usarSubsidioPix ? preco * faixa.subsidioPix : 0;
 
   const receitaLiquida = preco + subsidio - valorComissao - valorImposto - valorMarketing;
-  const lucro = receitaLiquida - custo;
+  const lucro = receitaLiquida - custo - extras;
 
   const detalhes: LinhaDetalhe[] = [
     { label: "Preço de venda", valor: preco, credito: true },
@@ -55,6 +57,7 @@ export function calcularShopee(
     { label: "Imposto", valor: valorImposto },
     { label: "Marketing", valor: valorMarketing },
     { label: "Subsídio Pix", valor: subsidio, credito: true },
+    { label: "Embalagem e etiqueta", valor: extras },
     { label: "Custo do produto", valor: custo },
   ].filter((l) => l.valor !== 0);
 
@@ -65,6 +68,7 @@ export function calcularShopee(
     valorImposto,
     valorMarketing,
     valorFrete: 0,
+    custosExtras: extras,
     subsidio,
     receitaLiquida,
     lucro,

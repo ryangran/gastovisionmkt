@@ -13,6 +13,7 @@ import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXA
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
 import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import { MargemSlider } from "@/components/MargemSlider";
+import { CustosExtrasPicker } from "@/components/CustosExtrasPicker";
 import { useTaxas } from "@/components/layout/TaxasProvider";
 import { CHAVE_PLATAFORMA } from "@/lib/transferirProduto";
 import logoHorizontal from "@/assets/logo-horizontal.png";
@@ -49,6 +50,7 @@ function parseNum(val: string): number {
 
 // ─── Calculadora Shopee ────────────────────────────────────────────────────────
 const ShopeeCalculadora = () => {
+  const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]   = usePersistedState("calc_shopee_nome", "");
   const [precoVenda, setPrecoVenda]     = usePersistedState("calc_shopee_preco", "");
@@ -66,6 +68,7 @@ const ShopeeCalculadora = () => {
   const comissao = preco > 0 ? faixaShopee(preco) : null;
 
   const inputs = {
+    custosExtras,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -114,6 +117,8 @@ const ShopeeCalculadora = () => {
             inputs={inputs}
             onPreco={(p) => setPrecoVenda(String(p))}
           />
+
+          <CustosExtrasPicker chave="calc_shopee_extras" onChange={setCustosExtras} />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -417,6 +422,7 @@ const AMAZON_DBA_ZONAS: { value: AmazonDBAZona; label: string }[] = [
 ];
 
 const AmazonCalculadora = () => {
+  const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_amazon_nome", "");
   const [categoriaNome, setCategoriaNome]   = usePersistedState("calc_amazon_cat", AMAZON_TAXAS.categorias[0].nome);
@@ -449,6 +455,7 @@ const AmazonCalculadora = () => {
   const dbaFreteInfo      = modelo === "dba" && preco > 0 ? freteDBA(pesoFinalFBA, preco, dbaZona) : null;
 
   const inputs = {
+    custosExtras,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -646,6 +653,8 @@ const AmazonCalculadora = () => {
             inputs={inputs}
             onPreco={(p) => setPrecoVenda(String(p))}
           />
+
+          <CustosExtrasPicker chave="calc_amazon_extras" onChange={setCustosExtras} />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -980,6 +989,7 @@ const AmazonCalculadora = () => {
 
 // ─── Calculadora Magalu ───────────────────────────────────────────────────────
 const MagaluCalculadora = () => {
+  const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]         = usePersistedState("calc_magalu_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_magalu_preco", "");
@@ -1013,6 +1023,7 @@ const MagaluCalculadora = () => {
   const valorTaxaFixa  = parseNum(taxaFixa);
 
   const inputs = {
+    custosExtras,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -1071,6 +1082,8 @@ const MagaluCalculadora = () => {
             inputs={inputs}
             onPreco={(p) => setPrecoVenda(String(p))}
           />
+
+          <CustosExtrasPicker chave="calc_magalu_extras" onChange={setCustosExtras} />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -1425,6 +1438,7 @@ const ML_FAIXA_PRECO_LABELS = [
 ];
 
 const MercadoLivreCalculadora = () => {
+  const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [mlCategorias, setMlCategorias] = usePersistedState<MLProduto[]>("calc_ml_categorias", ML_PRODUTOS_DEFAULT);
   const [nomeProduto, setNomeProduto] = usePersistedState("calc_ml_nome", "");
@@ -1453,6 +1467,7 @@ const MercadoLivreCalculadora = () => {
 
   const comissaoPerc   = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
   const inputs = {
+    custosExtras,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -1642,6 +1657,8 @@ const MercadoLivreCalculadora = () => {
             inputs={inputs}
             onPreco={(p) => setPrecoVenda(String(p))}
           />
+
+          <CustosExtrasPicker chave="calc_ml_extras" onChange={setCustosExtras} />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -1968,6 +1985,7 @@ const MercadoLivreCalculadora = () => {
 // - Preço < R$50: comissão 10% + taxa fixa R$4,00
 // - Preço ≥ R$50: comissão 6%  + taxa fixa R$6,00
 const TikTokCalculadora = () => {
+  const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_tiktok_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_tiktok_preco", "");
@@ -1993,6 +2011,7 @@ const TikTokCalculadora = () => {
   const valorTaxaFixa  = preco > 0 ? TIKTOK_TAXA_FIXA : 0;
 
   const inputs = {
+    custosExtras,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -2030,6 +2049,8 @@ const TikTokCalculadora = () => {
             inputs={inputs}
             onPreco={(p) => setPrecoVenda(String(p))}
           />
+
+          <CustosExtrasPicker chave="calc_tiktok_extras" onChange={setCustosExtras} />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>
@@ -2264,6 +2285,7 @@ const TikTokCalculadora = () => {
 
 // ─── Calculadora Shein ─────────────────────────────────────────────────────────
 const SheinCalculadora = () => {
+  const [custosExtras, setCustosExtras] = useState(0);
   const taxas = useTaxas();
   const [nomeProduto, setNomeProduto]       = usePersistedState("calc_shein_nome", "");
   const [precoVenda, setPrecoVenda]         = usePersistedState("calc_shein_preco", "");
@@ -2288,6 +2310,7 @@ const SheinCalculadora = () => {
   const freteInfo      = calcularFreteShein(pesoKg, comp, larg, alt);
 
   const inputs = {
+    custosExtras,
     precoVenda: preco,
     custoProduto: custo,
     impostoPercent: impostoPerc,
@@ -2327,6 +2350,8 @@ const SheinCalculadora = () => {
             inputs={inputs}
             onPreco={(p) => setPrecoVenda(String(p))}
           />
+
+          <CustosExtrasPicker chave="calc_shein_extras" onChange={setCustosExtras} />
 
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Custo do Produto (R$)</Label>

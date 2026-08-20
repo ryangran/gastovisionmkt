@@ -305,6 +305,8 @@ export function calcularAmazon(
 
   if (preco <= 0) return { ...RESULTADO_VAZIO, custoProduto: custo };
 
+  const extras = input.custosExtras ?? 0;
+
   const categoria = buscarCategoriaAmazon(categoriaNome, taxas);
 
   const pesoCubado = alturaCm > 0 && larguraCm > 0 && comprimentoCm > 0
@@ -326,7 +328,7 @@ export function calcularAmazon(
   const valorMarketing = preco * (marketingPercent / 100);
 
   const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete;
-  const lucro = receitaLiquida - custo;
+  const lucro = receitaLiquida - custo - extras;
 
   const rotuloFrete = modelo === "dba" ? "DBA" : modelo === "fba" ? "FBA" : "FBA Onsite";
 
@@ -336,6 +338,7 @@ export function calcularAmazon(
     { label: `Frete ${rotuloFrete}`, valor: valorFrete },
     { label: "Imposto", valor: valorImposto },
     { label: "Marketing", valor: valorMarketing },
+    { label: "Embalagem e etiqueta", valor: extras },
     { label: "Custo do produto", valor: custo },
   ].filter((l) => l.valor !== 0);
 
@@ -346,6 +349,7 @@ export function calcularAmazon(
     valorImposto,
     valorMarketing,
     valorFrete,
+    custosExtras: extras,
     subsidio: 0,
     receitaLiquida,
     lucro,

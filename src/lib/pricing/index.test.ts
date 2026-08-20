@@ -72,6 +72,18 @@ describe("registro de calculadoras", () => {
     }
   });
 
+  it("desconta custos extras em todas as plataformas", () => {
+    for (const key of PLATFORM_KEYS) {
+      const base = { ...BASE, ...INPUT_MINIMO[key], precoVenda: 150, custoProduto: 50 };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sem = calcular(key, base as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const com = calcular(key, { ...base, custosExtras: 3 } as any);
+      expect(com.custosExtras, key).toBeCloseTo(3, 2);
+      expect(com.lucro, key).toBeCloseTo(sem.lucro - 3, 2);
+    }
+  });
+
   it("devolve lucro e margem coerentes entre si em todas as plataformas", () => {
     for (const key of PLATFORM_KEYS) {
       const input = { ...BASE, ...INPUT_MINIMO[key], precoVenda: 150, custoProduto: 50 };

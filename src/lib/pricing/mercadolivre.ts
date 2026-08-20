@@ -158,6 +158,8 @@ export function calcularMercadoLivre(
 
   if (preco <= 0) return { ...RESULTADO_VAZIO, custoProduto: custo };
 
+  const extras = input.custosExtras ?? 0;
+
   const produto = categorias.find((p) => p.nome === produtoNome) ?? categorias[0] ?? null;
   const comissaoPerc = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
 
@@ -171,7 +173,7 @@ export function calcularMercadoLivre(
   const valorFrete = usarFrete && pesoKg > 0 ? freteMercadoLivre(preco, pesoKg, taxas) : 0;
 
   const receitaLiquida = preco - valorComissao - valorImposto - valorMarketing - valorFrete;
-  const lucro = receitaLiquida - custo;
+  const lucro = receitaLiquida - custo - extras;
 
   const detalhes: LinhaDetalhe[] = [
     { label: "Preço de venda", valor: preco, credito: true },
@@ -180,6 +182,7 @@ export function calcularMercadoLivre(
     { label: "Frete", valor: valorFrete },
     { label: "Imposto", valor: valorImposto },
     { label: "Marketing", valor: valorMarketing },
+    { label: "Embalagem e etiqueta", valor: extras },
     { label: "Custo do produto", valor: custo },
   ].filter((l) => l.valor !== 0);
 
@@ -190,6 +193,7 @@ export function calcularMercadoLivre(
     valorImposto,
     valorMarketing,
     valorFrete,
+    custosExtras: extras,
     subsidio: 0,
     receitaLiquida,
     lucro,
