@@ -204,6 +204,30 @@ export type Database = {
           },
         ]
       }
+      custos_extras: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          user_email: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          user_email: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          user_email?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       decision_history: {
         Row: {
           action_type: string
