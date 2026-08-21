@@ -25,9 +25,8 @@ import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 import { useNavigate } from "react-router-dom";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, ShoppingBag, LogOut, Plus, Trash2, Sun, Moon, Shield, BookmarkPlus } from "lucide-react";
+import { Calculator, ShoppingBag, Plus, Trash2, Sun, Moon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { UserProfileDialog } from "@/components/UserProfileDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -2709,7 +2708,6 @@ const Calculadora = () => {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = usePersistedState(CHAVE_PLATAFORMA, "shopee");
-  const [isAdminUser, setIsAdminUser] = useState(false);
 
   // Agora qualquer pessoa cadastrada entra. O que separa quem paga de quem
   // não paga é o PortaoCalculadora abaixo e o ExigePlano nas outras rotas,
@@ -2726,21 +2724,11 @@ const Calculadora = () => {
       setAuthorized(true);
       setLoading(false);
 
-      const { data: ehAdmin } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "admin",
-      });
-      if (ativo) setIsAdminUser(Boolean(ehAdmin));
     })();
     return () => {
       ativo = false;
     };
   }, [navigate]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
 
   if (loading && !authorized) {
     return (
@@ -2767,22 +2755,6 @@ const Calculadora = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <div className="md:hidden">
-                <UserProfileDialog />
-              </div>
-              {isAdminUser && (
-                <Button variant="outline" size="sm" onClick={() => navigate("/admin-panel")} className="gap-2">
-                  <Shield className="w-4 h-4" />
-                  <span className="hidden sm:inline">Admin</span>
-                </Button>
-              )}
-              <Button variant="outline" size="sm" onClick={() => navigate("/produtos-salvos")} className="gap-2 md:hidden">
-                <BookmarkPlus className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 md:hidden">
-                <LogOut className="w-4 h-4" />
-                Sair
-              </Button>
             </div>
           </div>
         </div>
@@ -2819,24 +2791,6 @@ const Calculadora = () => {
               <TabsTrigger value="shein" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2.5 border border-border bg-card transition-all text-sm"><MarketplaceLogo platform="shein" className="h-4 w-auto max-w-12 mr-2" /> Shein</TabsTrigger>
             </TabsList>
 
-            {/* Perfil e Sair fixo no rodapé */}
-            <div className="flex flex-col gap-1 pt-4 border-t border-border mt-auto">
-              <Button variant="outline" size="sm" onClick={() => navigate("/produtos-salvos")} className="gap-2 w-full justify-start">
-                <BookmarkPlus className="w-4 h-4" />
-                Produtos Salvos
-              </Button>
-              {isAdminUser && (
-                <Button variant="outline" size="sm" onClick={() => navigate("/admin-panel")} className="gap-2 w-full justify-start">
-                  <Shield className="w-4 h-4" />
-                  Painel Admin
-                </Button>
-              )}
-              <UserProfileDialog />
-              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 w-full justify-start">
-                <LogOut className="w-4 h-4" />
-                Sair
-              </Button>
-            </div>
           </div>
 
           <div className="flex-1 min-w-0">

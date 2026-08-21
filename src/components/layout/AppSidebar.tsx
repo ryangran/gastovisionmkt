@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Calculator,
@@ -12,6 +12,7 @@ import {
   GraduationCap,
   Lock,
   CreditCard,
+  LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,6 +102,7 @@ interface AppSidebarProps {
 
 export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
   const ehAdmin = useEhAdmin();
+  const navegar = useNavigate();
   const { ilimitado, carregando } = useAcesso();
 
   // Enquanto carrega não mostra cadeado: piscar cadeado na cara de quem já
@@ -172,6 +174,23 @@ export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
             </ul>
           </div>
         ))}
+      </div>
+
+      {/* Sair fica no rodapé, separado da navegação, porque não é um destino:
+          é a única ação destrutiva daqui e não deve ser clicada por engano. */}
+      <div className="border-t border-border p-3">
+        <button
+          type="button"
+          onClick={async () => {
+            onNavegar?.();
+            await supabase.auth.signOut();
+            navegar("/");
+          }}
+          className="flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          Sair
+        </button>
       </div>
     </nav>
   );
