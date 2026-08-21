@@ -106,15 +106,15 @@ const LandingPage = () => {
             { label: "Preço", href: "#preco" },
             { label: "Mentoria", href: "/mentoria" },
           ]}
-          ctaButtonText="Já sou aluno"
+          ctaButtonText="Entrar"
           ctaButtonHref="/auth"
           badgeLabel="Vetrex"
-          badgeText="A plataforma de quem vende em marketplace"
+          badgeText="Crie sua conta e teste a calculadora de graça"
           title="Entre o preço que você cobra"
           titleLine2="e o dinheiro que chega na sua conta"
-          description="Tem comissão, frete, imposto, anúncio e embalagem. Cada um cobra de um jeito, e muda por plataforma, por peso e por faixa de preço. A Vetrex controla todos eles num lugar só."
-          primaryButtonText="Quero ver quanto sobra pra mim"
-          primaryButtonHref="#preco"
+          description="Tem comissão, frete, imposto, anúncio e embalagem. Cada um cobra de um jeito, e muda por plataforma, por peso e por faixa de preço. A Vetrex controla todos eles num lugar só. Você cria a conta com email e senha e já calcula, sem pagar nada e sem cartão."
+          primaryButtonText="Testar grátis agora"
+          primaryButtonHref="/auth"
           secondaryButtonText="Ver como funciona"
           secondaryButtonHref="#como"
           partnersTitle="Calcula com as taxas reais de cada plataforma"
@@ -330,10 +330,12 @@ const LandingPage = () => {
         <section id="preco" className="container mx-auto px-4 py-20">
           <div className="mb-10 text-center">
             <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
-              Escolha como quer usar
+              Comece de graça. Pague quando fizer sentido.
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Os dois planos dão acesso a tudo. Muda só a forma de pagar.
+            <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+              A conta é grátis e já vem com a calculadora liberada, o bastante para conferir
+              alguns produtos por dia. Os dois planos abrem o resto e dão acesso a tudo. Muda só
+              a forma de pagar.
             </p>
           </div>
 
@@ -366,7 +368,7 @@ const LandingPage = () => {
                 className="mt-7 w-full py-6 text-base"
                 onClick={() => navigate("/auth")}
               >
-                Assinar mensal
+                Criar conta e assinar mensal
               </Button>
             </div>
 
@@ -408,7 +410,7 @@ const LandingPage = () => {
                   className="mt-7 w-full gap-2 py-6 text-base"
                   onClick={() => navigate("/auth")}
                 >
-                  Quero o vitalício
+                  Criar conta e pegar o vitalício
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </div>
@@ -418,9 +420,11 @@ const LandingPage = () => {
           <div className="mx-auto mt-6 flex max-w-3xl items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <p className="text-xs leading-relaxed text-muted-foreground">
-              <span className="text-foreground">Garantia de 7 dias nos dois planos.</span> Entra,
-              calcula seus produtos, e se não encontrar dinheiro que estava escapando,
-              devolvemos. Sem burocracia.
+              <span className="text-foreground">Não precisa decidir agora.</span> Crie a conta
+              com email e senha, use a calculadora grátis e veja o número saindo antes de gastar
+              um real. Se depois você assinar, tem <span className="text-foreground">garantia de
+              7 dias nos dois planos</span>: se não encontrar dinheiro que estava escapando,
+              devolvemos, sem burocracia.
             </p>
           </div>
         </section>
@@ -433,7 +437,8 @@ const LandingPage = () => {
               evita o erro que a maioria comete na primeira semana: colocar preço olhando o
               concorrente, sem saber o que a plataforma desconta. Se você já vende, ele confirma
               se o que você calcula está certo, e mostra os produtos da sua lista que estão
-              saindo no prejuízo agora.
+              saindo no prejuízo agora. Nos dois casos dá para conferir de graça antes: a conta
+              leva um minuto e não pede cartão.
             </p>
           </div>
         </section>

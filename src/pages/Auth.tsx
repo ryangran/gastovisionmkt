@@ -34,6 +34,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [modo, setModo] = useState<"entrar" | "criar">("entrar");
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const Auth = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        navigate("/calculadora");
       }
     });
   }, [navigate]);
@@ -71,6 +72,44 @@ const Auth = () => {
         setLockoutRemaining(remaining);
       }
     }, 1000);
+  };
+
+  const handleCadastro = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 6) {
+      toast.error("A senha precisa de pelo menos 6 caracteres.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/calculadora` },
+      });
+
+      if (error) {
+        // Mensagem genérica de propósito: dizer "já existe" entrega para
+        // qualquer um quais emails têm conta aqui.
+        console.error("Erro no cadastro:", error);
+        toast.error("Não consegui criar a conta. Confira o email e tente de novo.");
+        return;
+      }
+
+      // Sem sessão quer dizer que o projeto exige confirmação por email.
+      if (!data.session) {
+        toast.success("Conta criada. Confirme pelo link que enviamos no seu email.");
+        setModo("entrar");
+        return;
+      }
+
+      toast.success("Conta criada. Sua calculadora já está liberada.");
+      navigate("/calculadora");
+    } catch {
+      toast.error("Erro ao criar a conta. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -104,52 +143,8 @@ const Auth = () => {
       // Reset attempts on success
       attemptsRef.current = 0;
 
-      const { data: purchases } = await supabase
-        .from("purchases")
-        .select("id, plan_type, expires_at")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false });
-
-      if (!purchases || purchases.length === 0) {
-        await supabase.auth.signOut();
-        toast.error("Você não possui acesso. Adquira o Vetrex primeiro.");
-        navigate("/");
-        return;
-      }
-
-      const now = new Date();
-      const hasActiveAccess = (purchases as Purchase[]).some((p) => {
-        if (p.plan_type === "lifetime") return true;
-        if (p.expires_at && new Date(p.expires_at) > now) return true;
-        return false;
-      });
-
-      if (!hasActiveAccess) {
-        await supabase.auth.signOut();
-        toast.error("Seu plano expirou. Renove para continuar usando o Vetrex.");
-        navigate("/");
-        return;
-      }
-
-      const expiringPurchase = (purchases as Purchase[]).find((p) => {
-        if (p.plan_type !== "monthly" || !p.expires_at) return false;
-        const expiresAt = new Date(p.expires_at);
-        const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        return daysLeft > 0 && daysLeft <= 7;
-      });
-
-      if (expiringPurchase) {
-        const daysLeft = Math.ceil(
-          (new Date(expiringPurchase.expires_at!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        toast.warning(
-          `Seu plano mensal expira em ${daysLeft} dia${daysLeft > 1 ? "s" : ""}. Renove para não perder o acesso!`,
-          { duration: 8000 }
-        );
-      }
-
       toast.success("Bem-vindo de volta!");
-      navigate("/dashboard");
+      navigate("/calculadora");
     } catch {
       toast.error("Erro na autenticação. Tente novamente.");
     } finally {
@@ -222,16 +217,40 @@ const Auth = () => {
             <img src={logoLight} alt="Vetrex" className="h-12 block dark:hidden" />
           </div>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-foreground">
-              Acesse sua conta
+              {modo === "criar" ? "Crie sua conta grátis" : "Acesse sua conta"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Use o email e senha enviados após a compra
+              {modo === "criar"
+                ? "Email e senha, só isso. A calculadora já fica liberada."
+                : "Entre com seu email e senha"}
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          {/* Alternador entre entrar e criar conta. */}
+          <div className="mb-6 grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted/40 p-1">
+            {(["entrar", "criar"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setModo(m)}
+                className={
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors " +
+                  (modo === m
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {m === "entrar" ? "Entrar" : "Criar conta"}
+              </button>
+            ))}
+          </div>
+
+          <form
+            onSubmit={modo === "criar" ? handleCadastro : handleLogin}
+            className="space-y-5"
+          >
             <div className="space-y-2">
               <Label className="text-foreground">Email</Label>
               <div className="relative">
@@ -283,14 +302,25 @@ const Auth = () => {
             <Button
               type="submit"
               className="w-full py-5 text-base"
-              disabled={isLoading || isLocked}
+              disabled={isLoading || (isLocked && modo === "entrar")}
             >
               {isLoading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...</>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {modo === "criar" ? "Criando..." : "Entrando..."}
+                </>
+              ) : modo === "criar" ? (
+                "Criar conta grátis"
               ) : (
                 "Entrar"
               )}
             </Button>
+
+            {modo === "criar" && (
+              <p className="text-center text-xs text-muted-foreground">
+                Sem cartão. Você começa com a calculadora liberada e decide depois se quer o resto.
+              </p>
+            )}
           </form>
 
           <div className="mt-6 text-center">

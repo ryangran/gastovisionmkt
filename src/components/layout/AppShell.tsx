@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AppSidebar } from "./AppSidebar";
 import { TaxasProvider } from "./TaxasProvider";
 import { PerfilProvider } from "./PerfilProvider";
+import { AcessoProvider } from "./AcessoProvider";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 
@@ -15,6 +16,7 @@ export const AppShell = () => {
   return (
     <TaxasProvider>
     <PerfilProvider>
+    <AcessoProvider>
     <div className="relative flex min-h-screen bg-background">
       {/* Degradê vermelho da marca, em todas as abas do app.
           Fica aqui no AppShell para qualquer página nova já nascer com ele. */}
@@ -60,6 +62,7 @@ export const AppShell = () => {
         </main>
       </div>
     </div>
+    </AcessoProvider>
     </PerfilProvider>
     </TaxasProvider>
   );

@@ -11,6 +11,7 @@ import { calcularMercadoLivre, custoFixoMercadoLivre, pesoIdx, faixaPrecoIdx,
 import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXAS,
          type MagaluTipoProduto, type MagaluDescontoFrete } from "@/lib/pricing/magalu";
 import { MarketplaceLogo } from "@/components/MarketplaceLogo";
+import { PortaoCalculadora } from "@/components/acesso/PortaoCalculadora";
 import { SalvarProdutoDialog } from "@/components/SalvarProdutoDialog";
 import { MargemSlider } from "@/components/MargemSlider";
 import { CustosExtrasPicker } from "@/components/CustosExtrasPicker";
@@ -2710,79 +2711,30 @@ const Calculadora = () => {
   const [selectedPlatform, setSelectedPlatform] = usePersistedState(CHAVE_PLATAFORMA, "shopee");
   const [isAdminUser, setIsAdminUser] = useState(false);
 
+  // Agora qualquer pessoa cadastrada entra. O que separa quem paga de quem
+  // não paga é o PortaoCalculadora abaixo e o ExigePlano nas outras rotas,
+  // não mais um bloqueio na porta da página.
   useEffect(() => {
-    const checkAccess = async () => {
-      try {
-        const sessionResult = await Promise.race([
-          supabase.auth.getSession(),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout ao validar sessão")), 8000),
-          ),
-        ]);
-
-        const { data: { session } } = sessionResult;
-
-        if (!session) {
-          navigate("/auth");
-          return;
-        }
-
-        const purchasesResult = await Promise.race([
-          supabase
-            .from("purchases")
-            .select("id, plan_type, expires_at")
-            .eq("status", "approved")
-            .eq("user_email", session.user.email ?? "")
-            .order("created_at", { ascending: false }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout ao verificar compras")), 8000),
-          ),
-        ]);
-
-        const { data: purchases, error } = purchasesResult;
-
-        if (error) {
-          console.error("Erro ao verificar compras:", error);
-          toast.error("Erro ao verificar acesso. Tente novamente.");
-          navigate("/auth");
-          return;
-        }
-
-        if (!purchases || purchases.length === 0) {
-          toast.error("Você não possui acesso. Adquira a calculadora primeiro.");
-          supabase.auth.signOut();
-          navigate("/");
-          return;
-        }
-
-        const now = new Date();
-        const hasActive = purchases.some((p: any) => {
-          if (p.plan_type === "lifetime") return true;
-          if (p.expires_at && new Date(p.expires_at) > now) return true;
-          return false;
-        });
-
-        if (!hasActive) {
-          toast.error("Seu plano expirou. Renove para continuar usando.");
-          supabase.auth.signOut();
-          navigate("/");
-          return;
-        }
-
-        setAuthorized(true);
-        if (session.user.email === "ryanzinho.gran@gmail.com") {
-          setIsAdminUser(true);
-        }
-      } catch (err) {
-        console.error("Erro inesperado ao verificar acesso:", err);
-        toast.error("Não foi possível carregar seu acesso. Tente novamente.");
+    let ativo = true;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!ativo) return;
+      if (!session) {
         navigate("/auth");
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
+      setAuthorized(true);
+      setLoading(false);
 
-    checkAccess();
+      const { data: ehAdmin } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin",
+      });
+      if (ativo) setIsAdminUser(Boolean(ehAdmin));
+    })();
+    return () => {
+      ativo = false;
+    };
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -2888,6 +2840,7 @@ const Calculadora = () => {
           </div>
 
           <div className="flex-1 min-w-0">
+            <PortaoCalculadora plataforma={selectedPlatform}>
             <TabsContent value="shopee" className="mt-0">
               <ShopeeCalculadora />
             </TabsContent>
@@ -2906,6 +2859,7 @@ const Calculadora = () => {
             <TabsContent value="shein" className="mt-0">
               <SheinCalculadora />
             </TabsContent>
+            </PortaoCalculadora>
           </div>
         </Tabs>
       </main>

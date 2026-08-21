@@ -1,7 +1,8 @@
 import type { MarketplaceKey } from "@/components/MarketplaceLogo";
 
-/** Número que recebe os leads, em formato internacional para o link wa.me. */
-export const WHATSAPP_DESTINO = "5511944804280";
+// O número vive em @/lib/contato porque venda e mentoria caem no mesmo
+// WhatsApp, e ter duas cópias é ter uma para esquecer de trocar.
+export { WHATSAPP_DESTINO } from "@/lib/contato";
 
 export interface Opcao<T extends string = string> {
   valor: T;

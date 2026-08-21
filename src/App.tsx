@@ -7,9 +7,11 @@ import { ThemeProvider } from "next-themes";
 import { lazy, Suspense } from "react";
 import LandingPage from "./pages/LandingPage";
 import { AppShell } from "./components/layout/AppShell";
+import { ExigePlano, TRAVAS } from "./components/acesso/ExigePlano";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const Mentoria = lazy(() => import("./pages/Mentoria"));
+const Planos = lazy(() => import("./pages/Planos"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Comparador = lazy(() => import("./pages/Comparador"));
 const CalculadoraAds = lazy(() => import("./pages/CalculadoraAds"));
@@ -41,14 +43,30 @@ const App = () => {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/mentoria" element={<Mentoria />} />
                 <Route element={<AppShell />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route
+                    path="/dashboard"
+                    element={<ExigePlano {...TRAVAS.dashboard}><Dashboard /></ExigePlano>}
+                  />
                   <Route path="/calculadora" element={<Calculadora />} />
-                  <Route path="/comparador" element={<Comparador />} />
-                  <Route path="/ads" element={<CalculadoraAds />} />
-                  <Route path="/rpa-afiliados" element={<RpaAfiliados />} />
+                  <Route
+                    path="/comparador"
+                    element={<ExigePlano {...TRAVAS.comparador}><Comparador /></ExigePlano>}
+                  />
+                  <Route
+                    path="/ads"
+                    element={<ExigePlano {...TRAVAS.ads}><CalculadoraAds /></ExigePlano>}
+                  />
+                  <Route
+                    path="/rpa-afiliados"
+                    element={<ExigePlano {...TRAVAS.rpa}><RpaAfiliados /></ExigePlano>}
+                  />
                   <Route path="/perfil" element={<Perfil />} />
+                  <Route path="/planos" element={<Planos />} />
                   <Route path="/admin-panel" element={<AdminPanel />} />
-                  <Route path="/produtos-salvos" element={<ProdutosSalvos />} />
+                  <Route
+                    path="/produtos-salvos"
+                    element={<ExigePlano {...TRAVAS.produtosSalvos}><ProdutosSalvos /></ExigePlano>}
+                  />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

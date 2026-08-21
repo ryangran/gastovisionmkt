@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { BookmarkPlus, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BookmarkPlus, Loader2, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSavedCalculations } from "@/hooks/useSavedCalculations";
+import { useAcesso } from "@/components/layout/AcessoProvider";
 import type { PricingResult } from "@/lib/pricing/types";
 
 function formatCurrency(value: number): string {
@@ -40,6 +42,7 @@ export const SalvarProdutoDialog = ({
   compacto,
 }: SalvarProdutoDialogProps) => {
   const { saveCalculation } = useSavedCalculations();
+  const { ilimitado, carregando } = useAcesso();
   const [aberto, setAberto] = useState(false);
   const [nome, setNome] = useState(nomeInicial);
   const [quantidade, setQuantidade] = useState("0");
@@ -73,6 +76,34 @@ export const SalvarProdutoDialog = ({
     setSalvando(false);
     if (ok) setAberto(false);
   };
+
+  // Guardar produto é o que alimenta o painel, o comparador e o aviso de
+  // mudança de taxa, então é a primeira porta que fecha para quem não assinou.
+  // O botão continua ali, com cadeado, porque sumir com ele esconde justamente
+  // o que se quer que a pessoa queira.
+  if (!carregando && !ilimitado) {
+    return compacto ? (
+      <Button
+        asChild
+        size="icon"
+        variant="ghost"
+        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+        aria-label="Salvar produto está nos planos"
+        title="Salvar produto está nos planos"
+      >
+        <Link to="/planos">
+          <Lock className="h-4 w-4" />
+        </Link>
+      </Button>
+    ) : (
+      <Button asChild size="sm" variant="outline" className="gap-2 shrink-0">
+        <Link to="/planos" title="Salvar produto está nos planos">
+          <Lock className="w-4 h-4" />
+          Salvar produto
+        </Link>
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={aberto} onOpenChange={abrir}>

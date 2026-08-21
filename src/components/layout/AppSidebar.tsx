@@ -10,10 +10,13 @@ import {
   UserRound,
   Shield,
   GraduationCap,
+  Lock,
+  CreditCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useAcesso } from "./AcessoProvider";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 
@@ -21,6 +24,8 @@ interface ItemNav {
   to: string;
   label: string;
   icon: LucideIcon;
+  /** Fica com cadeado enquanto a pessoa não assina. */
+  pago?: boolean;
 }
 
 interface GrupoNav {
@@ -31,23 +36,23 @@ interface GrupoNav {
 const GRUPOS: GrupoNav[] = [
   {
     titulo: "Visão geral",
-    itens: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    itens: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, pago: true }],
   },
   {
     titulo: "Precificar",
     itens: [
       { to: "/calculadora", label: "Calculadora", icon: Calculator },
-      { to: "/comparador", label: "Comparador", icon: GitCompareArrows },
-      { to: "/ads", label: "Calculadora de Ads", icon: Megaphone },
+      { to: "/comparador", label: "Comparador", icon: GitCompareArrows, pago: true },
+      { to: "/ads", label: "Calculadora de Ads", icon: Megaphone, pago: true },
     ],
   },
   {
     titulo: "Carteira",
-    itens: [{ to: "/produtos-salvos", label: "Produtos salvos", icon: Bookmark }],
+    itens: [{ to: "/produtos-salvos", label: "Produtos salvos", icon: Bookmark, pago: true }],
   },
   {
     titulo: "Afiliados",
-    itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt }],
+    itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt, pago: true }],
   },
   {
     titulo: "Conta",
@@ -56,6 +61,10 @@ const GRUPOS: GrupoNav[] = [
   {
     titulo: "Mentoria",
     itens: [{ to: "/mentoria", label: "Diagnóstico gratuito", icon: GraduationCap }],
+  },
+  {
+    titulo: "Assinatura",
+    itens: [{ to: "/planos", label: "Planos", icon: CreditCard }],
   },
 ];
 
@@ -92,6 +101,11 @@ interface AppSidebarProps {
 
 export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
   const ehAdmin = useEhAdmin();
+  const { ilimitado, carregando } = useAcesso();
+
+  // Enquanto carrega não mostra cadeado: piscar cadeado na cara de quem já
+  // paga é pior que demorar meio segundo para mostrar na de quem não paga.
+  const travado = (item: ItemNav) => Boolean(item.pago) && !carregando && !ilimitado;
 
   const grupos = ehAdmin
     ? [...GRUPOS, { titulo: "Administração", itens: [{ to: "/admin-panel", label: "Painel admin", icon: Shield }] }]
@@ -113,35 +127,48 @@ export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
               {grupo.titulo}
             </p>
             <ul>
-              {grupo.itens.map(({ to, label, icon: Icone }) => (
-                <li key={to}>
-                  <NavLink
-                    to={to}
-                    onClick={onNavegar}
-                    className={({ isActive }) =>
-                      cn(
-                        "relative flex items-center gap-3 px-5 py-2.5 text-sm transition-colors",
-                        isActive
-                          ? "text-primary font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/40",
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {isActive && (
-                          <span
-                            aria-hidden
-                            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-primary"
-                          />
-                        )}
-                        <Icone className="h-4 w-4 shrink-0" />
-                        {label}
-                      </>
-                    )}
-                  </NavLink>
-                </li>
-              ))}
+              {grupo.itens.map((item) => {
+                const { to, label, icon: Icone } = item;
+                const comCadeado = travado(item);
+                return (
+                  <li key={to}>
+                    <NavLink
+                      to={to}
+                      onClick={onNavegar}
+                      title={comCadeado ? "Disponível nos planos" : undefined}
+                      className={({ isActive }) =>
+                        cn(
+                          "relative flex items-center gap-3 px-5 py-2.5 text-sm transition-colors",
+                          isActive
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40",
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive && (
+                            <span
+                              aria-hidden
+                              className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-primary"
+                            />
+                          )}
+                          <Icone className={cn("h-4 w-4 shrink-0", comCadeado && "opacity-50")} />
+                          <span className={cn("min-w-0 truncate", comCadeado && "opacity-60")}>
+                            {label}
+                          </span>
+                          {/* O item continua clicável de propósito: a tela de
+                              dentro é que vende o plano. Cadeado que não abre
+                              nada só irrita. */}
+                          {comCadeado && (
+                            <Lock className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
