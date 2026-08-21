@@ -81,7 +81,13 @@ export const GestaoTaxas = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const email = session?.user?.email ?? null;
-      const versao = `v${new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "")}`;
+      // Tira os separadores do ISO e sobra só o carimbo: v20260821143022.
+      // Usa \D em vez de listar hífen, dois pontos e T numa classe de
+      // caracteres: o Tailwind varre este arquivo inteiro atrás de classes,
+      // comentários incluídos, e um colchete com dois pontos no meio vira
+      // propriedade arbitrária, gerando regra morta e aviso de CSS no build.
+      // No recorte ISO todo separador é não dígito, então o resultado é igual.
+      const versao = `v${new Date().toISOString().slice(0, 19).replace(/\D/g, "")}`;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sb = supabase as any;
