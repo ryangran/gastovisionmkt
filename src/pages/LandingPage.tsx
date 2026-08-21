@@ -104,6 +104,7 @@ const LandingPage = () => {
             { label: "Marketplaces", href: "#como" },
             { label: "Depoimentos", href: "#depoimentos" },
             { label: "Preço", href: "#preco" },
+            { label: "Mentoria", href: "/mentoria" },
           ]}
           ctaButtonText="Já sou aluno"
           ctaButtonHref="/auth"

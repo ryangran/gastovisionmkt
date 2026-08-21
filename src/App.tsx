@@ -9,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import { AppShell } from "./components/layout/AppShell";
 
 const Auth = lazy(() => import("./pages/Auth"));
+const Mentoria = lazy(() => import("./pages/Mentoria"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Comparador = lazy(() => import("./pages/Comparador"));
 const CalculadoraAds = lazy(() => import("./pages/CalculadoraAds"));
@@ -38,6 +39,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/mentoria" element={<Mentoria />} />
                 <Route element={<AppShell />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/calculadora" element={<Calculadora />} />

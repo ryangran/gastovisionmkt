@@ -9,6 +9,7 @@ import {
   Receipt,
   UserRound,
   Shield,
+  GraduationCap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +52,10 @@ const GRUPOS: GrupoNav[] = [
   {
     titulo: "Conta",
     itens: [{ to: "/perfil", label: "Meu perfil", icon: UserRound }],
+  },
+  {
+    titulo: "Mentoria",
+    itens: [{ to: "/mentoria", label: "Diagnóstico gratuito", icon: GraduationCap }],
   },
 ];
 

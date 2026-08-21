@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MentoriaLeads } from "@/components/admin/MentoriaLeads";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -363,7 +365,14 @@ const AdminPanel = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="usuarios" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="usuarios">Usuários</TabsTrigger>
+            <TabsTrigger value="mentoria">Mentoria</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="usuarios" className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
@@ -557,6 +566,12 @@ const AdminPanel = () => {
           )}
         </div>
         <GestaoTaxas />
+          </TabsContent>
+
+          <TabsContent value="mentoria">
+            <MentoriaLeads />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Edit Plan Dialog */}
