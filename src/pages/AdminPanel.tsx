@@ -167,8 +167,19 @@ const AdminPanel = () => {
   const handleResetPassword = async (userId: string) => {
     setActionLoading(userId);
     try {
-      await invokeAdmin("reset_password", userId);
-      toast.success("Senha resetada para 'Gasto123'");
+      const resposta = await invokeAdmin("reset_password", userId);
+      const nova = (resposta as { password?: string } | undefined)?.password;
+      if (nova) {
+        await navigator.clipboard.writeText(nova).catch(() => undefined);
+        // A senha aparece uma vez só. Não fica gravada em lugar nenhum, então
+        // se fechar sem copiar é só resetar de novo.
+        toast.success(`Senha nova: ${nova}`, {
+          description: "Copiada para a área de transferência. Ela não aparece de novo.",
+          duration: 30000,
+        });
+      } else {
+        toast.success("Senha resetada. Peça para a pessoa usar 'Esqueci minha senha'.");
+      }
     } catch (err: any) {
       toast.error(err.message || "Erro ao resetar senha");
     } finally {

@@ -1,6 +1,21 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+/**
+ * Senha aleatória de verdade, tirada do gerador criptográfico do runtime.
+ *
+ * Antes havia uma constante "Gasto123" aqui. Como o repositório é público,
+ * qualquer pessoa sabia a senha inicial de toda conta criada, e bastava o
+ * email de um cliente para entrar na conta dele. Nenhuma regra de RLS protege
+ * contra alguém que entra como a própria pessoa.
+ */
+function senhaAleatoria(tamanho = 20): string {
+  const alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";
+  const bytes = new Uint8Array(tamanho);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alfabeto[b % alfabeto.length]).join("");
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -100,7 +115,7 @@ Deno.serve(async (req) => {
 
     // Tentar criar usuário; se já existe, continuar normalmente
     let isNewUser = false;
-    const password = "Gasto123";
+    const password = senhaAleatoria();
 
     const { error: createError } = await supabase.auth.admin.createUser({
       email,
@@ -126,6 +141,18 @@ Deno.serve(async (req) => {
     } else {
       isNewUser = true;
       console.log(`New user created: ${email}`);
+
+      // A senha gerada acima é aleatória e ninguém a conhece, nem quem comprou.
+      // Este email é a única porta de entrada dela: o link leva para /auth, que
+      // detecta a recuperação e pede a senha nova. Se o envio falhar, ainda
+      // resta o "Esqueci minha senha" na tela de login.
+      const site = Deno.env.get("SITE_URL") ?? "https://vetrex.lovable.app";
+      const { error: linkError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${site}/auth`,
+      });
+      if (linkError) {
+        console.error("Falha ao enviar o link de senha para", email, linkError);
+      }
     }
 
     // Registrar compra

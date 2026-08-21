@@ -1,5 +1,20 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+/**
+ * Senha aleatória de verdade, tirada do gerador criptográfico do runtime.
+ *
+ * Antes havia uma constante "Gasto123" aqui. Como o repositório é público,
+ * qualquer pessoa sabia a senha inicial de toda conta criada, e bastava o
+ * email de um cliente para entrar na conta dele. Nenhuma regra de RLS protege
+ * contra alguém que entra como a própria pessoa.
+ */
+function senhaAleatoria(tamanho = 20): string {
+  const alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";
+  const bytes = new Uint8Array(tamanho);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alfabeto[b % alfabeto.length]).join("");
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -168,11 +183,14 @@ Deno.serve(async (req) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
+        const novaSenha = senhaAleatoria();
         const { error: resetError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-          password: "Gasto123",
+          password: novaSenha,
         });
         if (resetError) throw resetError;
-        return new Response(JSON.stringify({ success: true }), {
+        // A senha volta uma única vez, para o admin repassar. Não fica gravada
+        // em lugar nenhum além da conta.
+        return new Response(JSON.stringify({ success: true, password: novaSenha }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
