@@ -36,10 +36,11 @@ export interface DocumentoLegal {
   secoes: SecaoLegal[];
 }
 
-/** Preencher antes de publicar. Aparecem literalmente no texto. */
-const RAZAO_SOCIAL = "[RAZÃO SOCIAL]";
-const CNPJ = "[CNPJ]";
-const ENDERECO = "[ENDEREÇO COMPLETO]";
+// Endereço de propósito fora dos documentos: a sede é residencial. Razão
+// social, CNPJ e canal de contato já identificam o controlador, que é o que a
+// LGPD e o CDC exigem.
+const RAZAO_SOCIAL = "VETREX COMPANY";
+const CNPJ = "61.986.179/0001-92";
 const CONTATO = "ryanzinho.gran@gmail.com";
 
 const VERSAO = "2026-08-21";
@@ -58,7 +59,7 @@ export const TERMOS_DE_USO: DocumentoLegal = {
       blocos: [
         {
           tipo: "paragrafo",
-          texto: `A Vetrex é uma plataforma de precificação para marketplaces, operada por ${RAZAO_SOCIAL}, inscrita no CNPJ sob o nº ${CNPJ}, com sede em ${ENDERECO}.`,
+          texto: `A Vetrex é uma plataforma de precificação para marketplaces, operada por ${RAZAO_SOCIAL}, inscrita no CNPJ sob o nº ${CNPJ}. O contato oficial para qualquer assunto relativo a estes Termos é ${CONTATO}.`,
         },
         {
           tipo: "paragrafo",
@@ -301,7 +302,7 @@ export const POLITICA_PRIVACIDADE: DocumentoLegal = {
       blocos: [
         {
           tipo: "paragrafo",
-          texto: `Para efeito da Lei nº 13.709/2018 (LGPD), a controladora dos seus dados é ${RAZAO_SOCIAL}, CNPJ ${CNPJ}, com sede em ${ENDERECO}.`,
+          texto: `Para efeito da Lei nº 13.709/2018 (LGPD), a controladora dos seus dados é ${RAZAO_SOCIAL}, inscrita no CNPJ sob o nº ${CNPJ}.`,
         },
         {
           tipo: "paragrafo",
