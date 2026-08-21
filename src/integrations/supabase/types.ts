@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      aceites_legais: {
+        Row: {
+          aceito_em: string
+          documento: string
+          id: string
+          origem: string
+          user_id: string
+          versao: string
+        }
+        Insert: {
+          aceito_em?: string
+          documento: string
+          id?: string
+          origem?: string
+          user_id: string
+          versao: string
+        }
+        Update: {
+          aceito_em?: string
+          documento?: string
+          id?: string
+          origem?: string
+          user_id?: string
+          versao?: string
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action: string
