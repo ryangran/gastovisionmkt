@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { LiquidGlassButton } from '@/components/ui/liquid-glass-button';
+
 interface NavLink {
     label: string;
     href: string;
@@ -94,16 +96,18 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                         {link.label}
                                     </a>
                                 ))}
-                                <a
+                                <LiquidGlassButton
                                     href={ctaButtonHref}
-                                    className="ml-1 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
+                                    variant="solid"
+                                    size="sm"
+                                    className="ml-1"
                                 >
                                     {ctaButtonText}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                         <path d="M7 7h10v10" />
                                         <path d="M7 17 17 7" />
                                     </svg>
-                                </a>
+                                </LiquidGlassButton>
                             </div>
                         </nav>
 
@@ -146,16 +150,13 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                         </p>
 
                         <div className="flex flex-col sm:flex-row sm:gap-4 mt-10 gap-3 items-center justify-center animate-fade-slide-in-4">
-                            <a
-                                href={primaryButtonHref}
-                                className="inline-flex items-center gap-2 hover:bg-white/15 text-sm font-medium text-white bg-white/10 ring-white/15 ring-1 rounded-full py-3 px-5 font-sans transition-colors"
-                            >
+                            <LiquidGlassButton href={primaryButtonHref} variant="glass">
                                 {primaryButtonText}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform duration-300 group-hover/lgb:translate-x-0.5">
                                     <path d="M5 12h14" />
                                     <path d="m12 5 7 7-7 7" />
                                 </svg>
-                            </a>
+                            </LiquidGlassButton>
                             <a
                                 href={secondaryButtonHref}
                                 className="inline-flex items-center gap-2 rounded-full bg-transparent px-5 py-3 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"

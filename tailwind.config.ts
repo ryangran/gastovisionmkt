@@ -101,6 +101,26 @@ export default {
             transform: "rotate(360deg)",
           },
         },
+        // Fumaça vermelha do liquid-glass-button
+        "lgb-smoke-a": {
+          "0%": { transform: "translate3d(-12%, 6%, 0) scale(1)", opacity: ".45" },
+          "50%": { transform: "translate3d(38%, -8%, 0) scale(1.45)", opacity: ".95" },
+          "100%": { transform: "translate3d(-12%, 6%, 0) scale(1)", opacity: ".45" },
+        },
+        "lgb-smoke-b": {
+          "0%": { transform: "translate3d(28%, -6%, 0) scale(1.3)", opacity: ".35" },
+          "50%": { transform: "translate3d(-30%, 10%, 0) scale(.85)", opacity: ".85" },
+          "100%": { transform: "translate3d(28%, -6%, 0) scale(1.3)", opacity: ".35" },
+        },
+        "lgb-smoke-c": {
+          "0%": { transform: "translate3d(8%, 12%, 0) scale(.8)", opacity: ".4" },
+          "50%": { transform: "translate3d(-24%, -12%, 0) scale(1.35)", opacity: ".9" },
+          "100%": { transform: "translate3d(8%, 12%, 0) scale(.8)", opacity: ".4" },
+        },
+        "lgb-sheen": {
+          "0%": { transform: "translateX(-160%) skewX(-18deg)" },
+          "100%": { transform: "translateX(400%) skewX(-18deg)" },
+        },
         "spotlight": {
           "0%": {
             opacity: "0",
@@ -121,6 +141,10 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "spin-slow": "spin-slow 20s linear infinite",
         "spotlight": "spotlight 2s ease .75s 1 forwards",
+        "lgb-smoke-a": "lgb-smoke-a 5.5s ease-in-out infinite",
+        "lgb-smoke-b": "lgb-smoke-b 7.2s ease-in-out -1.5s infinite",
+        "lgb-smoke-c": "lgb-smoke-c 6.1s ease-in-out -3s infinite",
+        "lgb-sheen": "lgb-sheen 1.1s ease-out 1",
       },
     },
   },
