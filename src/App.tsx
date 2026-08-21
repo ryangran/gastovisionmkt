@@ -20,6 +20,7 @@ const Perfil = lazy(() => import("./pages/Perfil"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ProdutosSalvos = lazy(() => import("./pages/ProdutosSalvos"));
+const PaginaLegal = lazy(() => import("./pages/PaginaLegal"));
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,9 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/mentoria" element={<Mentoria />} />
+                <Route path="/termos" element={<PaginaLegal documento="termos" />} />
+                <Route path="/privacidade" element={<PaginaLegal documento="privacidade" />} />
+                <Route path="/cookies" element={<PaginaLegal documento="cookies" />} />
                 <Route element={<AppShell />}>
                   <Route
                     path="/dashboard"

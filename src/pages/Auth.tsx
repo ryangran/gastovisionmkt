@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { mensagemErroCadastro } from "@/lib/acesso/erroCadastro";
+import { ROTA_LEGAL, versoesAceitas } from "@/lib/legal/documentos";
+import { ModalAceiteLegal } from "@/components/legal/ModalAceiteLegal";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [modo, setModo] = useState<"entrar" | "criar" | "recuperar" | "nova_senha">("entrar");
   const [isLocked, setIsLocked] = useState(false);
+  const [aceiteAberto, setAceiteAberto] = useState(false);
   const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const navigate = useNavigate();
 
@@ -130,18 +133,31 @@ const Auth = () => {
     }
   };
 
-  const handleCadastro = async (e: React.FormEvent) => {
+  // Valida antes de abrir o modal: obrigar a leitura dos documentos para
+  // depois reprovar a senha faria a pessoa ler tudo à toa.
+  const handleCadastro = (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) {
       toast.error("A senha precisa de pelo menos 6 caracteres.");
       return;
     }
+    setAceiteAberto(true);
+  };
+
+  // Só roda depois de a pessoa rolar os documentos até o fim e concordar.
+  const criarConta = async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/calculadora` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/calculadora`,
+          // Um trigger em auth.users copia isto para `aceites_legais`. Gravar
+          // pelo servidor é o que faz o registro valer quando o projeto exige
+          // confirmação por email e o cliente fica sem sessão.
+          data: { aceites_legais: versoesAceitas() },
+        },
       });
 
       if (error) {
@@ -152,6 +168,8 @@ const Auth = () => {
         toast.error(mensagemErroCadastro(error), { duration: 10000 });
         return;
       }
+
+      setAceiteAberto(false);
 
       // Sem sessão quer dizer que o projeto exige confirmação por email.
       if (!data.session) {
@@ -412,6 +430,24 @@ const Auth = () => {
               )}
             </Button>
 
+            {modo === "criar" && (
+              <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                Ao continuar você vai ler e aceitar os{" "}
+                <a href={ROTA_LEGAL.termos} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+                  Termos de Uso
+                </a>
+                , a{" "}
+                <a href={ROTA_LEGAL.privacidade} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+                  Política de Privacidade
+                </a>{" "}
+                e a{" "}
+                <a href={ROTA_LEGAL.cookies} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+                  Política de Cookies
+                </a>
+                .
+              </p>
+            )}
+
             {modo === "recuperar" && (
               <button
                 type="button"
@@ -457,6 +493,17 @@ const Auth = () => {
           </div>
         </motion.div>
       </div>
+
+      <ModalAceiteLegal
+        open={aceiteAberto}
+        onOpenChange={(aberto) => {
+          // Enquanto o signUp está em voo, fechar deixaria a conta sendo criada
+          // com o modal já sumido da tela.
+          if (!isLoading) setAceiteAberto(aberto);
+        }}
+        onAceitar={criarConta}
+        carregando={isLoading}
+      />
     </div>
   );
 };

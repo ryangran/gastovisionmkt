@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
+import { DOCUMENTOS_LEGAIS, ROTA_LEGAL } from "@/lib/legal/documentos";
 import ResponsiveHeroBanner from "@/components/ui/responsive-hero-banner";
 import { VideoFeature } from "@/components/landing/VideoFeature";
 import logo from "@/assets/logo.png";
@@ -447,6 +448,17 @@ const LandingPage = () => {
           <div className="container mx-auto flex flex-col items-center gap-3 px-4 py-8 text-center">
             <img src={logo} alt="Vetrex" className="hidden h-7 w-auto dark:block" />
             <img src={logoLight} alt="Vetrex" className="block h-7 w-auto dark:hidden" />
+            <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              {DOCUMENTOS_LEGAIS.map((doc) => (
+                <a
+                  key={doc.id}
+                  href={ROTA_LEGAL[doc.id]}
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {doc.titulo}
+                </a>
+              ))}
+            </nav>
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Vetrex. Todos os direitos reservados.
             </p>
