@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { mensagemErroCadastro } from "@/lib/acesso/erroCadastro";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
 import { Button } from "@/components/ui/button";
@@ -144,10 +145,11 @@ const Auth = () => {
       });
 
       if (error) {
-        // Mensagem genérica de propósito: dizer "já existe" entrega para
-        // qualquer um quais emails têm conta aqui.
+        // Erro de configuração e de dado inválido aparecem na tela, senão a
+        // pessoa fica travada sem saber o motivo. Só "email já existe" segue
+        // genérico, para o formulário não virar verificador de cadastro.
         console.error("Erro no cadastro:", error);
-        toast.error("Não consegui criar a conta. Confira o email e tente de novo.");
+        toast.error(mensagemErroCadastro(error), { duration: 10000 });
         return;
       }
 
