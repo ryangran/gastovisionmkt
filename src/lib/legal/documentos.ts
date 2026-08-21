@@ -41,7 +41,7 @@ export interface DocumentoLegal {
 // LGPD e o CDC exigem.
 const RAZAO_SOCIAL = "VETREX COMPANY";
 const CNPJ = "61.986.179/0001-92";
-const CONTATO = "ryanzinho.gran@gmail.com";
+const CONTATO = "vetrex.empresarial@gmail.com";
 
 const VERSAO = "2026-08-21";
 const ATUALIZADO_EM = "21 de agosto de 2026";
