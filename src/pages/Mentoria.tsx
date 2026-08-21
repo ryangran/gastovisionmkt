@@ -1,7 +1,8 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowDown,
   ArrowLeft,
   ArrowRight,
   CalendarCheck,
@@ -16,10 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
+import { BlackHoleHeroSection } from "@/components/ui/blackhole-hero-section";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import logoHorizontal from "@/assets/logo-horizontal.png";
-import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 
 import {
   FATURAMENTOS,
@@ -152,23 +153,113 @@ const Fundo = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
+/**
+ * O buraco negro é WebGL com ray marching, e o custo sobe com `steps`. Num
+ * celular, 300 passos derrubam o frame rate e esquentam o aparelho, então a
+ * tela pequena recebe uma versão mais barata da mesma imagem.
+ */
+function useTelaPequena(): boolean {
+  const [pequena, setPequena] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const aplicar = () => setPequena(mq.matches);
+    aplicar();
+    mq.addEventListener("change", aplicar);
+    return () => mq.removeEventListener("change", aplicar);
+  }, []);
+
+  return pequena;
+}
+
+const Hero = () => {
+  const leve = useTelaPequena();
+
+  return (
+    <section className="relative h-[92svh] min-h-[560px] w-full">
+      <BlackHoleHeroSection
+        className="absolute inset-0"
+        /* O disco sai do laranja padrão para o vermelho da marca: o miolo
+           quente quase branco, o meio no --primary e a borda num vermelho
+           escuro, mantendo a mesma rampa de luminância do original. */
+        hotColor="#FFEDEA"
+        midColor="#ED2C2C"
+        coolColor="#7A1410"
+        focus={leve ? [0.5, 0.32] : [0.74, 0.44]}
+        scrim={leve ? "bottom" : "left"}
+        scrimStrength={0.92}
+        steps={leve ? 170 : 300}
+        resolution={leve ? 0.55 : 0.7}
+        roll={-20}
+        elevation={-5.5}
+      >
+        <div className="flex h-full flex-col">
+          <header className="shrink-0">
+            <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
+              <Link to="/" aria-label="Vetrex">
+                <img src={logoHorizontal} alt="Vetrex" className="h-7 w-auto" />
+              </Link>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-white/70 hover:bg-white/10 hover:text-white"
+              >
+                <Link to="/">
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar
+                </Link>
+              </Button>
+            </div>
+          </header>
+
+          <div className="flex flex-1 items-end pb-14 sm:items-center sm:pb-0">
+            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="max-w-xl"
+              >
+                <p className="font-mono text-xs tracking-[0.3em] text-primary">MENTORIA VETREX</p>
+                <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">
+                  Antes de falar em mentoria, a gente faz um diagnóstico gratuito
+                </h1>
+                <p className="mt-5 text-base leading-relaxed text-white/70 sm:text-lg">
+                  Vender bem e não sobrar nada no fim do mês quase nunca é um problema só. É
+                  comissão, frete, imposto, anúncio e embalagem se acumulando em lugares que a sua
+                  planilha não mostra juntos.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Button asChild size="lg" className="gap-2">
+                    <a href="#formulario">
+                      Começar o diagnóstico
+                      <ArrowDown className="h-4 w-4" />
+                    </a>
+                  </Button>
+                  <span className="text-sm text-white/50">Leva menos de dois minutos.</span>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </BlackHoleHeroSection>
+    </section>
+  );
+};
+
 const Pitch = () => (
   <motion.section
     initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-80px" }}
     transition={{ duration: 0.45 }}
     className="lg:sticky lg:top-16 lg:self-start"
   >
-    <p className="font-mono text-xs tracking-[0.3em] text-primary">MENTORIA VETREX</p>
-    <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-      Antes de falar em mentoria, a gente faz um diagnóstico gratuito
-    </h1>
+    <h2 className="font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
+      Sem olhar seus números, qualquer conselho seria chute
+    </h2>
     <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-      Vender bem e não sobrar nada no fim do mês quase nunca é um problema só. É comissão, frete,
-      imposto, anúncio e embalagem se acumulando em lugares que a sua planilha não mostra juntos.
-      Sem olhar seus números, qualquer conselho que eu desse seria chute.
-    </p>
-    <p className="mt-4 text-base leading-relaxed text-muted-foreground">
       Por isso o primeiro passo é o diagnóstico, e ele não custa nada. Responda as perguntas ao
       lado e eu chego na conversa já sabendo do seu caso, em vez de te fazer contar tudo de novo.
     </p>
@@ -191,7 +282,7 @@ const Pitch = () => (
     </ul>
 
     <p className="mt-8 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-      O formulário leva menos de dois minutos. O diagnóstico é gratuito e sem compromisso.
+      O diagnóstico é gratuito e sem compromisso.
     </p>
   </motion.section>
 );
@@ -374,22 +465,12 @@ const Mentoria = () => {
 
   return (
     <Fundo>
-      <header className="border-b border-border/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" aria-label="Vetrex">
-            <img src={logoHorizontal} alt="Vetrex" className="hidden h-7 w-auto dark:block" />
-            <img src={logoHorizontalLight} alt="Vetrex" className="block h-7 w-auto dark:hidden" />
-          </Link>
-          <Button asChild variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Link>
-          </Button>
-        </div>
-      </header>
+      <Hero />
 
-      <main className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16 lg:py-16">
+      <main
+        id="formulario"
+        className="mx-auto grid max-w-6xl scroll-mt-8 gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16 lg:py-20"
+      >
         <Pitch />
 
         <motion.section
