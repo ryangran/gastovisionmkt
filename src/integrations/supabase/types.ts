@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      calculadora_usos: {
+        Row: {
+          atualizado_em: string
+          dia: string
+          interacoes: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          dia: string
+          interacoes?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          dia?: string
+          interacoes?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       company_memory: {
         Row: {
           category: string
@@ -815,6 +836,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consumir_interacao_calculadora: {
+        Args: { _plataforma?: string }
+        Returns: Json
+      }
       get_all_users_with_purchases: {
         Args: never
         Returns: {
@@ -845,6 +870,9 @@ export type Database = {
         Returns: boolean
       }
       is_authenticated_user: { Args: never; Returns: boolean }
+      orcamento_calculadora: { Args: { _plataforma: string }; Returns: number }
+      status_acesso: { Args: { _plataforma?: string }; Returns: Json }
+      tem_plano_ativo: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "production"
