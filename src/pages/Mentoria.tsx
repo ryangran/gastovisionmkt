@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -153,97 +153,195 @@ const Fundo = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
+/* ------------------------------------------------------------------- hero */
+
+type Qualidade = "media" | "baixa" | "off";
+
 /**
- * O buraco negro é WebGL com ray marching, e o custo sobe com `steps`. Num
- * celular, 300 passos derrubam o frame rate e esquentam o aparelho, então a
- * tela pequena recebe uma versão mais barata da mesma imagem.
+ * O buraco negro é ray marching em WebGL: cada pixel dispara um raio e caminha
+ * `steps` vezes por espaço curvo, várias vezes quando o raio dá a volta no
+ * buraco. O custo é pixels vezes passos, e numa placa integrada os 300 passos
+ * originais em 0.7 de resolução travam a página inteira.
  */
-function useTelaPequena(): boolean {
-  const [pequena, setPequena] = useState(false);
+const NIVEIS: Record<Exclude<Qualidade, "off">, {
+  steps: number;
+  resolution: number;
+  maxDpr: number;
+}> = {
+  media: { steps: 170, resolution: 0.5, maxDpr: 1.25 },
+  // Abaixo de 140 passos o disco começa a formar faixas, então esse é o piso.
+  baixa: { steps: 140, resolution: 0.42, maxDpr: 1 },
+};
+
+/**
+ * Todo mundo entra no piso e só sobe se a máquina provar que aguenta. O
+ * caminho contrário, entrar alto e cair quando trava, garante que todo mundo
+ * veja os primeiros segundos travados, que é justamente o que se quer evitar.
+ *
+ * A decisão é tomada uma vez e não muda mais. Trocar de nível realoca as
+ * texturas e causa um engasgo, então ficar corrigindo sai mais caro que o
+ * quadro extra que se ganharia.
+ */
+function useQualidadeBuraco(): Qualidade {
+  const [nivel, setNivel] = useState<Qualidade>("baixa");
+  const decidido = useRef(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const aplicar = () => setPequena(mq.matches);
-    aplicar();
-    mq.addEventListener("change", aplicar);
-    return () => mq.removeEventListener("change", aplicar);
+    if (decidido.current) return;
+
+    // Com movimento reduzido o componente congela no primeiro quadro sozinho,
+    // então não há frame rate para medir nem motivo para mexer.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      decidido.current = true;
+      return;
+    }
+
+    // Celular fica no piso sem medir: o teste em si já custa bateria e a
+    // resposta é quase sempre a mesma.
+    const celular = window.matchMedia("(max-width: 768px)").matches;
+    if (celular) {
+      decidido.current = true;
+      return;
+    }
+
+    let raf = 0;
+    let inicio = 0;
+    let quadros = 0;
+    // Os primeiros quadros pagam a compilação dos shaders e a alocação das
+    // texturas. Medir ali dentro condena qualquer máquina.
+    const ignorarAte = performance.now() + 600;
+
+    const medir = (t: number) => {
+      raf = requestAnimationFrame(medir);
+      if (t < ignorarAte) return;
+      if (!inicio) {
+        inicio = t;
+        quadros = 0;
+        return;
+      }
+      quadros++;
+      const decorrido = t - inicio;
+      if (decorrido < 1200) return;
+
+      cancelAnimationFrame(raf);
+      decidido.current = true;
+
+      const fps = (quadros * 1000) / decorrido;
+      // Nem o piso segurou: desliga o WebGL e usa o fundo estático.
+      if (fps < 24) setNivel("off");
+      else if (fps >= 55) setNivel("media");
+    };
+
+    raf = requestAnimationFrame(medir);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
-  return pequena;
+  return nivel;
 }
 
+/** Fundo de quem não aguenta o WebGL, ou não tem. Estático e barato. */
+const BuracoEstatico = ({ children }: { children: ReactNode }) => (
+  <div className="absolute inset-0 overflow-hidden bg-black">
+    <div
+      aria-hidden
+      className="absolute inset-0"
+      style={{
+        background:
+          "radial-gradient(60% 42% at 74% 44%, #FFEDEA 0%, #ED2C2C 14%, #7A1410 34%, transparent 62%), radial-gradient(28% 20% at 74% 44%, #000 0%, #000 46%, transparent 70%)",
+      }}
+    />
+    <div
+      aria-hidden
+      className="absolute inset-0"
+      style={{ background: "linear-gradient(to right, #000 22%, transparent 72%)" }}
+    />
+    <div className="relative z-10 h-full w-full">{children}</div>
+  </div>
+);
+
 const Hero = () => {
-  const leve = useTelaPequena();
+  const nivel = useQualidadeBuraco();
+  const estreito = typeof window !== "undefined" && window.innerWidth <= 768;
+
+  const conteudo = (
+    <div className="flex h-full flex-col">
+      <header className="shrink-0">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
+          <Link to="/" aria-label="Vetrex">
+            <img src={logoHorizontal} alt="Vetrex" className="h-7 w-auto" />
+          </Link>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Link>
+          </Button>
+        </div>
+      </header>
+
+      <div className="flex flex-1 items-end pb-14 sm:items-center sm:pb-0">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="max-w-xl"
+          >
+            <p className="font-mono text-xs tracking-[0.3em] text-primary">MENTORIA VETREX</p>
+            <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">
+              Antes de falar em mentoria, a gente faz um diagnóstico gratuito
+            </h1>
+            <p className="mt-5 text-base leading-relaxed text-white/70 sm:text-lg">
+              Vender bem e não sobrar nada no fim do mês quase nunca é um problema só. É comissão,
+              frete, imposto, anúncio e embalagem se acumulando em lugares que a sua planilha não
+              mostra juntos.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Button asChild size="lg" className="gap-2">
+                <a href="#formulario">
+                  Começar o diagnóstico
+                  <ArrowDown className="h-4 w-4" />
+                </a>
+              </Button>
+              <span className="text-sm text-white/50">Leva menos de dois minutos.</span>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <section className="relative h-[92svh] min-h-[560px] w-full">
-      <BlackHoleHeroSection
-        className="absolute inset-0"
-        /* O disco sai do laranja padrão para o vermelho da marca: o miolo
-           quente quase branco, o meio no --primary e a borda num vermelho
-           escuro, mantendo a mesma rampa de luminância do original. */
-        hotColor="#FFEDEA"
-        midColor="#ED2C2C"
-        coolColor="#7A1410"
-        focus={leve ? [0.5, 0.32] : [0.74, 0.44]}
-        scrim={leve ? "bottom" : "left"}
-        scrimStrength={0.92}
-        steps={leve ? 170 : 300}
-        resolution={leve ? 0.55 : 0.7}
-        roll={-20}
-        elevation={-5.5}
-      >
-        <div className="flex h-full flex-col">
-          <header className="shrink-0">
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-              <Link to="/" aria-label="Vetrex">
-                <img src={logoHorizontal} alt="Vetrex" className="h-7 w-auto" />
-              </Link>
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-white/70 hover:bg-white/10 hover:text-white"
-              >
-                <Link to="/">
-                  <ArrowLeft className="h-4 w-4" />
-                  Voltar
-                </Link>
-              </Button>
-            </div>
-          </header>
-
-          <div className="flex flex-1 items-end pb-14 sm:items-center sm:pb-0">
-            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="max-w-xl"
-              >
-                <p className="font-mono text-xs tracking-[0.3em] text-primary">MENTORIA VETREX</p>
-                <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">
-                  Antes de falar em mentoria, a gente faz um diagnóstico gratuito
-                </h1>
-                <p className="mt-5 text-base leading-relaxed text-white/70 sm:text-lg">
-                  Vender bem e não sobrar nada no fim do mês quase nunca é um problema só. É
-                  comissão, frete, imposto, anúncio e embalagem se acumulando em lugares que a sua
-                  planilha não mostra juntos.
-                </p>
-                <div className="mt-8 flex flex-wrap items-center gap-4">
-                  <Button asChild size="lg" className="gap-2">
-                    <a href="#formulario">
-                      Começar o diagnóstico
-                      <ArrowDown className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <span className="text-sm text-white/50">Leva menos de dois minutos.</span>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </BlackHoleHeroSection>
+    <section className="relative h-[86svh] min-h-[540px] w-full">
+      {nivel === "off" ? (
+        <BuracoEstatico>{conteudo}</BuracoEstatico>
+      ) : (
+        <BlackHoleHeroSection
+          className="absolute inset-0"
+          /* O disco sai do laranja padrão para o vermelho da marca: o miolo
+             quente quase branco, o meio no --primary e a borda num vermelho
+             escuro, mantendo a mesma rampa de luminância do original. */
+          hotColor="#FFEDEA"
+          midColor="#ED2C2C"
+          coolColor="#7A1410"
+          focus={estreito ? [0.5, 0.32] : [0.74, 0.44]}
+          scrim={estreito ? "bottom" : "left"}
+          scrimStrength={0.92}
+          steps={NIVEIS[nivel].steps}
+          resolution={NIVEIS[nivel].resolution}
+          maxDpr={NIVEIS[nivel].maxDpr}
+          glow={nivel === "baixa" ? 0.75 : 1}
+          roll={-20}
+          elevation={-5.5}
+        >
+          {conteudo}
+        </BlackHoleHeroSection>
+      )}
     </section>
   );
 };
