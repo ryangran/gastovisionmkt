@@ -269,6 +269,60 @@ export type Database = {
           },
         ]
       }
+      mentoria_leads: {
+        Row: {
+          created_at: string
+          dor: string
+          email: string | null
+          faturamento: string
+          id: string
+          nome: string
+          objetivos: string[]
+          observacoes: string
+          plataformas: string[]
+          precifica_hoje: string
+          status: string
+          telefone: string
+          tempo_vendendo: string
+          updated_at: string
+          urgencia: string
+        }
+        Insert: {
+          created_at?: string
+          dor: string
+          email?: string | null
+          faturamento: string
+          id?: string
+          nome: string
+          objetivos?: string[]
+          observacoes?: string
+          plataformas?: string[]
+          precifica_hoje: string
+          status?: string
+          telefone: string
+          tempo_vendendo: string
+          updated_at?: string
+          urgencia: string
+        }
+        Update: {
+          created_at?: string
+          dor?: string
+          email?: string | null
+          faturamento?: string
+          id?: string
+          nome?: string
+          objetivos?: string[]
+          observacoes?: string
+          plataformas?: string[]
+          precifica_hoje?: string
+          status?: string
+          telefone?: string
+          tempo_vendendo?: string
+          updated_at?: string
+          urgencia?: string
+        }
+        Relationships: []
+      }
       movements: {
         Row: {
           command: string
