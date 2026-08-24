@@ -879,6 +879,7 @@ export type Database = {
           purchase_id: string
           purchased_at: string
           status: string
+          telefone: string
           user_id: string
         }[]
       }
