@@ -1659,6 +1659,16 @@ const MercadoLivreCalculadora = () => {
                 <option key={p.nome} value={p.nome}>{p.nome}</option>
               ))}
             </select>
+            {/* Sem categoria a comissão entra como zero, e o lucro aparece
+                inflado sem nenhum sinal na tela. A comissão do ML varia por
+                categoria, então não dá para chutar um padrão — mas dá para
+                avisar. */}
+            {mlCategorias.length === 0 && (
+              <p className="text-xs text-primary">
+                Cadastre uma categoria com a comissão que o Mercado Livre cobra de você. Sem
+                isso a comissão entra como zero e o lucro acima fica maior do que o real.
+              </p>
+            )}
           </div>
 
           {/* Tipo de anúncio */}
