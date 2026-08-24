@@ -133,3 +133,45 @@ describe("margemDePrecoECusto", () => {
     expect(roasEquilibrio(margem)).toBe(5);
   });
 });
+
+describe("equivalência com a fórmula de mercado", () => {
+  /**
+   * Margem de Contribuição (%) = Valor que sobra / Preço de Venda
+   * ROAS de Equilíbrio         = 1 / Margem de Contribuição em decimal
+   *
+   * A implementação usa 100/margem por trabalhar em pontos percentuais. É a
+   * mesma conta, e este teste segura isso caso alguém "simplifique" um dos
+   * dois lados no futuro. A fórmula não depende de marketplace: o que muda
+   * por plataforma é o valor que sobra, não a divisão.
+   */
+  const casos: [number, number][] = [
+    [34.43, 21.01],
+    [34.43, 10.12],
+    [100, 20],
+    [59.9, 7.5],
+    [250, 175],
+  ];
+
+  it("100/margem é o mesmo que 1 dividido pela margem decimal", () => {
+    for (const [preco, sobra] of casos) {
+      const margemDecimal = sobra / preco;
+      const esperado = 1 / margemDecimal;
+
+      const margemPercent = margemDePrecoECusto(preco, preco - sobra) as number;
+      const obtido = roasEquilibrio(margemPercent) as number;
+
+      // Tolerância de centésimo: a implementação arredonda em dois pontos.
+      expect(obtido).toBeCloseTo(esperado, 1);
+    }
+  });
+
+  it("o ACOS de equilíbrio é a própria margem, como manda a definição", () => {
+    const margem = margemDePrecoECusto(34.43, 13.42) as number;
+    expect(acosEquilibrio(margem)).toBe(margem);
+    // E ACOS e ROAS são recíprocos: 100/ACOS = ROAS.
+    expect(100 / (acosEquilibrio(margem) as number)).toBeCloseTo(
+      roasEquilibrio(margem) as number,
+      1,
+    );
+  });
+});
