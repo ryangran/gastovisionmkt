@@ -45,23 +45,25 @@ describe("calcularMercadoLivre", () => {
   it("usa a fronteira exata entre as faixas de peso do frete (0,3kg vs 0,31kg)", () => {
     const noLimite = calcularMercadoLivre({
       ...base,
-      precoVenda: 10,
+      precoVenda: 30,
       custoProduto: 2,
       usarFrete: true,
       pesoKg: 0.3,
     });
     const acimaDoLimite = calcularMercadoLivre({
       ...base,
-      precoVenda: 10,
+      precoVenda: 30,
       custoProduto: 2,
       usarFrete: true,
       pesoKg: 0.31,
     });
-    // Preço R$10 cai na faixa "R$0–18,99" (coluna 0).
-    // 0,3kg ainda é a faixa "Até 0,3 kg" (linha 0) -> frete R$5,65.
-    // 0,31kg já cai na faixa "De 0,3 a 0,5 kg" (linha 1) -> frete R$5,95.
-    expect(noLimite.valorFrete).toBeCloseTo(5.65, 2);
-    expect(acimaDoLimite.valorFrete).toBeCloseTo(5.95, 2);
+    // Preço R$30 cai na faixa "R$19–48,99" (coluna 1). Acima de R$19 de
+    // propósito: abaixo disso o teto de metade do preço mascararia a fronteira
+    // de peso, que é o que este teste quer verificar.
+    // 0,3kg ainda é a faixa "Até 0,3 kg" (linha 0) -> frete R$6,85.
+    // 0,31kg já cai na faixa "De 0,3 a 0,5 kg" (linha 1) -> frete R$6,95.
+    expect(noLimite.valorFrete).toBeCloseTo(6.85, 2);
+    expect(acimaDoLimite.valorFrete).toBeCloseTo(6.95, 2);
   });
 
   it("desconta imposto e marketing sobre o preço de venda", () => {
@@ -98,5 +100,62 @@ describe("calcularMercadoLivre", () => {
     expect(r.valorFrete).toBe(0);
     expect(Number.isNaN(r.margemPercent)).toBe(false);
     expect(Number.isNaN(r.lucro)).toBe(false);
+  });
+});
+
+describe("teto de metade do preço abaixo de R$19", () => {
+  const base = {
+    precoVenda: 0,
+    custoProduto: 0,
+    impostoPercent: 0,
+    marketingPercent: 0,
+    tipoAnuncio: "premium" as const,
+    produto: "Padrão",
+    categorias: [{ nome: "Padrão", classicoPerc: 0.11, premiumPerc: 0.16 }],
+    pesoKg: 0,
+    usarFrete: true,
+  };
+
+  it("limita o frete a metade do preço quando o produto custa menos de R$19", () => {
+    // Produto de R$10 com 5 kg: a tabela diz R$6,55, mas o ML cobra no máximo
+    // metade do preço. Sem o teto a calculadora mostraria prejuízo onde não há.
+    const r = calcularMercadoLivre({ ...base, precoVenda: 10, pesoKg: 5 });
+    expect(r.valorFrete).toBeCloseTo(5, 2);
+  });
+
+  it("não aplica o teto quando ele é maior que o valor de tabela", () => {
+    // R$18 de preço dá teto de R$9, mas a tabela cobra R$5,65 — vence o menor.
+    const r = calcularMercadoLivre({ ...base, precoVenda: 18, pesoKg: 0.2 });
+    expect(r.valorFrete).toBeCloseTo(5.65, 2);
+  });
+
+  it("a partir de R$19 vale a tabela cheia", () => {
+    // 5 kg é o limite SUPERIOR da faixa "De 4 a 5 kg", então ainda é linha 7 e
+    // não linha 8. R$19 já sai da primeira coluna e cai em "R$19–48,99".
+    const r = calcularMercadoLivre({ ...base, precoVenda: 19, pesoKg: 5 });
+    expect(r.valorFrete).toBeCloseTo(8.85, 2);
+  });
+});
+
+describe("faixas de peso acima de 20 kg", () => {
+  const base = {
+    precoVenda: 0,
+    custoProduto: 0,
+    impostoPercent: 0,
+    marketingPercent: 0,
+    tipoAnuncio: "premium" as const,
+    produto: "Padrão",
+    categorias: [{ nome: "Padrão", classicoPerc: 0.11, premiumPerc: 0.16 }],
+    pesoKg: 0,
+    usarFrete: true,
+  };
+
+  it("cobre os pesos que a tabela antiga deixava de fora", () => {
+    // A tabela anterior parava em 20 kg, então tudo acima caía na última faixa
+    // e saía barato demais. Agora vai até "Mais de 150 kg".
+    expect(calcularMercadoLivre({ ...base, precoVenda: 250, pesoKg: 45 }).valorFrete)
+      .toBeCloseTo(111.65, 2);
+    expect(calcularMercadoLivre({ ...base, precoVenda: 250, pesoKg: 200 }).valorFrete)
+      .toBeCloseTo(262.85, 2);
   });
 });

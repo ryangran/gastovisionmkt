@@ -37,6 +37,22 @@ export interface MercadoLivreTaxas {
   custoFixo: MercadoLivreCustoFixoConfig;
 }
 
+/**
+ * Tabela de Custos dos Envios do Mercado Livre.
+ *
+ * Vigência: 24 de agosto de 2026.
+ * Fonte: vendedores.mercadolivre.com.br/knowledge-hub/48392
+ *
+ * Vale para Envios Full, Coleta e Agências, de todas as regiões do Brasil. O
+ * Mercado Livre trata isso como custo operacional e cobra "em todos os casos,
+ * mesmo quando o envio é pago pelo comprador" — por isso a calculadora aplica
+ * sempre que houver peso, sem interruptor.
+ *
+ * A tabela cobre só o frete grátis padrão. Abaixo de R$79 o vendedor pode
+ * optar por oferecer frete grátis e rápido, que custa bem mais (no exemplo do
+ * próprio ML, R$16,45 contra R$8,65 num produto de 2,5 kg a R$20). Essa opção
+ * fica de fora de propósito: assumimos sempre o padrão.
+ */
 export const MERCADOLIVRE_TAXAS: MercadoLivreTaxas = {
   // Faixas de peso (kg) — limites superiores
   pesos: [
@@ -52,11 +68,24 @@ export const MERCADOLIVRE_TAXAS: MercadoLivreTaxas = {
     { label: "De 6 a 7 kg", min: 6, max: 7 },
     { label: "De 7 a 8 kg", min: 7, max: 8 },
     { label: "De 8 a 9 kg", min: 8, max: 9 },
-    { label: "De 9 a 11 kg", min: 9, max: 11 },
+    { label: "De 9 a 10 kg", min: 9, max: 10 },
+    { label: "De 10 a 11 kg", min: 10, max: 11 },
     { label: "De 11 a 13 kg", min: 11, max: 13 },
     { label: "De 13 a 15 kg", min: 13, max: 15 },
     { label: "De 15 a 17 kg", min: 15, max: 17 },
     { label: "De 17 a 20 kg", min: 17, max: 20 },
+    { label: "De 20 a 25 kg", min: 20, max: 25 },
+    { label: "De 25 a 30 kg", min: 25, max: 30 },
+    { label: "De 30 a 40 kg", min: 30, max: 40 },
+    { label: "De 40 a 50 kg", min: 40, max: 50 },
+    { label: "De 50 a 60 kg", min: 50, max: 60 },
+    { label: "De 60 a 70 kg", min: 60, max: 70 },
+    { label: "De 70 a 80 kg", min: 70, max: 80 },
+    { label: "De 80 a 90 kg", min: 80, max: 90 },
+    { label: "De 90 a 100 kg", min: 90, max: 100 },
+    { label: "De 100 a 125 kg", min: 100, max: 125 },
+    { label: "De 125 a 150 kg", min: 125, max: 150 },
+    { label: "Mais de 150 kg", min: 150, max: Infinity },
   ],
   // Faixas de preço: 0-18.99 | 19-48.99 | 49-78.99 | 79-99.99 | 100-119.99 | 120-149.99 | 150-199.99 | 200+
   faixasPreco: [
@@ -71,23 +100,36 @@ export const MERCADOLIVRE_TAXAS: MercadoLivreTaxas = {
   ],
   // Tabela de frete por [pesoIdx][faixaPrecoIdx]
   freteTabela: [
-    [5.65, 6.55, 7.75, 12.35, 14.35, 16.45, 18.45, 20.95],
-    [5.95, 6.65, 7.85, 13.25, 15.45, 17.65, 19.85, 22.55],
-    [6.05, 6.75, 7.95, 13.85, 16.15, 18.45, 20.75, 23.65],
-    [6.15, 6.85, 8.05, 14.15, 16.45, 18.85, 21.15, 24.65],
-    [6.25, 6.95, 8.15, 14.45, 16.85, 19.25, 21.65, 24.65],
-    [6.35, 7.95, 8.55, 15.75, 18.35, 21.05, 23.65, 26.25],
-    [6.45, 8.15, 8.95, 17.05, 19.85, 22.65, 25.55, 28.35],
-    [6.55, 8.35, 9.75, 18.45, 21.55, 24.65, 27.75, 30.75],
-    [6.65, 8.55, 9.95, 25.45, 28.55, 32.65, 35.75, 39.75],
-    [6.75, 8.75, 10.15, 27.05, 31.05, 36.05, 40.05, 44.05],
-    [6.85, 8.95, 10.35, 28.85, 33.65, 38.45, 43.25, 48.05],
-    [6.95, 9.15, 10.55, 29.65, 34.55, 39.55, 44.45, 49.35],
-    [7.05, 9.55, 10.95, 41.25, 48.05, 54.95, 61.75, 68.65],
-    [7.15, 9.95, 11.35, 42.15, 49.25, 56.25, 63.25, 70.25],
-    [7.25, 10.15, 11.55, 45.05, 52.45, 59.95, 67.45, 74.95],
-    [7.35, 10.35, 11.75, 48.55, 56.05, 63.55, 70.75, 78.65],
-    [7.45, 10.55, 11.95, 54.75, 63.85, 72.95, 82.05, 91.15],
+    [  5.65,   6.85,   8.15,  12.95,  14.95,  16.95,  19.05,  21.65],
+    [  5.95,   6.95,   8.25,  13.85,  16.15,  18.15,  20.45,  23.25],
+    [  6.05,   7.15,   8.45,  14.45,  16.85,  19.05,  21.35,  24.45],
+    [  6.15,   7.35,   8.65,  14.75,  17.15,  19.45,  21.75,  25.45],
+    [  6.25,   7.45,   8.75,  15.05,  17.65,  19.85,  22.25,  25.55],
+    [  6.35,   8.65,   9.15,  16.45,  19.15,  21.65,  24.35,  27.05],
+    [  6.45,   8.75,   9.75,  17.85,  20.75,  23.35,  26.35,  29.25],
+    [  6.55,   8.85,  10.25,  19.75,  22.85,  26.05,  29.25,  32.45],
+    [  6.65,   8.95,  10.35,  25.95,  29.15,  33.35,  36.45,  40.85],
+    [  6.75,   9.05,  10.45,  27.55,  31.65,  36.75,  40.85,  45.25],
+    [  6.85,   9.25,  10.55,  29.45,  34.35,  39.25,  44.15,  49.35],
+    [  6.95,   9.35,  10.65,  30.25,  35.25,  40.35,  45.35,  50.75],
+    [  7.05,   9.45,  10.85,  38.25,  45.05,  51.95,  58.75,  65.85],
+    [  7.05,   9.65,  11.05,  41.65,  48.55,  55.45,  62.35,  69.35],
+    [  7.15,  10.05,  11.45,  42.55,  49.75,  56.85,  63.85,  70.95],
+    [  7.25,  10.25,  11.65,  45.55,  52.95,  60.55,  68.15,  75.65],
+    [  7.35,  10.45,  11.85,  48.95,  56.55,  64.05,  71.35,  79.35],
+    [  7.45,  10.65,  12.05,  55.15,  64.35,  73.55,  82.75,  91.95],
+    [  7.65,  11.05,  12.25,  64.55,  75.75,  85.45,  96.25, 106.85],
+    [  7.75,  11.25,  12.45,  66.45,  76.05,  86.25,  97.15, 107.85],
+    [  7.85,  11.45,  12.65,  68.35,  79.65,  89.75, 100.05, 107.95],
+    [  7.95,  11.65,  12.85,  70.95,  81.85,  92.85, 103.45, 111.65],
+    [  8.05,  11.85,  13.05,  75.55,  87.25,  99.05, 110.25, 119.05],
+    [  8.15,  12.05,  13.25,  80.95,  93.75, 105.95, 118.05, 127.45],
+    [  8.25,  12.25,  13.45,  84.65,  97.95, 110.75, 123.35, 133.15],
+    [  8.35,  12.45,  13.65,  94.05, 108.35, 122.95, 136.95, 147.85],
+    [  8.45,  12.65,  13.85, 107.45, 124.85, 140.45, 156.45, 168.85],
+    [  8.55,  12.85,  14.05, 120.15, 138.95, 156.95, 174.85, 188.85],
+    [  8.65,  12.85,  14.25, 127.45, 147.05, 166.55, 185.55, 200.35],
+    [  8.75,  12.85,  14.45, 167.05, 193.35, 218.45, 243.45, 262.85],
   ],
   // Custo fixo ML por faixa de preço
   custoFixo: {
@@ -114,11 +156,24 @@ export function faixaPrecoIdx(preco: number, faixas: MercadoLivreFaixaPreco[]): 
   return idx === -1 ? faixas.length - 1 : idx;
 }
 
-/** Valor do frete Mercado Livre, por peso × faixa de preço. */
+/** Abaixo deste preço o frete não passa de metade do valor do produto. */
+export const ML_LIMIAR_METADE_PRECO = 19;
+
+/**
+ * Valor do frete Mercado Livre, por peso × faixa de preço.
+ *
+ * O rodapé da tabela diz: "os produtos de menos de R$ 19 pagam no máximo
+ * metade do preço do produto". Sem esse teto, um produto de R$10 pesando 5 kg
+ * apareceria com R$6,65 de frete quando o cobrado é R$5,00 — a calculadora
+ * mostraria prejuízo onde não há.
+ */
 function freteMercadoLivre(preco: number, peso: number, taxas: MercadoLivreTaxas): number {
   const pi = pesoIdx(peso, taxas.pesos);
   const fi = faixaPrecoIdx(preco, taxas.faixasPreco);
-  return taxas.freteTabela[pi][fi];
+  const tabelado = taxas.freteTabela[pi][fi];
+
+  if (preco < ML_LIMIAR_METADE_PRECO) return Math.min(tabelado, preco / 2);
+  return tabelado;
 }
 
 /** Custo fixo de venda cobrado pelo Mercado Livre, em função do preço. */
@@ -134,9 +189,9 @@ export interface MercadoLivreInput extends BaseInput {
   produto: string;
   /** Categorias cadastradas, com a comissão (fração, 0.115 = 11,5%) de cada tipo de anúncio. */
   categorias: { nome: string; classicoPerc: number; premiumPerc: number }[];
-  /** Peso do produto, em kg — usado apenas quando `usarFrete` é true. */
+  /** Peso do produto, em kg. Sem peso não há como saber a faixa de frete. */
   pesoKg: number;
-  /** Espelha o switch "Nós oferecemos entrega" da UI. */
+  /** Verdadeiro quando há peso informado. O frete do ML não é opcional. */
   usarFrete: boolean;
 }
 
