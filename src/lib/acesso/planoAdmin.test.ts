@@ -5,6 +5,7 @@ import {
   ehLegado,
   estaAtiva,
   nivelDoPlanType,
+  assinantesRecorrentes,
   receitaRecorrente,
   rotuloCurto,
   situacao,
@@ -98,8 +99,23 @@ describe("receitaRecorrente", () => {
     expect(receitaRecorrente([{ plan_type: "plus", expires_at: emDias(-5) }])).toBe(0);
   });
 
-  it("conta o legado monthly como plus, que é o acesso que ele dá", () => {
-    expect(receitaRecorrente([{ plan_type: "monthly", expires_at: emDias(10) }])).toBe(67.9);
+  it("NÃO conta o legado monthly, que paga o preço antigo", () => {
+    // monthly dá acesso Plus, mas quem tem esse plano paga R$19,90. Somar
+    // R$67,90 por ele inflaria justamente o número que diz quanto entra.
+    expect(receitaRecorrente([{ plan_type: "monthly", expires_at: emDias(10) }])).toBe(0);
+  });
+
+  it("NÃO conta o teste de 1 dia, que não paga nada", () => {
+    expect(receitaRecorrente([{ plan_type: "daily", expires_at: emDias(1) }])).toBe(0);
+  });
+
+  it("soma exatamente os preços de tabela do Essencial e do Plus", () => {
+    expect(receitaRecorrente([{ plan_type: "essencial", expires_at: emDias(5) }])).toBe(29.9);
+    expect(receitaRecorrente([{ plan_type: "plus", expires_at: emDias(5) }])).toBe(67.9);
+  });
+
+  it("não se importa com a caixa do plan_type", () => {
+    expect(receitaRecorrente([{ plan_type: "PLUS", expires_at: emDias(5) }])).toBe(67.9);
   });
 });
 
@@ -137,5 +153,19 @@ describe("rotuloCurto", () => {
     expect(rotuloCurto("plus")).toBe("Plus");
     expect(rotuloCurto("lifetime")).toBe("Deluxe");
     expect(rotuloCurto(null)).toBe("Sem plano");
+  });
+});
+
+describe("assinantesRecorrentes", () => {
+  it("conta quem entra na receita, para o número na tela ser conferível", () => {
+    expect(
+      assinantesRecorrentes([
+        { plan_type: "essencial", expires_at: emDias(10) },
+        { plan_type: "plus", expires_at: emDias(10) },
+        { plan_type: "monthly", expires_at: emDias(10) },
+        { plan_type: "deluxe", expires_at: null },
+        { plan_type: "plus", expires_at: emDias(-1) },
+      ]),
+    ).toBe(2);
   });
 });

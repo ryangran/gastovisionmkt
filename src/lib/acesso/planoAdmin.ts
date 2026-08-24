@@ -72,21 +72,36 @@ export function estaAtiva(a: AssinaturaBruta): boolean {
   return s === "vitalicio" || s === "ativo" || s === "expirando";
 }
 
+/** Planos que geram mensalidade hoje, pelo preço de tabela atual. */
+const MENSAIS_ATUAIS: readonly PlanoId[] = ["essencial", "plus"];
+
 /**
- * Receita recorrente mensal das assinaturas vigentes.
+ * Receita recorrente mensal.
  *
- * O Deluxe fica de fora de propósito: é pagamento único, e somá-lo ao MRR
- * inflaria um número que só faz sentido como recorrência.
+ * Conta só Essencial e Plus vigentes, e usa o `plan_type` cru em vez do nível
+ * traduzido. A diferença importa: `monthly` e `daily` dão acesso Plus, mas o
+ * mensal legado paga o preço antigo e o teste de 1 dia não paga nada. Contá-los
+ * a R$67,90 inflaria o número que serve justamente para você saber quanto entra
+ * por mês.
+ *
+ * O Deluxe fica de fora pelo mesmo motivo de sempre: é pagamento único.
  */
 export function receitaRecorrente(assinaturas: AssinaturaBruta[]): number {
   let total = 0;
   for (const a of assinaturas) {
     if (!estaAtiva(a)) continue;
-    const nivel = nivelDoPlanType(a.plan_type);
-    if (!nivel || nivel === "deluxe") continue;
-    total += planoPorId(nivel).preco;
+    const tipo = (a.plan_type ?? "").toLowerCase() as PlanoId;
+    if (!MENSAIS_ATUAIS.includes(tipo)) continue;
+    total += planoPorId(tipo).preco;
   }
   return Math.round(total * 100) / 100;
+}
+
+/** Quantos assinantes entram no cálculo da receita recorrente. */
+export function assinantesRecorrentes(assinaturas: AssinaturaBruta[]): number {
+  return assinaturas.filter(
+    (a) => estaAtiva(a) && MENSAIS_ATUAIS.includes((a.plan_type ?? "").toLowerCase() as PlanoId),
+  ).length;
 }
 
 /** Conta por nível, já na ordem dos planos, só de quem está vigente. */

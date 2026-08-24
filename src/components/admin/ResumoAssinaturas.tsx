@@ -3,6 +3,7 @@ import { AlertTriangle, Crown, TrendingUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ORDEM_PLANOS, planoPorId, precoBR } from "@/lib/acesso/planos";
 import {
+  assinantesRecorrentes,
   distribuicao,
   estaAtiva,
   receitaRecorrente,
@@ -63,6 +64,7 @@ export const ResumoAssinaturas = ({ contas }: ResumoAssinaturasProps) => {
   const ativos = contas.filter(estaAtiva);
   const porPlano = distribuicao(contas);
   const mrr = receitaRecorrente(contas);
+  const pagantes = assinantesRecorrentes(contas);
   const expirando = contas.filter((c) => situacao(c) === "expirando").length;
   const expirados = contas.filter((c) => situacao(c) === "expirado").length;
   const totalBarra = ORDEM_PLANOS.reduce((soma, p) => soma + porPlano[p], 0);
@@ -79,7 +81,7 @@ export const ResumoAssinaturas = ({ contas }: ResumoAssinaturasProps) => {
         <Indicador
           rotulo="Receita recorrente"
           valor={precoBR(mrr)}
-          apoio="Mensais vigentes, sem o Deluxe"
+          apoio={`${pagantes} ${pagantes === 1 ? "assinatura mensal" : "assinaturas mensais"} vigentes`}
           icone={TrendingUp}
           tom="text-emerald-400"
         />
