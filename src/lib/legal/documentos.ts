@@ -514,7 +514,7 @@ export const POLITICA_COOKIES: DocumentoLegal = {
           tipo: "lista",
           itens: [
             "Sessão de autenticação (Supabase): mantém você logado entre uma página e outra. Sem esse, cada clique pediria a senha de novo. Fica no localStorage e dura até você sair.",
-            "Preferência de tema: guarda se você escolheu claro ou escuro.",
+            "Preferências de interface: guarda se você escolheu tema claro ou escuro e quais grupos do menu lateral deixou fechados.",
             "Estado da calculadora: guarda no sessionStorage o que você digitou, para não perder o preenchimento ao trocar de aba dentro da ferramenta. Some ao fechar a aba.",
             "Segurança: controla o limite de tentativas de login para conter ataque de força bruta.",
           ],

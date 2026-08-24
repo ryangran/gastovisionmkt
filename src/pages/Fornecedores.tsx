@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { MapPin, MessageCircle, Phone, Search, Store, X } from "lucide-react";
+import { ChevronDown, MapPin, MessageCircle, Phone, Search, Store, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,6 +117,9 @@ const CartaoFornecedor = ({ fornecedor }: { fornecedor: Fornecedor }) => {
 
 const Fornecedores = () => {
   const [segmento, setSegmento] = useState<Segmento>("geral");
+  // Fechado por padrão: 36 chips abertos ocupavam quatro linhas antes do
+  // primeiro resultado aparecer.
+  const [filtroAberto, setFiltroAberto] = useState(false);
   const [busca, setBusca] = useState("");
   const [categoria, setCategoria] = useState<CategoriaFornecedor | null>(null);
 
@@ -145,6 +148,14 @@ const Fornecedores = () => {
   const trocarSegmento = (novo: Segmento) => {
     setSegmento(novo);
     setCategoria(null);
+    setFiltroAberto(false);
+  };
+
+  // Escolher já fecha: a lista é longa e manter aberta empurraria os
+  // resultados para fora da tela justamente na hora de olhar para eles.
+  const escolherCategoria = (nova: CategoriaFornecedor | null) => {
+    setCategoria(nova);
+    setFiltroAberto(false);
   };
 
   return (
@@ -201,41 +212,71 @@ const Fornecedores = () => {
         ) : null}
       </div>
 
-      {/* Filtro por categoria. A lista de moda não tem categoria na origem. */}
-      <div className={cn("mb-6 flex-wrap gap-2", segmento === "geral" ? "flex" : "hidden")}>
-        <button
-          type="button"
-          onClick={() => setCategoria(null)}
-          className={cn(
-            "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-            categoria === null
-              ? "border-primary bg-primary/10 text-foreground"
-              : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
-          )}
-        >
-          Todas ({lista.length})
-        </button>
+      {/* Filtro por categoria, recolhido. A lista de moda não tem categoria na
+          origem, então o seletor inteiro some naquele segmento. */}
+      {segmento === "geral" ? (
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => setFiltroAberto((v) => !v)}
+            aria-expanded={filtroAberto}
+            aria-controls="lista-categorias"
+            className={cn(
+              "flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+              categoria
+                ? "border-primary bg-primary/10 text-foreground"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+            )}
+          >
+            Categoria: {categoria ?? "todas"} ({categoria ? contagem.get(categoria) ?? 0 : lista.length})
+            <ChevronDown
+              aria-hidden
+              className={cn("h-4 w-4 transition-transform", filtroAberto && "rotate-180")}
+            />
+          </button>
 
-        {CATEGORIAS_FORNECEDOR.map((cat) => {
-          const total = contagem.get(cat) ?? 0;
-          if (total === 0) return null;
-          return (
+          <div
+            id="lista-categorias"
+            className={cn(
+              "mt-3 flex-wrap gap-2 rounded-lg border border-border bg-card/40 p-3",
+              filtroAberto ? "flex" : "hidden",
+            )}
+          >
             <button
-              key={cat}
               type="button"
-              onClick={() => setCategoria(cat)}
+              onClick={() => escolherCategoria(null)}
               className={cn(
                 "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                categoria === cat
+                categoria === null
                   ? "border-primary bg-primary/10 text-foreground"
                   : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
               )}
             >
-              {cat} ({total})
+              Todas ({lista.length})
             </button>
-          );
-        })}
-      </div>
+
+            {CATEGORIAS_FORNECEDOR.map((cat) => {
+              const total = contagem.get(cat) ?? 0;
+              if (total === 0) return null;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => escolherCategoria(cat)}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    categoria === cat
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                  )}
+                >
+                  {cat} ({total})
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       {filtrados.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border py-16 text-center">

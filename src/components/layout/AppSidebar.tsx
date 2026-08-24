@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -14,6 +14,7 @@ import {
   Lock,
   CreditCard,
   LogOut,
+  ChevronDown,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,6 +77,34 @@ const GRUPOS: GrupoNav[] = [
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string;
 
+/** Grupos que a pessoa fechou. localStorage e não sessionStorage: é preferência
+ *  de interface, e teria que ser refeita a cada aba nova. */
+const CHAVE_GRUPOS = "vetrex:menu-grupos-fechados";
+
+function useGruposFechados() {
+  const [fechados, setFechados] = useState<Record<string, boolean>>(() => {
+    try {
+      const bruto = localStorage.getItem(CHAVE_GRUPOS);
+      return bruto ? (JSON.parse(bruto) as Record<string, boolean>) : {};
+    } catch {
+      // Navegador com dados de site bloqueados. Menu todo aberto é o certo aqui.
+      return {};
+    }
+  });
+
+  const alternar = useCallback((titulo: string) => {
+    setFechados((atual) => {
+      const proximo = { ...atual, [titulo]: !atual[titulo] };
+      try {
+        localStorage.setItem(CHAVE_GRUPOS, JSON.stringify(proximo));
+      } catch {}
+      return proximo;
+    });
+  }, []);
+
+  return { fechados, alternar };
+}
+
 /** Mostra o item de admin só para quem tem o papel — o RPC é a fonte de verdade. */
 function useEhAdmin(): boolean {
   const [ehAdmin, setEhAdmin] = useState(false);
@@ -108,6 +137,7 @@ interface AppSidebarProps {
 export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
   const ehAdmin = useEhAdmin();
   const navegar = useNavigate();
+  const { fechados, alternar } = useGruposFechados();
   const { ilimitado, carregando } = useAcesso();
 
   // Enquanto carrega não mostra cadeado: piscar cadeado na cara de quem já
@@ -128,12 +158,25 @@ export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-6">
-        {grupos.map((grupo) => (
-          <div key={grupo.titulo} className="mb-6">
-            <p className="px-5 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {grupos.map((grupo) => {
+          const fechado = Boolean(fechados[grupo.titulo]);
+          const idLista = `grupo-${grupo.titulo.replace(/\s+/g, "-").toLowerCase()}`;
+          return (
+          <div key={grupo.titulo} className={cn(fechado ? "mb-2" : "mb-6")}>
+            <button
+              type="button"
+              onClick={() => alternar(grupo.titulo)}
+              aria-expanded={!fechado}
+              aria-controls={idLista}
+              className="flex w-full items-center justify-between px-5 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+            >
               {grupo.titulo}
-            </p>
-            <ul>
+              <ChevronDown
+                aria-hidden
+                className={cn("h-3.5 w-3.5 transition-transform", fechado && "-rotate-90")}
+              />
+            </button>
+            <ul id={idLista} className={cn(fechado && "hidden")}>
               {grupo.itens.map((item) => {
                 const { to, label, icon: Icone } = item;
                 const comCadeado = travado(item);
@@ -178,7 +221,8 @@ export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
               })}
             </ul>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Sair fica no rodapé, separado da navegação, porque não é um destino:
