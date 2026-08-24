@@ -37,27 +37,19 @@ export interface AvaliacaoRoas {
 }
 
 /**
- * Margem em % do preço, a partir do que a pessoa paga e do que recebe.
+ * Margem de contribuição em % do preço, a partir do lucro em reais.
  *
- * Pedir a margem pronta obriga quem usa a já ter feito essa conta em algum
- * lugar. Custo do produto é o número que todo seller sabe de cabeça.
+ * É o "valor que sobra ÷ preço de venda" da definição. Pedir o lucro direto
+ * poupa uma conta intermediária: o ROAS de equilíbrio vira simplesmente
+ * preço ÷ lucro, que é a forma como o seller pensa o número.
  *
- * `outrosCustos` é onde entram comissão do marketplace, frete, imposto e
- * embalagem. Sem eles a margem sai otimista, e margem otimista vira ROAS de
- * equilíbrio baixo demais — o erro que faz a pessoa perder dinheiro em cada
- * venda achando que está no lucro.
+ * O que entra em "lucro" é decisão de quem digita. Se o valor já vier líquido
+ * de comissão, frete e imposto, o ROAS sai líquido também.
  */
-export function margemDePrecoECusto(
-  preco: number,
-  custo: number,
-  outrosCustos = 0,
-): number | null {
+export function margemDeLucro(preco: number, lucro: number): number | null {
   if (!Number.isFinite(preco) || preco <= 0) return null;
-  if (!Number.isFinite(custo) || custo < 0) return null;
-
-  const extras = Number.isFinite(outrosCustos) && outrosCustos > 0 ? outrosCustos : 0;
-  const sobra = preco - custo - extras;
-  return arredondar((sobra / preco) * 100);
+  if (!Number.isFinite(lucro)) return null;
+  return arredondar((lucro / preco) * 100);
 }
 
 function margemValida(margemPercent: number): boolean {

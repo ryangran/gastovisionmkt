@@ -19,7 +19,7 @@ import {
   recomendarRoas,
   avaliarRoasAtual,
   fmtNumero,
-  margemDePrecoECusto,
+  margemDeLucro,
   type Objetivo,
 } from "@/lib/pricing/ads";
 
@@ -75,7 +75,7 @@ const CalculadoraAds = () => {
 
   const [selecionado, setSelecionado] = usePersistedState<string>("ads_produto", MANUAL);
   const [precoManual, setPrecoManual] = usePersistedState("ads_preco", "");
-  const [custoManual, setCustoManual] = usePersistedState("ads_custo", "");
+  const [lucroManual, setLucroManual] = usePersistedState("ads_lucro", "");
   const [objetivo, setObjetivo] = usePersistedState<Objetivo>("ads_objetivo", "rentabilidade");
   const [roasAtual, setRoasAtual] = usePersistedState("ads_roas", "");
 
@@ -84,11 +84,11 @@ const CalculadoraAds = () => {
   const precoVenda = produto ? produto.sale_price : parseNum(precoManual);
 
   // Produto salvo já traz a margem líquida, calculada com as taxas reais do
-  // marketplace. No manual a margem sai de preço menos custo, que é o número
-  // que o seller sabe de cabeça.
-  const margemManualCalculada = margemDePrecoECusto(
+  // marketplace. No manual a pessoa informa o lucro em reais, e o ROAS de
+  // equilíbrio é só preço dividido por ele.
+  const margemManualCalculada = margemDeLucro(
     parseNum(precoManual),
-    parseNum(custoManual),
+    parseNum(lucroManual),
   );
   const margemPercent = produto
     ? produto.profit_margin_percent
@@ -182,9 +182,9 @@ const CalculadoraAds = () => {
                       onChange={(e) => setPrecoManual(e.target.value)} placeholder="0,00" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="ads-custo">Custo do produto (R$)</Label>
-                    <Input id="ads-custo" inputMode="decimal" value={custoManual}
-                      onChange={(e) => setCustoManual(e.target.value)} placeholder="0,00" />
+                    <Label htmlFor="ads-lucro">Lucro por venda (R$)</Label>
+                    <Input id="ads-lucro" inputMode="decimal" value={lucroManual}
+                      onChange={(e) => setLucroManual(e.target.value)} placeholder="0,00" />
                   </div>
                 </div>
 
@@ -253,7 +253,7 @@ const CalculadoraAds = () => {
                   <Megaphone className="h-8 w-8 text-primary" />
                 </div>
                 <p className="max-w-sm text-sm text-muted-foreground">
-                  Escolha um produto salvo ou informe preço e custo para descobrir o ROAS mínimo
+                  Escolha um produto salvo ou informe preço e lucro para descobrir o ROAS mínimo
                   que o anúncio precisa entregar.
                 </p>
               </CardContent>
@@ -269,7 +269,7 @@ const CalculadoraAds = () => {
                   <p className="mt-1 text-sm text-muted-foreground">
                     Com margem de {margemPercent.toFixed(1)}% não existe ROAS que torne o
                     anúncio viável: cada venda já sai no negativo antes de qualquer gasto com
-                    tráfego. Ajuste preço ou custo antes de anunciar.
+                    tráfego. Ajuste preço ou custos antes de anunciar.
                   </p>
                 </div>
               </CardContent>

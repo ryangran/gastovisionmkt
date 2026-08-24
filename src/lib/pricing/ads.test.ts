@@ -4,7 +4,7 @@ import {
   acosEquilibrio,
   recomendarRoas,
   avaliarRoasAtual,
-  margemDePrecoECusto,
+  margemDeLucro,
 } from "./ads";
 
 describe("roasEquilibrio", () => {
@@ -90,45 +90,39 @@ describe("avaliarRoasAtual", () => {
   });
 });
 
-describe("margemDePrecoECusto", () => {
-  it("tira a margem do preço e do custo", () => {
-    // 34,43 vendendo, 15 de custo: sobram 19,43, que são 56,43% do preço.
-    expect(margemDePrecoECusto(34.43, 15)).toBe(56.43);
-    expect(margemDePrecoECusto(100, 60)).toBe(40);
+describe("margemDeLucro", () => {
+  it("tira a margem do preço e do lucro em reais", () => {
+    // 34,43 vendendo com 21,01 de lucro: 61,02% do preço.
+    expect(margemDeLucro(34.43, 21.01)).toBe(61.02);
+    expect(margemDeLucro(100, 40)).toBe(40);
   });
 
-  it("desconta os outros custos por venda", () => {
-    // Sem comissão, frete e imposto a margem sai otimista, e margem otimista
-    // vira ROAS de equilíbrio baixo demais.
-    expect(margemDePrecoECusto(34.43, 15, 8)).toBe(33.2);
-    expect(margemDePrecoECusto(100, 40, 20)).toBe(40);
+  it("lucro igual ao preço é margem de 100%", () => {
+    expect(margemDeLucro(50, 50)).toBe(100);
   });
 
-  it("aceita custo zero, que é o caso de brinde e amostra", () => {
-    expect(margemDePrecoECusto(50, 0)).toBe(100);
-  });
-
-  it("devolve margem negativa quando o custo passa do preço", () => {
+  it("devolve margem negativa quando o lucro é negativo", () => {
     // Negativo é informação: quem cai aqui não deveria anunciar. Quem consome
     // trata margem <= 0 como sem ROAS possível.
-    expect(margemDePrecoECusto(100, 130)).toBe(-30);
-    expect(recomendarRoas(margemDePrecoECusto(100, 130) as number, "giro")).toBeNull();
+    expect(margemDeLucro(100, -30)).toBe(-30);
+    expect(recomendarRoas(margemDeLucro(100, -30) as number, "giro")).toBeNull();
+  });
+
+  it("lucro zero não tem ROAS que salve", () => {
+    expect(margemDeLucro(100, 0)).toBe(0);
+    expect(roasEquilibrio(margemDeLucro(100, 0) as number)).toBeNull();
   });
 
   it("devolve null para entradas sem sentido", () => {
-    expect(margemDePrecoECusto(0, 10)).toBeNull();
-    expect(margemDePrecoECusto(-5, 10)).toBeNull();
-    expect(margemDePrecoECusto(100, -1)).toBeNull();
-    expect(margemDePrecoECusto(Number.NaN, 10)).toBeNull();
-  });
-
-  it("ignora outros custos negativos em vez de somar lucro do nada", () => {
-    expect(margemDePrecoECusto(100, 60, -20)).toBe(40);
+    expect(margemDeLucro(0, 10)).toBeNull();
+    expect(margemDeLucro(-5, 10)).toBeNull();
+    expect(margemDeLucro(Number.NaN, 10)).toBeNull();
+    expect(margemDeLucro(100, Number.NaN)).toBeNull();
   });
 
   it("fecha o ciclo com o ROAS de equilíbrio", () => {
-    // 100 de preço e 80 de custo dão 20% de margem, que é ROAS 5.
-    const margem = margemDePrecoECusto(100, 80) as number;
+    // 100 de preço e 20 de lucro dão 20% de margem, que é ROAS 5.
+    const margem = margemDeLucro(100, 20) as number;
     expect(margem).toBe(20);
     expect(roasEquilibrio(margem)).toBe(5);
   });
@@ -157,8 +151,11 @@ describe("equivalência com a fórmula de mercado", () => {
       const margemDecimal = sobra / preco;
       const esperado = 1 / margemDecimal;
 
-      const margemPercent = margemDePrecoECusto(preco, preco - sobra) as number;
+      const margemPercent = margemDeLucro(preco, sobra) as number;
       const obtido = roasEquilibrio(margemPercent) as number;
+
+      // A forma curta que o seller usa: preço dividido pelo lucro.
+      expect(obtido).toBeCloseTo(preco / sobra, 1);
 
       // Tolerância de centésimo: a implementação arredonda em dois pontos.
       expect(obtido).toBeCloseTo(esperado, 1);
@@ -166,7 +163,7 @@ describe("equivalência com a fórmula de mercado", () => {
   });
 
   it("o ACOS de equilíbrio é a própria margem, como manda a definição", () => {
-    const margem = margemDePrecoECusto(34.43, 13.42) as number;
+    const margem = margemDeLucro(34.43, 21.01) as number;
     expect(acosEquilibrio(margem)).toBe(margem);
     // E ACOS e ROAS são recíprocos: 100/ACOS = ROAS.
     expect(100 / (acosEquilibrio(margem) as number)).toBeCloseTo(
