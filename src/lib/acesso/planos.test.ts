@@ -57,6 +57,15 @@ describe("PLANOS", () => {
     expect(PLANOS.filter((p) => p.destaque)).toHaveLength(1);
   });
 
+  it("o destaque é o Deluxe, e ele tem selo próprio", () => {
+    // Decisão de negócio: o Deluxe é o que se quer vender. Um teste segura
+    // isso, senão uma edição no arquivo de planos move o realce sem querer.
+    expect(planoPorId("deluxe").destaque).toBe(true);
+    expect(planoPorId("deluxe").selo).toBeTruthy();
+    expect(planoPorId("plus").destaque).toBeFalsy();
+    expect(planoPorId("essencial").destaque).toBeFalsy();
+  });
+
   it("só o deluxe é pagamento único", () => {
     expect(planoPorId("deluxe").periodo).toBe("pagamento único");
     expect(planoPorId("essencial").periodo).toBe("por mês");

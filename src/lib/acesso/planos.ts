@@ -65,6 +65,8 @@ export interface Plano {
   /** Benefício que não é uma área do sistema. */
   bonus?: string;
   destaque?: boolean;
+  /** Texto do selo do plano em destaque. */
+  selo?: string;
   /**
    * URL do checkout. Enquanto estiver vazia o botão cai no WhatsApp, que é
    * como a venda acontece hoje. Basta colar o link aqui para o botão passar a
@@ -103,7 +105,6 @@ export const PLANOS: Plano[] = [
       "Produtos salvos, sem limite",
       "RPA de afiliados da Shopee",
     ],
-    destaque: true,
     checkoutUrl: "https://pay.cakto.com.br/39x7i89",
   },
   {
@@ -119,6 +120,8 @@ export const PLANOS: Plano[] = [
       "Atualizações vitalícias, incluindo as taxas",
     ],
     bonus: "1 diagnóstico em call, gratuito",
+    destaque: true,
+    selo: "Melhor escolha",
     checkoutUrl: "https://pay.cakto.com.br/6m7kaiz_785267",
   },
 ];

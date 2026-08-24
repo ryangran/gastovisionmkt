@@ -29,7 +29,7 @@ export const CartaoPlano = ({ plano, compacto }: CartaoPlanoProps) => {
     >
       {plano.destaque && (
         <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-          Mais escolhido
+          {plano.selo ?? "Mais escolhido"}
         </span>
       )}
 
