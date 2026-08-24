@@ -21,6 +21,7 @@ const Calculadora = lazy(() => import("./pages/Calculadora"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const ProdutosSalvos = lazy(() => import("./pages/ProdutosSalvos"));
 const PaginaLegal = lazy(() => import("./pages/PaginaLegal"));
+const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => {
                     path="/rpa-afiliados"
                     element={<ExigePlano {...TRAVAS.rpa}><RpaAfiliados /></ExigePlano>}
                   />
+                  <Route path="/fornecedores" element={<Fornecedores />} />
                   <Route path="/perfil" element={<Perfil />} />
                   <Route path="/planos" element={<Planos />} />
                   <Route path="/admin-panel" element={<AdminPanel />} />

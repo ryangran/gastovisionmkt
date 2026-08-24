@@ -7,6 +7,7 @@ import {
   Megaphone,
   Bookmark,
   Receipt,
+  Store,
   UserRound,
   Shield,
   GraduationCap,
@@ -54,6 +55,10 @@ const GRUPOS: GrupoNav[] = [
   {
     titulo: "Afiliados",
     itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt, pago: true }],
+  },
+  {
+    titulo: "Fornecedores",
+    itens: [{ to: "/fornecedores", label: "Fornecedores", icon: Store, pago: true }],
   },
   {
     titulo: "Conta",
