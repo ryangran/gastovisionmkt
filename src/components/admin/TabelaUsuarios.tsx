@@ -1,4 +1,12 @@
-import { Edit, Infinity as Vitalicio, KeyRound, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import {
+  Edit,
+  Infinity as Vitalicio,
+  KeyRound,
+  MessageCircle,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +33,7 @@ import {
   situacao,
   type Situacao,
 } from "@/lib/acesso/planoAdmin";
+import { linkWhatsApp, pareceFixo } from "@/lib/telefone";
 
 /**
  * Lista de contas em tabela, e não em cartões empilhados.
@@ -45,6 +54,7 @@ export interface ContaAdmin {
   purchase_id: string | null;
   plan_type: string | null;
   expires_at: string | null;
+  telefone: string | null;
 }
 
 interface TabelaUsuariosProps {
@@ -94,6 +104,38 @@ const Validade = ({ conta }: { conta: ContaAdmin }) => {
   );
 };
 
+/**
+ * Telefone com atalho para a conversa. O botão é o motivo de a coluna existir:
+ * dá para chamar a pessoa sem sair da lista e sem copiar número na mão.
+ */
+const Contato = ({ telefone, email }: { telefone: string | null; email: string }) => {
+  if (!telefone) return <span className="text-muted-foreground">—</span>;
+
+  const link = linkWhatsApp(
+    telefone,
+    `Olá! Aqui é da Vetrex, sobre a sua conta ${email}.`,
+  );
+  if (!link) {
+    // Número guardado mas inválido: mostra para dar o que corrigir, sem
+    // oferecer um botão que abriria conversa com o número errado.
+    return <span className="text-muted-foreground line-through">{telefone}</span>;
+  }
+
+  return (
+    <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 text-foreground transition-colors hover:text-emerald-400"
+      title={pareceFixo(telefone) ? "Número fixo — pode não ter WhatsApp" : "Abrir conversa"}
+    >
+      <MessageCircle className="h-3.5 w-3.5 text-emerald-500" />
+      <span className="tabular-nums">{telefone}</span>
+      {pareceFixo(telefone) && <span className="text-[10px] text-muted-foreground">fixo</span>}
+    </a>
+  );
+};
+
 export const TabelaUsuarios = ({
   contas,
   emailAdmin,
@@ -113,10 +155,11 @@ export const TabelaUsuarios = ({
 
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
-      <Table className="min-w-[820px]">
+      <Table className="min-w-[960px]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-[34%]">Conta</TableHead>
+            <TableHead className="w-[28%]">Conta</TableHead>
+            <TableHead>WhatsApp</TableHead>
             <TableHead>Plano</TableHead>
             <TableHead>Validade</TableHead>
             <TableHead>Cadastro</TableHead>
@@ -142,6 +185,10 @@ export const TabelaUsuarios = ({
                       </Badge>
                     )}
                   </div>
+                </TableCell>
+
+                <TableCell className="text-xs">
+                  <Contato telefone={conta.telefone} email={conta.email} />
                 </TableCell>
 
                 <TableCell>

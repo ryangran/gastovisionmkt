@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { mensagemErroCadastro } from "@/lib/acesso/erroCadastro";
 import { ROTA_LEGAL, versoesAceitas } from "@/lib/legal/documentos";
+import { formatarTelefone, telefoneValido } from "@/lib/telefone";
 import { ModalAceiteLegal } from "@/components/legal/ModalAceiteLegal";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
@@ -20,6 +21,7 @@ import {
   EyeOff,
   CheckCircle2,
   MessageCircle,
+  Phone,
 } from "lucide-react";
 
 // Rate limiting: max 5 attempts per 15 minutes per session
@@ -36,6 +38,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [modo, setModo] = useState<"entrar" | "criar" | "recuperar" | "nova_senha">("entrar");
   const [isLocked, setIsLocked] = useState(false);
@@ -141,6 +144,10 @@ const Auth = () => {
       toast.error("A senha precisa de pelo menos 6 caracteres.");
       return;
     }
+    if (!telefoneValido(telefone)) {
+      toast.error("Confira o telefone: precisa de DDD e número completo.");
+      return;
+    }
     setAceiteAberto(true);
   };
 
@@ -156,7 +163,7 @@ const Auth = () => {
           // Um trigger em auth.users copia isto para `aceites_legais`. Gravar
           // pelo servidor é o que faz o registro valer quando o projeto exige
           // confirmação por email e o cliente fica sem sessão.
-          data: { aceites_legais: versoesAceitas() },
+          data: { aceites_legais: versoesAceitas(), telefone },
         },
       });
 
@@ -362,6 +369,34 @@ const Auth = () => {
                   maxLength={254}
                 />
               </div>
+            </div>
+            )}
+
+            {modo === "criar" && (
+            <div className="space-y-2">
+              <Label className="text-foreground" htmlFor="telefone">
+                WhatsApp
+              </Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="telefone"
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="(11) 99999-9999"
+                  value={telefone}
+                  // Formata a cada tecla: máscara aplicada só no envio deixa a
+                  // pessoa digitar 15 dígitos sem perceber o erro.
+                  onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+                  className="pl-10 py-5"
+                  required
+                  disabled={isLoading}
+                  maxLength={16}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                É por aqui que falamos com você sobre a conta e o suporte.
+              </p>
             </div>
             )}
 

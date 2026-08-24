@@ -53,6 +53,7 @@ interface UserWithPurchase {
   purchased_at: string | null;
   expires_at: string | null;
   product_name: string | null;
+  telefone: string | null;
 }
 
 import { ResumoAssinaturas } from "@/components/admin/ResumoAssinaturas";
