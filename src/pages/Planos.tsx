@@ -4,6 +4,7 @@ import { Check, Infinity as InfinityIcon, Loader2, ShieldCheck, Sparkles } from 
 import { CartaoPlano } from "@/components/acesso/CartaoPlano";
 import { useAcesso } from "@/components/layout/AcessoProvider";
 import { PLANOS } from "@/lib/acesso/planos";
+import { TabelaComparativa } from "@/components/acesso/TabelaComparativa";
 import { supabase } from "@/integrations/supabase/client";
 
 const PERGUNTAS = [
@@ -194,7 +195,7 @@ const Planos = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="mt-12 grid gap-6 md:grid-cols-2"
+        className="mt-12 grid gap-6 md:grid-cols-3"
       >
         {PLANOS.map((plano) => (
           <CartaoPlano key={plano.id} plano={plano} />
@@ -205,6 +206,18 @@ const Planos = () => {
         <Check className="h-4 w-4 shrink-0 text-primary" />
         Garantia de 7 dias. Se não achar dinheiro que estava escapando, devolvemos.
       </div>
+
+      <section className="mt-16">
+        <h2 className="font-display text-xl font-semibold text-foreground">
+          O que muda entre os planos
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Cada linha é uma área da plataforma. O que está marcado, você abre.
+        </p>
+        <div className="mt-6">
+          <TabelaComparativa />
+        </div>
+      </section>
 
       <section className="mt-16">
         <h2 className="font-display text-xl font-semibold text-foreground">Dúvidas comuns</h2>

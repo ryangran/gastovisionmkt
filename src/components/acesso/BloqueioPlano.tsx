@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Calculator, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartaoPlano } from "@/components/acesso/CartaoPlano";
-import { PLANOS } from "@/lib/acesso/planos";
+import { ORDEM_PLANOS, PLANOS, type Plano } from "@/lib/acesso/planos";
 
 interface BloqueioPlanoProps {
   titulo: string;
@@ -11,10 +11,27 @@ interface BloqueioPlanoProps {
   descricao: string;
   /** Três frases curtas do que a pessoa veria aqui dentro. */
   amostra?: readonly string[];
+  /** O plano mais barato que libera esta área. */
+  planoNecessario?: Plano;
 }
 
 /** Tela de quem ainda não assinou, no lugar de uma ferramenta paga. */
-export const BloqueioPlano = ({ titulo, descricao, amostra }: BloqueioPlanoProps) => (
+export const BloqueioPlano = ({
+  titulo,
+  descricao,
+  amostra,
+  planoNecessario,
+}: BloqueioPlanoProps) => {
+  // Mostra do plano que resolve para cima. Oferecer um plano que não libera
+  // esta tela seria vender a coisa errada para quem chegou aqui.
+  const suficientes = planoNecessario
+    ? PLANOS.filter(
+        (p) =>
+          ORDEM_PLANOS.indexOf(p.id) >= ORDEM_PLANOS.indexOf(planoNecessario.id),
+      )
+    : PLANOS;
+
+  return (
   <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:py-14">
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -28,6 +45,11 @@ export const BloqueioPlano = ({ titulo, descricao, amostra }: BloqueioPlanoProps
       <h1 className="mt-5 font-display text-2xl font-semibold text-foreground sm:text-3xl">
         {titulo}
       </h1>
+      {planoNecessario && (
+        <p className="mt-3 text-sm font-medium text-primary">
+          Disponível a partir do {planoNecessario.nome}
+        </p>
+      )}
       <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
         {descricao}
       </p>
@@ -44,8 +66,14 @@ export const BloqueioPlano = ({ titulo, descricao, amostra }: BloqueioPlanoProps
       )}
     </motion.div>
 
-    <div className="mt-10 grid gap-5 md:grid-cols-2">
-      {PLANOS.map((plano) => (
+    <div
+      className={
+        suficientes.length > 1
+          ? "mt-10 grid gap-5 md:grid-cols-2"
+          : "mx-auto mt-10 grid max-w-md gap-5"
+      }
+    >
+      {suficientes.map((plano) => (
         <CartaoPlano key={plano.id} plano={plano} compacto />
       ))}
     </div>
@@ -65,4 +93,5 @@ export const BloqueioPlano = ({ titulo, descricao, amostra }: BloqueioPlanoProps
       </Button>
     </div>
   </div>
-);
+  );
+};

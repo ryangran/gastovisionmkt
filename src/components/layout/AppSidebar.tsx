@@ -20,6 +20,7 @@ import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAcesso } from "./AcessoProvider";
+import type { Recurso } from "@/lib/acesso/planos";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoHorizontalLight from "@/assets/logo-horizontal-light.png";
 
@@ -27,8 +28,8 @@ interface ItemNav {
   to: string;
   label: string;
   icon: LucideIcon;
-  /** Fica com cadeado enquanto a pessoa não assina. */
-  pago?: boolean;
+  /** Área que o item abre. Sem isto, o item é livre para todo mundo. */
+  recurso?: Recurso;
 }
 
 interface GrupoNav {
@@ -39,27 +40,27 @@ interface GrupoNav {
 const GRUPOS: GrupoNav[] = [
   {
     titulo: "Visão geral",
-    itens: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, pago: true }],
+    itens: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, recurso: "dashboard" }],
   },
   {
     titulo: "Precificar",
     itens: [
       { to: "/calculadora", label: "Calculadora", icon: Calculator },
-      { to: "/comparador", label: "Comparador", icon: GitCompareArrows, pago: true },
-      { to: "/ads", label: "Calculadora de Ads", icon: Megaphone, pago: true },
+      { to: "/comparador", label: "Comparador", icon: GitCompareArrows, recurso: "comparador" },
+      { to: "/ads", label: "Calculadora de Ads", icon: Megaphone, recurso: "ads" },
     ],
   },
   {
     titulo: "Carteira",
-    itens: [{ to: "/produtos-salvos", label: "Produtos salvos", icon: Bookmark, pago: true }],
+    itens: [{ to: "/produtos-salvos", label: "Produtos salvos", icon: Bookmark, recurso: "produtosSalvos" }],
   },
   {
     titulo: "Afiliados",
-    itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt, pago: true }],
+    itens: [{ to: "/rpa-afiliados", label: "RPA de afiliados", icon: Receipt, recurso: "rpa" }],
   },
   {
     titulo: "Fornecedores",
-    itens: [{ to: "/fornecedores", label: "Fornecedores", icon: Store, pago: true }],
+    itens: [{ to: "/fornecedores", label: "Fornecedores", icon: Store, recurso: "fornecedores" }],
   },
   {
     titulo: "Conta",
@@ -141,11 +142,12 @@ export const AppSidebar = ({ onNavegar }: AppSidebarProps) => {
   const ehAdmin = useEhAdmin();
   const navegar = useNavigate();
   const { fechados, alternar } = useGruposFechados();
-  const { ilimitado, carregando } = useAcesso();
+  const { podeUsar, carregando } = useAcesso();
 
   // Enquanto carrega não mostra cadeado: piscar cadeado na cara de quem já
   // paga é pior que demorar meio segundo para mostrar na de quem não paga.
-  const travado = (item: ItemNav) => Boolean(item.pago) && !carregando && !ilimitado;
+  const travado = (item: ItemNav) =>
+    Boolean(item.recurso) && !carregando && !podeUsar(item.recurso as Recurso);
 
   const grupos = ehAdmin
     ? [...GRUPOS, { titulo: "Administração", itens: [{ to: "/admin-panel", label: "Painel admin", icon: Shield }] }]

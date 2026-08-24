@@ -1,4 +1,4 @@
-import { ArrowRight, Check, MessageCircle } from "lucide-react";
+import { ArrowRight, Check, Gift, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -63,6 +63,15 @@ export const CartaoPlano = ({ plano, compacto }: CartaoPlanoProps) => {
           </li>
         )}
       </ul>
+
+      {/* Bônus fora da lista de propósito: é brinde, não funcionalidade, e
+          misturado nos bullets some no meio dos outros. */}
+      {plano.bonus && (
+        <p className="mt-4 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-medium text-foreground">
+          <Gift className="h-4 w-4 shrink-0 text-primary" />
+          {plano.bonus}
+        </p>
+      )}
 
       <Button
         asChild

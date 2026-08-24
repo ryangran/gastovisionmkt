@@ -7,12 +7,15 @@ import {
   type ReactNode,
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { planoLibera, type PlanoId, type Recurso } from "@/lib/acesso/planos";
 
 export interface Acesso {
   carregando: boolean;
   autenticado: boolean;
-  /** Plano ativo, ou admin. Libera a plataforma inteira. */
+  /** Tem algum plano ativo. Libera a calculadora sem orçamento diário. */
   ilimitado: boolean;
+  /** Qual plano. Null quando não assinou. Admin conta como deluxe. */
+  plano: PlanoId | null;
   usados: number;
   limite: number;
   restantes: number;
@@ -22,6 +25,7 @@ export const ACESSO_INICIAL: Acesso = {
   carregando: true,
   autenticado: false,
   ilimitado: false,
+  plano: null,
   usados: 0,
   limite: 2,
   restantes: 0,
@@ -35,12 +39,15 @@ interface ContextoAcesso extends Acesso {
   consumir: (plataforma: string) => Promise<boolean>;
   /** Reconsulta o saldo, já com o orçamento da plataforma aberta. */
   recarregar: (plataforma?: string) => Promise<void>;
+  /** Se o plano atual libera a área. Fonte única para rota e barra lateral. */
+  podeUsar: (recurso: Recurso) => boolean;
 }
 
 const AcessoContext = createContext<ContextoAcesso>({
   ...ACESSO_INICIAL,
   consumir: async () => false,
   recarregar: async () => undefined,
+  podeUsar: () => false,
 });
 
 /** Menor orçamento existente, usado antes de saber qual aba está aberta. */
@@ -51,6 +58,7 @@ interface RespostaRpc {
   autenticado?: boolean;
   ilimitado?: boolean;
   permitido?: boolean;
+  plano?: PlanoId | null;
   usados?: number;
   limite?: number;
   restantes?: number;
@@ -66,6 +74,10 @@ function daResposta(r: RespostaRpc | null): Acesso {
     carregando: false,
     autenticado: true,
     ilimitado: Boolean(r.ilimitado),
+    // consumir_interacao_calculadora não devolve `plano`. Quando vier ausente,
+    // deduz do ilimitado em vez de zerar o plano e derrubar o acesso da pessoa
+    // no meio de um cálculo.
+    plano: r.plano ?? (r.ilimitado ? "deluxe" : null),
     usados,
     limite,
     restantes: r.restantes ?? Math.max(limite - usados, 0),
@@ -130,8 +142,13 @@ export const AcessoProvider = ({ children }: { children: ReactNode }) => {
     return Boolean(r?.permitido);
   }, [acesso.ilimitado]);
 
+  const podeUsar = useCallback(
+    (recurso: Recurso) => planoLibera(acesso.plano, recurso),
+    [acesso.plano],
+  );
+
   return (
-    <AcessoContext.Provider value={{ ...acesso, consumir, recarregar }}>
+    <AcessoContext.Provider value={{ ...acesso, consumir, recarregar, podeUsar }}>
       {children}
     </AcessoContext.Provider>
   );

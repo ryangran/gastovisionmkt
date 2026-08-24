@@ -64,6 +64,27 @@ interface UserWithPurchase {
   product_name: string | null;
 }
 
+/**
+ * Espelha `nivel_do_plan_type` do banco. Precisa existir aqui porque o painel
+ * lê `plan_type` cru da tabela, e sem traduzir os valores legados um assinante
+ * antigo apareceria como "sem plano" para o admin.
+ */
+function nivelDoPlanType(planType: string | null): string | null {
+  switch ((planType ?? "").toLowerCase()) {
+    case "deluxe":
+    case "lifetime":
+      return "deluxe";
+    case "plus":
+    case "monthly":
+    case "daily":
+      return "plus";
+    case "essencial":
+      return "essencial";
+    default:
+      return null;
+  }
+}
+
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,16 +108,16 @@ const AdminPanel = () => {
     open: false,
     user: null,
   });
-  const [editPlanType, setEditPlanType] = useState("monthly");
+  const [editPlanType, setEditPlanType] = useState("plus");
   const [addPlanDialog, setAddPlanDialog] = useState<{ open: boolean; user: UserWithPurchase | null }>({
     open: false,
     user: null,
   });
-  const [addPlanType, setAddPlanType] = useState("monthly");
+  const [addPlanType, setAddPlanType] = useState("plus");
   const [createUserDialog, setCreateUserDialog] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState(() => generateSecurePassword());
-  const [newUserPlanType, setNewUserPlanType] = useState("monthly");
+  const [newUserPlanType, setNewUserPlanType] = useState("plus");
 
   useEffect(() => {
     checkAccessAndLoad();
@@ -195,7 +216,7 @@ const AdminPanel = () => {
         purchaseId: editDialog.user.purchase_id,
         plan_type: editPlanType,
       };
-      if (editPlanType === "lifetime") {
+      if (editPlanType === "deluxe" || editPlanType === "lifetime") {
         updateData.expires_at = null;
       } else if (editPlanType === "daily") {
         const exp = new Date();
@@ -259,7 +280,7 @@ const AdminPanel = () => {
       setCreateUserDialog(false);
       setNewUserEmail("");
       setNewUserPassword(generateSecurePassword());
-      setNewUserPlanType("monthly");
+      setNewUserPlanType("plus");
       await loadUsers();
     } catch (err: any) {
       toast.error(err.message || "Erro ao criar usuário");
@@ -285,8 +306,18 @@ const AdminPanel = () => {
     if (!user.plan_type) {
       return <Badge variant="outline" className="text-muted-foreground">Sem plano</Badge>;
     }
-    if (user.plan_type === "lifetime") {
-      return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">👑 Vitalício</Badge>;
+    if (nivelDoPlanType(user.plan_type) === "deluxe") {
+      const legado = user.plan_type === "lifetime";
+      return (
+        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+          👑 Deluxe{legado ? " (legado)" : ""}
+        </Badge>
+      );
+    }
+    if (user.plan_type === "essencial") {
+      const dias = getDaysRemaining(user.expires_at);
+      if (dias !== null && dias <= 0) return <Badge variant="destructive">Expirado</Badge>;
+      return <Badge className="bg-slate-500/20 text-slate-300 border-slate-500/30">Essencial</Badge>;
     }
     if (user.plan_type === "daily") {
       const days = getDaysRemaining(user.expires_at);
@@ -332,10 +363,13 @@ const AdminPanel = () => {
   const stats = {
     total: groupedUsers.length,
     withPlan: groupedUsers.filter((u) => u.plan_type).length,
-    lifetime: groupedUsers.filter((u) => u.plan_type === "lifetime").length,
-    monthly: groupedUsers.filter((u) => u.plan_type === "monthly").length,
+    deluxe: groupedUsers.filter((u) => nivelDoPlanType(u.plan_type) === "deluxe").length,
+    plus: groupedUsers.filter((u) => nivelDoPlanType(u.plan_type) === "plus").length,
+    essencial: groupedUsers.filter((u) => nivelDoPlanType(u.plan_type) === "essencial").length,
+    // Só os mensais expiram. Deluxe não tem validade.
     expired: groupedUsers.filter((u) => {
-      if (u.plan_type !== "monthly") return false;
+      const nivel = nivelDoPlanType(u.plan_type);
+      if (nivel === null || nivel === "deluxe") return false;
       const d = getDaysRemaining(u.expires_at);
       return d !== null && d <= 0;
     }).length,
@@ -385,12 +419,13 @@ const AdminPanel = () => {
 
           <TabsContent value="usuarios" className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           {[
             { label: "Total", value: stats.total, icon: Users, color: "text-foreground" },
             { label: "Com Plano", value: stats.withPlan, icon: Crown, color: "text-primary" },
-            { label: "Vitalício", value: stats.lifetime, icon: Crown, color: "text-amber-400" },
-            { label: "Mensal", value: stats.monthly, icon: Clock, color: "text-blue-400" },
+            { label: "Deluxe", value: stats.deluxe, icon: Crown, color: "text-amber-400" },
+            { label: "Plus", value: stats.plus, icon: Clock, color: "text-blue-400" },
+            { label: "Essencial", value: stats.essencial, icon: Clock, color: "text-slate-400" },
             { label: "Expirado", value: stats.expired, icon: AlertTriangle, color: "text-destructive" },
           ].map((s) => (
             <Card key={s.label} className="border-border">
@@ -475,7 +510,7 @@ const AdminPanel = () => {
                         size="sm"
                         className="gap-1 text-xs"
                         onClick={() => {
-                          setAddPlanType("monthly");
+                          setAddPlanType("plus");
                           setAddPlanDialog({ open: true, user });
                         }}
                       >
@@ -598,9 +633,10 @@ const AdminPanel = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="daily">Diário (1 dia - teste)</SelectItem>
-                <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
-                <SelectItem value="lifetime">Vitalício</SelectItem>
+                <SelectItem value="essencial">Vetrex Essencial (30 dias)</SelectItem>
+                <SelectItem value="plus">Vetrex Plus (30 dias)</SelectItem>
+                <SelectItem value="deluxe">Vetrex Deluxe (vitalício)</SelectItem>
+                <SelectItem value="daily">Teste de 1 dia (acesso Plus)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -628,9 +664,10 @@ const AdminPanel = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="daily">Diário (1 dia - teste)</SelectItem>
-                <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
-                <SelectItem value="lifetime">Vitalício</SelectItem>
+                <SelectItem value="essencial">Vetrex Essencial (30 dias)</SelectItem>
+                <SelectItem value="plus">Vetrex Plus (30 dias)</SelectItem>
+                <SelectItem value="deluxe">Vetrex Deluxe (vitalício)</SelectItem>
+                <SelectItem value="daily">Teste de 1 dia (acesso Plus)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -689,9 +726,10 @@ const AdminPanel = () => {
                   <SelectValue />
                 </SelectTrigger>
               <SelectContent>
-                <SelectItem value="daily">Diário (1 dia - teste)</SelectItem>
-                <SelectItem value="monthly">Mensal (30 dias)</SelectItem>
-                <SelectItem value="lifetime">Vitalício</SelectItem>
+                <SelectItem value="essencial">Vetrex Essencial (30 dias)</SelectItem>
+                <SelectItem value="plus">Vetrex Plus (30 dias)</SelectItem>
+                <SelectItem value="deluxe">Vetrex Deluxe (vitalício)</SelectItem>
+                <SelectItem value="daily">Teste de 1 dia (acesso Plus)</SelectItem>
               </SelectContent>
               </Select>
             </div>

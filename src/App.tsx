@@ -50,28 +50,35 @@ const App = () => {
                 <Route element={<AppShell />}>
                   <Route
                     path="/dashboard"
-                    element={<ExigePlano {...TRAVAS.dashboard}><Dashboard /></ExigePlano>}
+                    element={<ExigePlano recurso="dashboard" {...TRAVAS.dashboard}><Dashboard /></ExigePlano>}
                   />
                   <Route path="/calculadora" element={<Calculadora />} />
                   <Route
                     path="/comparador"
-                    element={<ExigePlano {...TRAVAS.comparador}><Comparador /></ExigePlano>}
+                    element={<ExigePlano recurso="comparador" {...TRAVAS.comparador}><Comparador /></ExigePlano>}
                   />
                   <Route
                     path="/ads"
-                    element={<ExigePlano {...TRAVAS.ads}><CalculadoraAds /></ExigePlano>}
+                    element={<ExigePlano recurso="ads" {...TRAVAS.ads}><CalculadoraAds /></ExigePlano>}
                   />
                   <Route
                     path="/rpa-afiliados"
-                    element={<ExigePlano {...TRAVAS.rpa}><RpaAfiliados /></ExigePlano>}
+                    element={<ExigePlano recurso="rpa" {...TRAVAS.rpa}><RpaAfiliados /></ExigePlano>}
                   />
-                  <Route path="/fornecedores" element={<Fornecedores />} />
+                  <Route
+                    path="/fornecedores"
+                    element={
+                      <ExigePlano recurso="fornecedores" {...TRAVAS.fornecedores}>
+                        <Fornecedores />
+                      </ExigePlano>
+                    }
+                  />
                   <Route path="/perfil" element={<Perfil />} />
                   <Route path="/planos" element={<Planos />} />
                   <Route path="/admin-panel" element={<AdminPanel />} />
                   <Route
                     path="/produtos-salvos"
-                    element={<ExigePlano {...TRAVAS.produtosSalvos}><ProdutosSalvos /></ExigePlano>}
+                    element={<ExigePlano recurso="produtosSalvos" {...TRAVAS.produtosSalvos}><ProdutosSalvos /></ExigePlano>}
                   />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
 import { BloqueioPlano } from "@/components/acesso/BloqueioPlano";
 import { useAcesso } from "@/components/layout/AcessoProvider";
+import { menorPlanoCom, planoPorId, type Recurso } from "@/lib/acesso/planos";
 
 interface ExigePlanoProps {
+  /** Qual área está sendo protegida. Decide qual plano libera. */
+  recurso: Recurso;
   titulo: string;
   descricao: string;
   amostra?: readonly string[];
@@ -16,8 +19,14 @@ interface ExigePlanoProps {
  * caber numa tela só em App.tsx. Página que nasce nova entra aqui e já está
  * protegida.
  */
-export const ExigePlano = ({ titulo, descricao, amostra, children }: ExigePlanoProps) => {
-  const { carregando, ilimitado } = useAcesso();
+export const ExigePlano = ({
+  recurso,
+  titulo,
+  descricao,
+  amostra,
+  children,
+}: ExigePlanoProps) => {
+  const { carregando, podeUsar } = useAcesso();
 
   // Mostrar a tela de venda antes de saber a resposta faria quem paga ver um
   // paywall piscando toda vez que troca de aba.
@@ -29,8 +38,18 @@ export const ExigePlano = ({ titulo, descricao, amostra, children }: ExigePlanoP
     );
   }
 
-  if (!ilimitado) {
-    return <BloqueioPlano titulo={titulo} descricao={descricao} amostra={amostra} />;
+  if (!podeUsar(recurso)) {
+    // Diz qual plano resolve, em vez de mandar para a lista inteira e deixar a
+    // pessoa descobrir sozinha qual comprar.
+    const necessario = planoPorId(menorPlanoCom(recurso));
+    return (
+      <BloqueioPlano
+        titulo={titulo}
+        descricao={descricao}
+        amostra={amostra}
+        planoNecessario={necessario}
+      />
+    );
   }
 
   return <>{children}</>;
@@ -86,6 +105,16 @@ export const TRAVAS = {
       "Relatório mensal vira um recibo por afiliado",
       "INSS e IRRF calculados pela tabela vigente",
       "Todos os afiliados de uma vez, num arquivo só",
+    ],
+  },
+  fornecedores: {
+    titulo: "O catálogo de fornecedores está no Deluxe",
+    descricao:
+      "587 fornecedores do Brás e de importadoras, do brinquedo à maquiagem, com o WhatsApp de cada um a um clique. É a parte mais cara de montar sozinho: são meses de feira e indicação para chegar numa lista dessas.",
+    amostra: [
+      "395 fornecedores gerais em 36 categorias, mais 192 de moda",
+      "Busca por produto, categoria ou nome, e contato direto no WhatsApp",
+      "Especialidade e endereço de cada um, para você saber a quem ligar",
     ],
   },
 } as const;
