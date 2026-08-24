@@ -97,7 +97,10 @@ function useGruposFechados() {
       const proximo = { ...atual, [titulo]: !atual[titulo] };
       try {
         localStorage.setItem(CHAVE_GRUPOS, JSON.stringify(proximo));
-      } catch {}
+      } catch {
+        // Cota cheia ou dados de site bloqueados. A preferência vale só nesta
+        // sessão, mas o menu continua respondendo ao clique.
+      }
       return proximo;
     });
   }, []);
