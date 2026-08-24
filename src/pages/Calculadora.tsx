@@ -1493,8 +1493,10 @@ const MercadoLivreCalculadora = () => {
   useImpostoDoPerfil(imposto, setImposto);
   const [marketing, setMarketing]     = usePersistedState("calc_ml_marketing", "");
   const [usarMarketing, setUsarMarketing] = usePersistedState("calc_ml_usarMkt", false);
-  const [usarFrete, setUsarFrete]     = usePersistedState("calc_ml_usarFrete", false);
-  const [peso, setPeso]               = usePersistedState("calc_ml_peso", "");
+  // O frete do ML é custo operacional: o próprio Mercado Livre diz que ele se
+  // aplica em todos os casos, mesmo quando o comprador paga o envio. Não é
+  // opcional, então depende só de haver peso informado.
+  const [peso, setPeso] = usePersistedState("calc_ml_peso", "");
 
   // Dialog para adicionar categoria
   const [showAddCategoria, setShowAddCategoria] = useState(false);
@@ -1521,7 +1523,8 @@ const MercadoLivreCalculadora = () => {
     produto: produtoNome,
     categorias: mlCategorias,
     pesoKg: pesoNum,
-    usarFrete,
+    // Frete sempre considerado: é custo operacional do ML.
+    usarFrete: pesoNum > 0,
   };
   const resultado = calcularMercadoLivre(inputs, taxas.mercadolivre);
   const { valorImposto, valorMarketing, valorFrete, receitaLiquida, lucro } = resultado;
@@ -1737,33 +1740,30 @@ const MercadoLivreCalculadora = () => {
 
           <Separator />
 
-          {/* Frete opcional */}
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-foreground font-medium">Nós oferecemos entrega</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">Calcular frete por peso e preço</p>
-            </div>
-            <Switch checked={usarFrete} onCheckedChange={setUsarFrete} />
+          {/* Peso, sempre aberto.
+              Antes ficava atrás de um interruptor desligado por padrão. Quem
+              esquecia de ligar recebia frete zero e um lucro maior que o real —
+              e a tela não dava nenhum sinal de que faltava alguma coisa. */}
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Peso do Produto (kg)</Label>
+            <Input
+              type="number"
+              placeholder="0,5"
+              value={peso}
+              onChange={(e) => setPeso(e.target.value)}
+              step="0.1"
+            />
+            {pesoNum > 0 && preco > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Faixa: <span className="font-medium text-foreground">{MERCADOLIVRE_TAXAS.pesos[pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos)].label}</span>
+                {" "}· Frete: <span className="font-medium text-primary">{formatCurrency(valorFrete)}</span>
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Sem o peso o frete entra como zero, e o lucro acima fica maior do que o real.
+              </p>
+            )}
           </div>
-
-          {usarFrete && (
-            <div className="space-y-2">
-              <Label className="text-foreground">Peso do Produto (kg)</Label>
-              <Input
-                type="number"
-                placeholder="0,5"
-                value={peso}
-                onChange={(e) => setPeso(e.target.value)}
-                step="0.1"
-              />
-              {pesoNum > 0 && preco > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Faixa: <span className="font-medium text-foreground">{MERCADOLIVRE_TAXAS.pesos[pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos)].label}</span>
-                  {" "}· Frete: <span className="font-medium text-primary">{formatCurrency(valorFrete)}</span>
-                </p>
-              )}
-            </div>
-          )}
 
           {/* Marketing */}
           <div className="flex items-center justify-between">
@@ -1812,7 +1812,7 @@ const MercadoLivreCalculadora = () => {
                     {preco < 12.50 && <span className="text-muted-foreground"> (metade do preço)</span>}
                   </p>
                 )}
-                {usarFrete && valorFrete > 0 && (
+                {valorFrete > 0 && (
                   <p>+ Frete ({MERCADOLIVRE_TAXAS.pesos[pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos)].label}) = <span className="font-semibold text-foreground">{formatCurrency(valorFrete)}</span></p>
                 )}
               </div>
@@ -1843,7 +1843,7 @@ const MercadoLivreCalculadora = () => {
                   <span className="text-destructive font-medium">−{formatCurrency(valorCustoFixo)}</span>
                 </div>
               )}
-              {usarFrete && valorFrete > 0 && (
+              {valorFrete > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Frete</span>
                   <span className="text-destructive font-medium">−{formatCurrency(valorFrete)}</span>
@@ -1986,7 +1986,7 @@ const MercadoLivreCalculadora = () => {
         </Card>
 
         {/* Tabela de frete (colapsável) */}
-        {usarFrete && (
+        {pesoNum > 0 && (
           <Card className="border-border bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
