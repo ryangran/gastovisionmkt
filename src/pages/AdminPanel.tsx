@@ -4,8 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MentoriaLeads } from "@/components/admin/MentoriaLeads";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { GestaoTaxas } from "@/components/GestaoTaxas";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -36,17 +34,10 @@ import {
 } from "@/components/ui/select";
 import {
   Shield,
-  Users,
-  Trash2,
-  KeyRound,
   Search,
   LogOut,
   ArrowLeft,
-  Clock,
-  Crown,
-  AlertTriangle,
   Plus,
-  Edit,
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -64,26 +55,10 @@ interface UserWithPurchase {
   product_name: string | null;
 }
 
-/**
- * Espelha `nivel_do_plan_type` do banco. Precisa existir aqui porque o painel
- * lê `plan_type` cru da tabela, e sem traduzir os valores legados um assinante
- * antigo apareceria como "sem plano" para o admin.
- */
-function nivelDoPlanType(planType: string | null): string | null {
-  switch ((planType ?? "").toLowerCase()) {
-    case "deluxe":
-    case "lifetime":
-      return "deluxe";
-    case "plus":
-    case "monthly":
-    case "daily":
-      return "plus";
-    case "essencial":
-      return "essencial";
-    default:
-      return null;
-  }
-}
+import { ResumoAssinaturas } from "@/components/admin/ResumoAssinaturas";
+import { TabelaUsuarios, type ContaAdmin } from "@/components/admin/TabelaUsuarios";
+import { nivelDoPlanType, situacao } from "@/lib/acesso/planoAdmin";
+import { ORDEM_PLANOS, planoPorId, type PlanoId } from "@/lib/acesso/planos";
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string;
 
@@ -103,6 +78,12 @@ const AdminPanel = () => {
   const [users, setUsers] = useState<UserWithPurchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filtroPlano, setFiltroPlano] = useState<PlanoId | "todos" | "sem-plano">("todos");
+  // As ações saíram para um menu suspenso, então a confirmação não pode mais
+  // ficar presa a um gatilho por linha: vira um diálogo só, controlado aqui.
+  const [confirmar, setConfirmar] = useState<
+    { tipo: "senha" | "excluir"; conta: ContaAdmin } | null
+  >(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editDialog, setEditDialog] = useState<{ open: boolean; user: UserWithPurchase | null }>({
     open: false,
@@ -294,56 +275,6 @@ const AdminPanel = () => {
     navigate("/");
   };
 
-  const getDaysRemaining = (expiresAt: string | null) => {
-    if (!expiresAt) return null;
-    const now = new Date();
-    const exp = new Date(expiresAt);
-    const diff = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diff;
-  };
-
-  const getPlanBadge = (user: UserWithPurchase) => {
-    if (!user.plan_type) {
-      return <Badge variant="outline" className="text-muted-foreground">Sem plano</Badge>;
-    }
-    if (nivelDoPlanType(user.plan_type) === "deluxe") {
-      const legado = user.plan_type === "lifetime";
-      return (
-        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-          👑 Deluxe{legado ? " (legado)" : ""}
-        </Badge>
-      );
-    }
-    if (user.plan_type === "essencial") {
-      const dias = getDaysRemaining(user.expires_at);
-      if (dias !== null && dias <= 0) return <Badge variant="destructive">Expirado</Badge>;
-      return <Badge className="bg-slate-500/20 text-slate-300 border-slate-500/30">Essencial</Badge>;
-    }
-    if (user.plan_type === "daily") {
-      const days = getDaysRemaining(user.expires_at);
-      if (days !== null && days <= 0) {
-        return <Badge variant="destructive">Teste Expirado</Badge>;
-      }
-      return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">🧪 Teste 1 dia</Badge>;
-    }
-    const days = getDaysRemaining(user.expires_at);
-    if (days !== null && days <= 0) {
-      return <Badge variant="destructive">Expirado</Badge>;
-    }
-    if (days !== null && days <= 7) {
-      return (
-        <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
-          ⏰ {days}d restantes
-        </Badge>
-      );
-    }
-    return (
-      <Badge className="bg-primary/20 text-primary border-primary/30">
-        Mensal • {days}d restantes
-      </Badge>
-    );
-  };
-
   /** Quando a compra entrou. Linha antiga pode não ter purchased_at. */
   const quando = (u: UserWithPurchase) =>
     new Date(u.purchased_at ?? u.created_at ?? 0).getTime();
@@ -363,24 +294,12 @@ const AdminPanel = () => {
     return acc;
   }, [] as UserWithPurchase[]);
 
-  const filtered = groupedUsers.filter((u) =>
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const stats = {
-    total: groupedUsers.length,
-    withPlan: groupedUsers.filter((u) => u.plan_type).length,
-    deluxe: groupedUsers.filter((u) => nivelDoPlanType(u.plan_type) === "deluxe").length,
-    plus: groupedUsers.filter((u) => nivelDoPlanType(u.plan_type) === "plus").length,
-    essencial: groupedUsers.filter((u) => nivelDoPlanType(u.plan_type) === "essencial").length,
-    // Só os mensais expiram. Deluxe não tem validade.
-    expired: groupedUsers.filter((u) => {
-      const nivel = nivelDoPlanType(u.plan_type);
-      if (nivel === null || nivel === "deluxe") return false;
-      const d = getDaysRemaining(u.expires_at);
-      return d !== null && d <= 0;
-    }).length,
-  };
+  const filtered = groupedUsers.filter((u) => {
+    if (!u.email?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filtroPlano === "todos") return true;
+    if (filtroPlano === "sem-plano") return situacao(u) === "sem-plano";
+    return nivelDoPlanType(u.plan_type) === filtroPlano;
+  });
 
   if (loading) {
     return (
@@ -425,32 +344,12 @@ const AdminPanel = () => {
           </TabsList>
 
           <TabsContent value="usuarios" className="space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-          {[
-            { label: "Total", value: stats.total, icon: Users, color: "text-foreground" },
-            { label: "Com Plano", value: stats.withPlan, icon: Crown, color: "text-primary" },
-            { label: "Deluxe", value: stats.deluxe, icon: Crown, color: "text-amber-400" },
-            { label: "Plus", value: stats.plus, icon: Clock, color: "text-blue-400" },
-            { label: "Essencial", value: stats.essencial, icon: Clock, color: "text-slate-400" },
-            { label: "Expirado", value: stats.expired, icon: AlertTriangle, color: "text-destructive" },
-          ].map((s) => (
-            <Card key={s.label} className="border-border">
-              <CardContent className="pt-4 pb-3 px-4">
-                <div className="flex items-center gap-2">
-                  <s.icon className={`w-4 h-4 ${s.color}`} />
-                  <span className="text-xs text-muted-foreground">{s.label}</span>
-                </div>
-                <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ResumoAssinaturas contas={groupedUsers} />
 
-        {/* Search + Refresh */}
-        <div className="flex items-center gap-3">
+        {/* Busca, filtro e ações */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Buscar por email..."
               value={searchTerm}
@@ -458,166 +357,57 @@ const AdminPanel = () => {
               className="pl-9"
             />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCreateUserDialog(true)}
-            className="gap-2"
+
+          <Select
+            value={filtroPlano}
+            onValueChange={(v) => setFiltroPlano(v as PlanoId | "todos" | "sem-plano")}
           >
-            <Plus className="w-4 h-4" />
-            Novo Usuário
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { setLoading(true); loadUsers().finally(() => setLoading(false)); }}
-            className="gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Atualizar
-          </Button>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os planos</SelectItem>
+              {ORDEM_PLANOS.map((id) => (
+                <SelectItem key={id} value={id}>
+                  {planoPorId(id).nome}
+                </SelectItem>
+              ))}
+              <SelectItem value="sem-plano">Sem plano</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-2">
+            <Button onClick={() => setCreateUserDialog(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nova conta
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Atualizar lista"
+              onClick={() => { setLoading(true); loadUsers().finally(() => setLoading(false)); }}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Users list */}
-        <div className="space-y-3">
-          {filtered.map((user) => (
-            <Card key={user.user_id} className="border-border">
-              <CardContent className="py-4 px-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-foreground truncate">{user.email}</span>
-                      {user.email === ADMIN_EMAIL && (
-                        <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">Admin</Badge>
-                      )}
-                      {getPlanBadge(user)}
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>
-                        Cadastro: {new Date(user.created_at).toLocaleDateString("pt-BR")}
-                      </span>
-                      {user.last_sign_in_at && (
-                        <span>
-                          Último login: {new Date(user.last_sign_in_at).toLocaleDateString("pt-BR")}
-                        </span>
-                      )}
-                      {user.expires_at && user.plan_type === "monthly" && (
-                        <span>
-                          Expira: {new Date(user.expires_at).toLocaleDateString("pt-BR")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+        <TabelaUsuarios
+          contas={filtered}
+          emailAdmin={ADMIN_EMAIL}
+          ocupado={actionLoading}
+          onEditarPlano={(conta) => {
+            setEditPlanType(conta.plan_type || "plus");
+            setEditDialog({ open: true, user: conta as UserWithPurchase });
+          }}
+          onAdicionarPlano={(conta) => {
+            setAddPlanType("plus");
+            setAddPlanDialog({ open: true, user: conta as UserWithPurchase });
+          }}
+          onResetarSenha={(conta) => setConfirmar({ tipo: "senha", conta })}
+          onExcluir={(conta) => setConfirmar({ tipo: "excluir", conta })}
+        />
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* Add plan */}
-                    {!user.purchase_id && user.email !== ADMIN_EMAIL && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 text-xs"
-                        onClick={() => {
-                          setAddPlanType("plus");
-                          setAddPlanDialog({ open: true, user });
-                        }}
-                      >
-                        <Plus className="w-3 h-3" />
-                        Plano
-                      </Button>
-                    )}
-
-                    {/* Edit plan */}
-                    {user.purchase_id && user.email !== ADMIN_EMAIL && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 text-xs"
-                        onClick={() => {
-                          setEditPlanType(user.plan_type || "monthly");
-                          setEditDialog({ open: true, user });
-                        }}
-                      >
-                        <Edit className="w-3 h-3" />
-                        Editar
-                      </Button>
-                    )}
-
-                    {/* Reset password */}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs"
-                          disabled={actionLoading === user.user_id}
-                        >
-                          <KeyRound className="w-3 h-3" />
-                          Senha
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Resetar senha?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            A senha de <strong>{user.email}</strong> será resetada para uma senha temporária segura. Informe o usuário para alterar no próximo acesso.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleResetPassword(user.user_id)}>
-                            Confirmar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
-                    {/* Delete user */}
-                    {user.email !== ADMIN_EMAIL && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 text-xs text-destructive hover:text-destructive"
-                            disabled={actionLoading === user.user_id}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                            Excluir
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir usuário?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              O usuário <strong>{user.email}</strong> e todos os seus dados serão excluídos permanentemente.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              onClick={() => handleDeleteUser(user.user_id, user.email)}
-                            >
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {filtered.length === 0 && (
-            <Card className="border-dashed border-border">
-              <CardContent className="py-12 text-center text-muted-foreground">
-                Nenhum usuário encontrado
-              </CardContent>
-            </Card>
-          )}
-        </div>
         <GestaoTaxas />
           </TabsContent>
 
@@ -626,6 +416,53 @@ const AdminPanel = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Confirmação de senha e exclusão. Um diálogo só, porque as ações agora
+          saem de um menu e não de um gatilho por linha. */}
+      <AlertDialog
+        open={confirmar !== null}
+        onOpenChange={(aberto) => !aberto && setConfirmar(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmar?.tipo === "excluir" ? "Excluir conta?" : "Resetar a senha?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmar?.tipo === "excluir" ? (
+                <>
+                  A conta <strong>{confirmar?.conta.email}</strong> e todos os dados dela serão
+                  apagados. Não dá para desfazer.
+                </>
+              ) : (
+                <>
+                  A senha de <strong>{confirmar?.conta.email}</strong> vira uma temporária, que
+                  aparece aqui para você repassar. A senha atual para de funcionar na hora.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={
+                confirmar?.tipo === "excluir"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : undefined
+              }
+              onClick={() => {
+                if (!confirmar) return;
+                const { tipo, conta } = confirmar;
+                setConfirmar(null);
+                if (tipo === "excluir") void handleDeleteUser(conta.user_id, conta.email);
+                else void handleResetPassword(conta.user_id);
+              }}
+            >
+              {confirmar?.tipo === "excluir" ? "Excluir" : "Resetar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Edit Plan Dialog */}
       <Dialog open={editDialog.open} onOpenChange={(o) => !o && setEditDialog({ open: false, user: null })}>
