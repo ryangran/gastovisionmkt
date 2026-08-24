@@ -8,12 +8,20 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   CATEGORIAS_FORNECEDOR,
-  FORNECEDORES,
+  FORNECEDORES_GERAIS,
   linkWhatsApp,
   pareceFixo,
   type CategoriaFornecedor,
   type Fornecedor,
 } from "@/lib/fornecedores/dados";
+import { FORNECEDORES_MODA } from "@/lib/fornecedores/moda";
+
+type Segmento = "geral" | "moda";
+
+const SEGMENTOS: { id: Segmento; label: string; lista: Fornecedor[] }[] = [
+  { id: "geral", label: "Gerais", lista: FORNECEDORES_GERAIS },
+  { id: "moda", label: "Moda", lista: FORNECEDORES_MODA },
+];
 
 /** Tira acento para a busca casar "eletronico" com "Eletrônicos". */
 const normalizar = (texto: string) =>
@@ -41,9 +49,11 @@ const CartaoFornecedor = ({ fornecedor }: { fornecedor: Fornecedor }) => {
           </Badge>
         </div>
 
-        <Badge variant="secondary" className="w-fit text-xs font-normal">
-          {fornecedor.categoria}
-        </Badge>
+        {fornecedor.categoria ? (
+          <Badge variant="secondary" className="w-fit text-xs font-normal">
+            {fornecedor.categoria}
+          </Badge>
+        ) : null}
 
         <div className="space-y-1.5 text-sm text-muted-foreground">
           {fornecedor.telefone ? (
@@ -106,24 +116,36 @@ const CartaoFornecedor = ({ fornecedor }: { fornecedor: Fornecedor }) => {
 };
 
 const Fornecedores = () => {
+  const [segmento, setSegmento] = useState<Segmento>("geral");
   const [busca, setBusca] = useState("");
   const [categoria, setCategoria] = useState<CategoriaFornecedor | null>(null);
+
+  const lista = segmento === "moda" ? FORNECEDORES_MODA : FORNECEDORES_GERAIS;
 
   // Só as categorias que têm alguém, e já com a contagem do filtro.
   const contagem = useMemo(() => {
     const mapa = new Map<string, number>();
-    for (const f of FORNECEDORES) mapa.set(f.categoria, (mapa.get(f.categoria) ?? 0) + 1);
+    for (const f of lista) {
+      if (f.categoria) mapa.set(f.categoria, (mapa.get(f.categoria) ?? 0) + 1);
+    }
     return mapa;
-  }, []);
+  }, [lista]);
 
   const filtrados = useMemo(() => {
     const termo = normalizar(busca.trim());
-    return FORNECEDORES.filter((f) => {
+    return lista.filter((f) => {
       if (categoria && f.categoria !== categoria) return false;
       if (!termo) return true;
-      return normalizar(`${f.nome} ${f.especialidades} ${f.categoria} ${f.codigo}`).includes(termo);
+      const campos = `${f.nome} ${f.especialidades} ${f.categoria ?? ""} ${f.contato} ${f.codigo}`;
+      return normalizar(campos).includes(termo);
     });
-  }, [busca, categoria]);
+  }, [busca, categoria, lista]);
+
+  // Trocar de segmento tem que limpar a categoria: as de gerais não existem em moda.
+  const trocarSegmento = (novo: Segmento) => {
+    setSegmento(novo);
+    setCategoria(null);
+  };
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
@@ -133,10 +155,31 @@ const Fornecedores = () => {
           <h1 className="font-display text-2xl font-bold text-foreground">Fornecedores</h1>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          {FORNECEDORES.length} fornecedores em {contagem.size} categorias. O botão abre a conversa
-          direto no WhatsApp.
+          {segmento === "moda"
+            ? `${FORNECEDORES_MODA.length} fornecedores de moda no Brás.`
+            : `${FORNECEDORES_GERAIS.length} fornecedores em ${contagem.size} categorias.`}{" "}
+          O botão abre a conversa direto no WhatsApp.
         </p>
       </header>
+
+      {/* Segmento: as duas listas vêm de origens diferentes e não se misturam */}
+      <div className="mb-4 inline-flex rounded-lg border border-border p-1">
+        {SEGMENTOS.map((seg) => (
+          <button
+            key={seg.id}
+            type="button"
+            onClick={() => trocarSegmento(seg.id)}
+            className={cn(
+              "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+              segmento === seg.id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {seg.label} ({seg.lista.length})
+          </button>
+        ))}
+      </div>
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -158,8 +201,8 @@ const Fornecedores = () => {
         ) : null}
       </div>
 
-      {/* Filtro por categoria */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      {/* Filtro por categoria. A lista de moda não tem categoria na origem. */}
+      <div className={cn("mb-6 flex-wrap gap-2", segmento === "geral" ? "flex" : "hidden")}>
         <button
           type="button"
           onClick={() => setCategoria(null)}
@@ -170,7 +213,7 @@ const Fornecedores = () => {
               : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
           )}
         >
-          Todas ({FORNECEDORES.length})
+          Todas ({lista.length})
         </button>
 
         {CATEGORIAS_FORNECEDOR.map((cat) => {

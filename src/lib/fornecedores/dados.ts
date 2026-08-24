@@ -56,7 +56,8 @@ export interface Fornecedor {
   /** Código da lista original. Não é único: alguns se repetem entre categorias. */
   codigo: string;
   nome: string;
-  categoria: CategoriaFornecedor;
+  /** Só os gerais têm categoria. A lista de moda vem sem. */
+  categoria?: CategoriaFornecedor;
   /** Vazio quando o número da lista original estava ilegível. */
   telefone: string;
   /** Endereço, segundo telefone ou instrução de contato. */
@@ -80,8 +81,8 @@ export const pareceFixo = (telefone: string): boolean => {
   return digitos.length === 10 && /^[2-5]/.test(digitos.slice(2));
 };
 
-/** Ordenado por nome. */
-export const FORNECEDORES: Fornecedor[] = [
+/** Fornecedores gerais, ordenados por nome. */
+export const FORNECEDORES_GERAIS: Fornecedor[] = [
   { codigo: "NJV111", nome: "123 Útil (Cris)", categoria: "Utilidades Domésticas", telefone: "(11) 99749-6533", contato: "Av. Sen. Queirós, 667", especialidades: "Grande importadora de produtos" },
   { codigo: "NJV034", nome: "1Kase", categoria: "Capinha", telefone: "(11) 99474-9990", contato: "Rua Carlos Pinto Alves, 29", especialidades: "Capas de alta qualidade" },
   { codigo: "NIJV088", nome: "3Ud Plastic", categoria: "Utilidades", telefone: "(19) 3852-1313", contato: "(19) 98947-5966", especialidades: "Plásticos em Geral" },
@@ -479,8 +480,3 @@ export const FORNECEDORES: Fornecedor[] = [
   { codigo: "NIJV127", nome: "Zuca Toys", categoria: "Brinquedos", telefone: "(11) 95254-6594", contato: "(11) 96121-0465", especialidades: "Brinquedos em Geral" },
 ];
 
-export const contarPorCategoria = (): Record<string, number> => {
-  const mapa: Record<string, number> = {};
-  for (const f of FORNECEDORES) mapa[f.categoria] = (mapa[f.categoria] ?? 0) + 1;
-  return mapa;
-};
