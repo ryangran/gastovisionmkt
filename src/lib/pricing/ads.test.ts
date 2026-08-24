@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { roasEquilibrio, acosEquilibrio, recomendarRoas, avaliarRoasAtual } from "./ads";
+import {
+  roasEquilibrio,
+  acosEquilibrio,
+  recomendarRoas,
+  avaliarRoasAtual,
+  margemDePrecoECusto,
+} from "./ads";
 
 describe("roasEquilibrio", () => {
   it("margem de 20% exige ROAS 5 para empatar", () => {
@@ -81,5 +87,49 @@ describe("avaliarRoasAtual", () => {
   it("devolve null para entradas sem sentido", () => {
     expect(avaliarRoasAtual(20, 0)).toBeNull();
     expect(avaliarRoasAtual(-1, 5)).toBeNull();
+  });
+});
+
+describe("margemDePrecoECusto", () => {
+  it("tira a margem do preço e do custo", () => {
+    // 34,43 vendendo, 15 de custo: sobram 19,43, que são 56,43% do preço.
+    expect(margemDePrecoECusto(34.43, 15)).toBe(56.43);
+    expect(margemDePrecoECusto(100, 60)).toBe(40);
+  });
+
+  it("desconta os outros custos por venda", () => {
+    // Sem comissão, frete e imposto a margem sai otimista, e margem otimista
+    // vira ROAS de equilíbrio baixo demais.
+    expect(margemDePrecoECusto(34.43, 15, 8)).toBe(33.2);
+    expect(margemDePrecoECusto(100, 40, 20)).toBe(40);
+  });
+
+  it("aceita custo zero, que é o caso de brinde e amostra", () => {
+    expect(margemDePrecoECusto(50, 0)).toBe(100);
+  });
+
+  it("devolve margem negativa quando o custo passa do preço", () => {
+    // Negativo é informação: quem cai aqui não deveria anunciar. Quem consome
+    // trata margem <= 0 como sem ROAS possível.
+    expect(margemDePrecoECusto(100, 130)).toBe(-30);
+    expect(recomendarRoas(margemDePrecoECusto(100, 130) as number, "giro")).toBeNull();
+  });
+
+  it("devolve null para entradas sem sentido", () => {
+    expect(margemDePrecoECusto(0, 10)).toBeNull();
+    expect(margemDePrecoECusto(-5, 10)).toBeNull();
+    expect(margemDePrecoECusto(100, -1)).toBeNull();
+    expect(margemDePrecoECusto(Number.NaN, 10)).toBeNull();
+  });
+
+  it("ignora outros custos negativos em vez de somar lucro do nada", () => {
+    expect(margemDePrecoECusto(100, 60, -20)).toBe(40);
+  });
+
+  it("fecha o ciclo com o ROAS de equilíbrio", () => {
+    // 100 de preço e 80 de custo dão 20% de margem, que é ROAS 5.
+    const margem = margemDePrecoECusto(100, 80) as number;
+    expect(margem).toBe(20);
+    expect(roasEquilibrio(margem)).toBe(5);
   });
 });

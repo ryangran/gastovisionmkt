@@ -15,7 +15,13 @@ import {
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useCarteira } from "@/hooks/useCarteira";
-import { recomendarRoas, avaliarRoasAtual, fmtNumero, type Objetivo } from "@/lib/pricing/ads";
+import {
+  recomendarRoas,
+  avaliarRoasAtual,
+  fmtNumero,
+  margemDePrecoECusto,
+  type Objetivo,
+} from "@/lib/pricing/ads";
 
 function parseNum(val: string): number {
   return parseFloat(val.replace(",", ".")) || 0;
@@ -69,16 +75,26 @@ const CalculadoraAds = () => {
 
   const [selecionado, setSelecionado] = usePersistedState<string>("ads_produto", MANUAL);
   const [precoManual, setPrecoManual] = usePersistedState("ads_preco", "");
-  const [margemManual, setMargemManual] = usePersistedState("ads_margem", "");
+  const [custoManual, setCustoManual] = usePersistedState("ads_custo", "");
+  const [outrosManual, setOutrosManual] = usePersistedState("ads_outros", "");
   const [objetivo, setObjetivo] = usePersistedState<Objetivo>("ads_objetivo", "rentabilidade");
   const [roasAtual, setRoasAtual] = usePersistedState("ads_roas", "");
 
   const produto = produtos.find((p) => p.id === selecionado) ?? null;
 
+  const precoVenda = produto ? produto.sale_price : parseNum(precoManual);
+
+  // Produto salvo já traz a margem líquida, calculada com as taxas reais do
+  // marketplace. No manual a margem sai de preço menos custo, que é o número
+  // que o seller sabe de cabeça.
+  const margemManualCalculada = margemDePrecoECusto(
+    parseNum(precoManual),
+    parseNum(custoManual),
+    parseNum(outrosManual),
+  );
   const margemPercent = produto
     ? produto.profit_margin_percent
-    : parseNum(margemManual);
-  const precoVenda = produto ? produto.sale_price : parseNum(precoManual);
+    : (margemManualCalculada ?? 0);
 
   const recomendacao = useMemo(
     () => recomendarRoas(margemPercent, objetivo),
@@ -160,17 +176,46 @@ const CalculadoraAds = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="ads-preco">Preço de venda (R$)</Label>
-                  <Input id="ads-preco" inputMode="decimal" value={precoManual}
-                    onChange={(e) => setPrecoManual(e.target.value)} placeholder="0,00" />
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ads-preco">Preço de venda (R$)</Label>
+                    <Input id="ads-preco" inputMode="decimal" value={precoManual}
+                      onChange={(e) => setPrecoManual(e.target.value)} placeholder="0,00" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ads-custo">Custo do produto (R$)</Label>
+                    <Input id="ads-custo" inputMode="decimal" value={custoManual}
+                      onChange={(e) => setCustoManual(e.target.value)} placeholder="0,00" />
+                  </div>
                 </div>
+
                 <div className="space-y-1.5">
-                  <Label htmlFor="ads-margem">Margem (%)</Label>
-                  <Input id="ads-margem" inputMode="decimal" value={margemManual}
-                    onChange={(e) => setMargemManual(e.target.value)} placeholder="0" />
+                  <Label htmlFor="ads-outros">Outros custos por venda (R$)</Label>
+                  <Input id="ads-outros" inputMode="decimal" value={outrosManual}
+                    onChange={(e) => setOutrosManual(e.target.value)} placeholder="0,00" />
+                  <p className="text-xs text-muted-foreground">
+                    Comissão do marketplace, frete, imposto e embalagem. Deixar em branco faz a
+                    margem sair otimista e o ROAS de equilíbrio sair baixo demais.
+                  </p>
                 </div>
+
+                {/* Mostra a margem calculada: é ela que manda no resultado, e sem
+                    ver o número a pessoa não tem como perceber que digitou errado. */}
+                {margemManualCalculada !== null && (
+                  <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
+                    <span className="text-sm text-muted-foreground">Margem que sobra</span>
+                    <span
+                      className={
+                        margemManualCalculada > 0
+                          ? "font-mono text-sm font-semibold text-foreground"
+                          : "font-mono text-sm font-semibold text-destructive"
+                      }
+                    >
+                      {fmtNumero(margemManualCalculada)}%
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -220,7 +265,7 @@ const CalculadoraAds = () => {
                   <Megaphone className="h-8 w-8 text-primary" />
                 </div>
                 <p className="max-w-sm text-sm text-muted-foreground">
-                  Escolha um produto salvo ou informe a margem para descobrir o ROAS mínimo
+                  Escolha um produto salvo ou informe preço e custo para descobrir o ROAS mínimo
                   que o anúncio precisa entregar.
                 </p>
               </CardContent>
