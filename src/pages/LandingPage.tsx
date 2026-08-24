@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarketplaceLogo, type MarketplaceKey } from "@/components/MarketplaceLogo";
 import { DOCUMENTOS_LEGAIS, ROTA_LEGAL } from "@/lib/legal/documentos";
+import { PLANOS } from "@/lib/acesso/planos";
+import { CartaoPlano } from "@/components/acesso/CartaoPlano";
+import { TabelaComparativa } from "@/components/acesso/TabelaComparativa";
 import ResponsiveHeroBanner from "@/components/ui/responsive-hero-banner";
 import { VideoFeature } from "@/components/landing/VideoFeature";
 import logo from "@/assets/logo.png";
@@ -53,17 +56,6 @@ const DEPOIMENTOS = [
   },
 ];
 
-const INCLUSO = [
-  "Seis calculadoras, uma por marketplace",
-  "Comparador entre as seis",
-  "Precificação reversa por margem",
-  "Calculadora de anúncios com ROAS de equilíbrio",
-  "Painel de estoque e margem da carteira",
-  "Cadastro de embalagem e etiqueta reutilizável",
-  "RPA de afiliados da Shopee em massa",
-  "Perfil com regime tributário",
-  "Atualizações vitalícias, incluindo as taxas",
-];
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -335,86 +327,29 @@ const LandingPage = () => {
             </h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
               A conta é grátis e já vem com a calculadora liberada, o bastante para conferir
-              alguns produtos por dia. Os dois planos abrem o resto e dão acesso a tudo. Muda só
-              a forma de pagar.
+              alguns produtos por dia. Os três planos abrem o resto, cada um até onde você
+              precisa.
             </p>
           </div>
 
-          <div className="mx-auto grid max-w-3xl items-start gap-5 md:grid-cols-2">
-            {/* Mensal */}
-            <div className="rounded-2xl border border-border bg-card p-7">
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Mensal
-              </p>
-              <div className="mt-4 flex items-end gap-1">
-                <span className="font-display text-4xl font-bold leading-none text-foreground">
-                  R$19,90
-                </span>
-                <span className="pb-1 text-sm text-muted-foreground">/mês</span>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">Cancele quando quiser.</p>
+          {/* Cartões e tabela saem de PLANOS e da matriz de acesso. Escrever os
+              planos à mão aqui foi o que deixou a landing anunciando preço
+              antigo depois que os planos mudaram. */}
+          <div className="mx-auto grid max-w-6xl items-start gap-5 md:grid-cols-3">
+            {PLANOS.map((plano) => (
+              <CartaoPlano key={plano.id} plano={plano} />
+            ))}
+          </div>
 
-              <ul className="mt-6 space-y-2.5">
-                {INCLUSO.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="mt-7 w-full py-6 text-base"
-                onClick={() => navigate("/auth")}
-              >
-                Criar conta e assinar mensal
-              </Button>
-            </div>
-
-            {/* Vitalício */}
-            <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-card p-7">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
-              />
-              <div className="relative">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
-                    Vitalício
-                  </p>
-                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-medium text-primary-foreground">
-                    Mais escolhido
-                  </span>
-                </div>
-
-                <div className="mt-4 flex items-end gap-3">
-                  <span className="text-sm text-muted-foreground line-through">R$197,00</span>
-                  <span className="font-display text-4xl font-bold leading-none text-foreground">
-                    R$97
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-primary">Pagamento único. Sem mensalidade.</p>
-
-                <ul className="mt-6 space-y-2.5">
-                  {INCLUSO.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  size="lg"
-                  className="mt-7 w-full gap-2 py-6 text-base"
-                  onClick={() => navigate("/auth")}
-                >
-                  Criar conta e pegar o vitalício
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </div>
+          <div className="mx-auto mt-14 max-w-4xl">
+            <h3 className="text-center font-display text-xl font-semibold text-foreground">
+              Comparativo de planos
+            </h3>
+            <p className="mt-1 text-center text-sm text-muted-foreground">
+              Cada linha é uma área da plataforma. O que está marcado, você abre.
+            </p>
+            <div className="mt-6">
+              <TabelaComparativa />
             </div>
           </div>
 
@@ -424,7 +359,7 @@ const LandingPage = () => {
               <span className="text-foreground">Não precisa decidir agora.</span> Crie a conta
               com email e senha, use a calculadora grátis e veja o número saindo antes de gastar
               um real. Se depois você assinar, tem <span className="text-foreground">garantia de
-              7 dias nos dois planos</span>: se não encontrar dinheiro que estava escapando,
+              7 dias em qualquer plano</span>: se não encontrar dinheiro que estava escapando,
               devolvemos, sem burocracia.
             </p>
           </div>

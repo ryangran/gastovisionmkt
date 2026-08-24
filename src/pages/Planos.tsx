@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Check, Infinity as InfinityIcon, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { CartaoPlano } from "@/components/acesso/CartaoPlano";
 import { useAcesso } from "@/components/layout/AcessoProvider";
-import { PLANOS } from "@/lib/acesso/planos";
+import { PLANOS, planoPorId } from "@/lib/acesso/planos";
+import { nivelDoPlanType } from "@/lib/acesso/planoAdmin";
 import { TabelaComparativa } from "@/components/acesso/TabelaComparativa";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -90,8 +91,15 @@ const PlanoAtivo = () => {
     );
   }
 
-  const vitalicio = assinatura?.tipo === "lifetime";
-  const nome = !assinatura ? "Acesso de administrador" : vitalicio ? "Vitalício" : "Mensal";
+  // O nome sai de nivelDoPlanType, não de uma comparação com "lifetime": quem
+  // assinou o Essencial via "Mensal" aqui, que não é mais um plano que existe.
+  const nivel = nivelDoPlanType(assinatura?.tipo ?? null);
+  const vitalicio = nivel === "deluxe";
+  const nome = !assinatura
+    ? "Acesso de administrador"
+    : nivel
+      ? planoPorId(nivel).nome
+      : "Plano ativo";
   const dias = assinatura?.expiraEm ? diasAte(assinatura.expiraEm) : null;
   const acabando = dias !== null && dias <= 7;
 
