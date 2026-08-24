@@ -897,7 +897,10 @@ export type Database = {
         Returns: boolean
       }
       is_authenticated_user: { Args: never; Returns: boolean }
+      nivel_do_plan_type: { Args: { _plan_type: string }; Returns: string }
       orcamento_calculadora: { Args: { _plataforma: string }; Returns: number }
+      peso_do_plano: { Args: { _plano: string }; Returns: number }
+      plano_do_usuario: { Args: { _user_id: string }; Returns: string }
       status_acesso: { Args: { _plataforma?: string }; Returns: Json }
       tem_plano_ativo: { Args: { _user_id: string }; Returns: boolean }
     }
