@@ -449,6 +449,15 @@ const Auth = () => {
                   Esqueci minha senha
                 </button>
               )}
+              {(modo === "criar" || modo === "nova_senha") && (
+                // O servidor recusa senha que já apareceu em vazamento, por
+                // mais longa que seja. Avisar antes evita a pessoa descobrir
+                // isso só depois de tentar e receber um erro.
+                <p className="text-xs text-muted-foreground">
+                  Mínimo de 6 caracteres. Senhas comuns, como 123456 ou
+                  senha123, são recusadas.
+                </p>
+              )}
             </div>
             )}
 

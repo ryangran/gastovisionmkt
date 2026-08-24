@@ -9,10 +9,48 @@ const SINAIS_EXISTENTE = [
   { status: 422 },
   { message: "User already registered" },
   // Caso real, capturado do servidor:
-  { code: "422", message: "User already registered" },
+  { status: 422, code: "user_already_exists", message: "User already registered" },
+];
+
+/**
+ * Respostas reais do servidor para senha fraca, capturadas em teste. O projeto
+ * tem a proteção contra senha vazada ligada, então senha comum é recusada por
+ * mais longa que seja.
+ */
+const SINAIS_SENHA_FRACA = [
+  {
+    status: 422,
+    code: "weak_password",
+    message: "Password is known to be weak and easy to guess, please choose a different one.",
+  },
+  {
+    status: 422,
+    code: "weak_password",
+    message: "Password should be at least 6 characters. Password is known to be weak and easy to guess.",
+  },
 ];
 
 describe("mensagemErroCadastro", () => {
+  it("diz que o problema é a senha quando o servidor recusa a senha", () => {
+    // Era o bug que travou um cliente: 422 de senha fraca caía na regra de
+    // email existente, e a tela mandava a pessoa conferir um email que estava
+    // certo. Senha longa e comum é recusada igual, então a mensagem não pode
+    // falar só de tamanho.
+    for (const sinal of SINAIS_SENHA_FRACA) {
+      const msg = mensagemErroCadastro(sinal);
+      expect(msg).toMatch(/senha/i);
+      expect(msg).toMatch(/comum|vazamento/i);
+      expect(msg).not.toContain("email");
+      expect(ehProvavelContaExistente(sinal)).toBe(false);
+    }
+  });
+
+  it("senha fraca vence a regra de 422, que é mais genérica", () => {
+    expect(mensagemErroCadastro({ status: 422, code: "weak_password" })).not.toBe(
+      mensagemErroCadastro({ code: "user_already_exists" }),
+    );
+  });
+
   it("responde igual para todo sinal de conta existente, para não virar verificador de emails", () => {
     // O texto pode mudar; o que não pode é variar entre os sinais, senão dá
     // para descobrir quais emails têm conta comparando as respostas.
@@ -28,12 +66,12 @@ describe("mensagemErroCadastro", () => {
     expect(msg).not.toMatch(/esse email (já|ja) (está|esta|tem)/i);
   });
 
-  it("não deixa outra regra vazar o email existente", () => {
-    // Status 422 com texto de senha fraca segue a mesma resposta: a existência
-    // do email pesa mais que a dica sobre a senha.
-    expect(
-      mensagemErroCadastro({ status: 422, message: "Password should be at least 6 characters" }),
-    ).toBe(mensagemErroCadastro({ code: "user_already_exists" }));
+  it("422 sem código reconhecível continua caindo no genérico de existência", () => {
+    // Padrão seguro: sem saber o motivo, não se revela se o email existe.
+    expect(mensagemErroCadastro({ status: 422 })).toBe(
+      mensagemErroCadastro({ code: "user_already_exists" }),
+    );
+    expect(ehProvavelContaExistente({ status: 422 })).toBe(true);
   });
 
   it("a mensagem de conta existente é diferente da genérica de erro desconhecido", () => {
@@ -56,8 +94,12 @@ describe("mensagemErroCadastro", () => {
     expect(mensagemErroCadastro({ code: "email_provider_disabled" })).toContain("provedor Email");
   });
 
-  it("explica senha fraca", () => {
-    expect(mensagemErroCadastro({ code: "weak_password" })).toContain("fraca");
+  it("explica que o problema é a senha", () => {
+    // Não prende a palavra 'fraca': o texto precisa poder mudar sem quebrar,
+    // desde que continue apontando a senha como causa.
+    const msg = mensagemErroCadastro({ code: "weak_password" });
+    expect(msg).toMatch(/senha/i);
+    expect(msg).toMatch(/6 caracteres/);
   });
 
   it("explica email inválido", () => {
