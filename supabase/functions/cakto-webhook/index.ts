@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { planoDaCompra, validadeEmIso } from "./planoDaCompra.ts";
 
 /**
  * Senha aleatória de verdade, tirada do gerador criptográfico do runtime.
@@ -19,43 +20,58 @@ function senhaAleatoria(tamanho = 20): string {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-webhook-secret",
 };
 
-const MONTHLY_CHECKOUT_IDENTIFIERS = ["vgi2b7q", "n9b89by", "32i2hyh"];
-const LIFETIME_CHECKOUT_IDENTIFIERS = ["6m7kaiz"];
-
-function identifyPlanType(data: Record<string, unknown>): "monthly" | "lifetime" {
-  const offer = (data?.offer ?? {}) as Record<string, unknown>;
-  const offerId = String(offer?.id ?? "");
-  const offerName = String(offer?.name ?? "").toLowerCase();
-  const checkoutUrl = String(data?.checkoutUrl ?? "");
-
-  const allText = `${checkoutUrl} ${offerName} ${offerId}`.toLowerCase();
-
-  if (LIFETIME_CHECKOUT_IDENTIFIERS.some((id) => allText.includes(id))) {
-    return "lifetime";
+/**
+ * Confere o segredo combinado com a Cakto.
+ *
+ * Sem isso, qualquer pessoa que descubra a URL desta função consegue mandar um
+ * payload forjado e se dar um Deluxe vitalício. A função cria usuário e grava
+ * compra sem nenhuma autenticação.
+ *
+ * É opcional de propósito: enquanto CAKTO_WEBHOOK_SECRET não estiver
+ * configurado, a função segue aceitando tudo e apenas avisa no log. Exigir o
+ * segredo de imediato faria toda compra real ser recusada até alguém lembrar
+ * de preencher a variável — o remédio seria pior que a doença.
+ *
+ * Para ativar: defina CAKTO_WEBHOOK_SECRET nos secrets da Edge Function e
+ * acrescente ?secret=VALOR na URL do webhook dentro do painel da Cakto, ou
+ * mande o mesmo valor no cabeçalho x-webhook-secret.
+ */
+function segredoConfere(req: Request): boolean {
+  const esperado = Deno.env.get("CAKTO_WEBHOOK_SECRET");
+  if (!esperado) {
+    console.warn(
+      "CAKTO_WEBHOOK_SECRET não configurado: o webhook está aberto a qualquer origem.",
+    );
+    return true;
   }
-  if (
-    offerName.includes("vitalício") ||
-    offerName.includes("vitalicio") ||
-    offerName.includes("lifetime")
-  ) {
-    return "lifetime";
-  }
 
-  if (MONTHLY_CHECKOUT_IDENTIFIERS.some((id) => allText.includes(id))) {
-    return "monthly";
-  }
+  const url = new URL(req.url);
+  const recebido = req.headers.get("x-webhook-secret") ?? url.searchParams.get("secret") ?? "";
 
-  return "monthly";
+  // Comparação de tempo constante, para não vazar o segredo pelo tempo de
+  // resposta a quem for tentando caractere por caractere.
+  if (recebido.length !== esperado.length) return false;
+  let diferenca = 0;
+  for (let i = 0; i < esperado.length; i += 1) {
+    diferenca |= recebido.charCodeAt(i) ^ esperado.charCodeAt(i);
+  }
+  return diferenca === 0;
 }
-
-
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  if (!segredoConfere(req)) {
+    console.error("Webhook recusado: segredo inválido.");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
@@ -110,8 +126,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    const planType = identifyPlanType(data);
-    console.log(`Plan identified: ${planType} for ${email}`);
+    const { plano: planType, origem } = planoDaCompra(data);
+    console.log(`Plano identificado: ${planType} (por ${origem}) para ${email}`);
+    if (origem === "padrao") {
+      // Nenhum sinal bateu. Registra como Essencial e grita no log, porque a
+      // pessoa pagou por algo que não conseguimos identificar e alguém precisa
+      // olhar antes de ela reclamar.
+      console.error(
+        `ATENÇÃO: compra sem plano reconhecido para ${email}. Payload: ${JSON.stringify(data)}`,
+      );
+    }
 
     // Tentar criar usuário; se já existe, continuar normalmente
     let isNewUser = false;
@@ -156,10 +180,7 @@ Deno.serve(async (req) => {
     }
 
     // Registrar compra
-    const expiresAt =
-      planType === "monthly"
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        : null;
+    const expiresAt = validadeEmIso(planType);
 
     const { error: purchaseError } = await supabase.from("purchases").insert({
       user_email: email,

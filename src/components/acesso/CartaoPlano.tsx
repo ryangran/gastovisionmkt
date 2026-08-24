@@ -81,7 +81,9 @@ export const CartaoPlano = ({ plano, compacto }: CartaoPlanoProps) => {
       >
         <a href={linkAssinatura(plano)} target="_blank" rel="noreferrer">
           {noWhatsApp && <MessageCircle className="h-4 w-4" />}
-          Assinar {plano.nome.toLowerCase()}
+          {/* Sem o prefixo: "Assinar Vetrex Essencial" repete a marca que já
+              está no topo do cartão. */}
+          Assinar {plano.nome.replace("Vetrex ", "")}
           {!noWhatsApp && <ArrowRight className="h-4 w-4" />}
         </a>
       </Button>

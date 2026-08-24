@@ -87,7 +87,7 @@ export const PLANOS: Plano[] = [
       "Perfil com regime tributário",
       "Atualizações de taxa dos marketplaces",
     ],
-    checkoutUrl: undefined,
+    checkoutUrl: "https://pay.cakto.com.br/vgi2b7q",
   },
   {
     id: "plus",
@@ -104,7 +104,7 @@ export const PLANOS: Plano[] = [
       "RPA de afiliados da Shopee",
     ],
     destaque: true,
-    checkoutUrl: undefined,
+    checkoutUrl: "https://pay.cakto.com.br/39x7i89",
   },
   {
     id: "deluxe",
@@ -119,7 +119,7 @@ export const PLANOS: Plano[] = [
       "Atualizações vitalícias, incluindo as taxas",
     ],
     bonus: "1 diagnóstico em call, gratuito",
-    checkoutUrl: undefined,
+    checkoutUrl: "https://pay.cakto.com.br/6m7kaiz_785267",
   },
 ];
 

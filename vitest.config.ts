@@ -7,6 +7,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    // As Edge Functions entram aqui para a lógica pura delas ser testável.
+    // O arquivo testado não importa nada do Deno, só o index.ts é que importa.
+    include: ["src/**/*.test.ts", "supabase/functions/**/*.test.ts"],
   },
 });

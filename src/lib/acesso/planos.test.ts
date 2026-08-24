@@ -118,25 +118,42 @@ describe("matriz de acesso", () => {
   });
 });
 
-describe("linkAssinatura", () => {
-  it("cai no WhatsApp enquanto não houver checkout", () => {
-    const p = planoPorId("deluxe");
-    expect(assinaturaPeloWhatsApp(p)).toBe(true);
-    expect(linkAssinatura(p)).toMatch(/^https:\/\/wa\.me\/5511944804280\?text=/);
+describe("checkout", () => {
+  it("os três planos apontam para um checkout, não para o WhatsApp", () => {
+    for (const p of PLANOS) {
+      expect(assinaturaPeloWhatsApp(p)).toBe(false);
+      expect(linkAssinatura(p)).toMatch(/^https:\/\/pay\.cakto\.com\.br\//);
+    }
   });
 
-  it("usa o checkout assim que a URL for preenchida", () => {
-    const p: Plano = { ...planoPorId("plus"), checkoutUrl: "https://pay.exemplo.com/plus" };
+  it("cada plano tem um link diferente", () => {
+    // Colar o mesmo link em dois planos cobraria o preço errado sem nenhum
+    // erro aparecer na tela.
+    const urls = PLANOS.map((p) => p.checkoutUrl);
+    expect(new Set(urls).size).toBe(PLANOS.length);
+  });
+});
+
+describe("linkAssinatura", () => {
+  /** Plano sem checkout, para exercitar o caminho de fallback. */
+  const semCheckout: Plano = { ...planoPorId("plus"), checkoutUrl: undefined };
+
+  it("cai no WhatsApp quando o plano não tem checkout", () => {
+    expect(assinaturaPeloWhatsApp(semCheckout)).toBe(true);
+    expect(linkAssinatura(semCheckout)).toMatch(/^https:\/\/wa\.me\/5511944804280\?text=/);
+  });
+
+  it("prefere o checkout quando existe", () => {
+    const p: Plano = { ...semCheckout, checkoutUrl: "https://pay.exemplo.com/plus" };
     expect(assinaturaPeloWhatsApp(p)).toBe(false);
     expect(linkAssinatura(p)).toBe("https://pay.exemplo.com/plus");
   });
 
   it("escapa a mensagem, para acento e quebra de linha não corromperem a URL", () => {
-    const p = planoPorId("essencial");
-    const link = linkAssinatura(p);
+    const link = linkAssinatura(semCheckout);
     expect(link).not.toContain(" ");
     expect(link).not.toContain("\n");
-    expect(decodeURIComponent(link.split("?text=")[1])).toBe(mensagemAssinatura(p));
+    expect(decodeURIComponent(link.split("?text=")[1])).toBe(mensagemAssinatura(semCheckout));
   });
 });
 
