@@ -14,18 +14,6 @@ interface MercadoLivreFaixaPreco {
   max: number;
 }
 
-/**
- * Custo fixo cobrado pelo Mercado Livre por venda, em função do preço.
- * Abaixo de `limiar`, o custo é `percentualAbaixo` do preço (ex.: metade do preço).
- * Acima do limiar, usa a primeira faixa de `faixas` cujo `max` comporte o preço;
- * se nenhuma faixa comportar, o custo fixo é zero.
- */
-interface MercadoLivreCustoFixoConfig {
-  limiar: number;
-  percentualAbaixo: number;
-  faixas: { max: number; valor: number }[];
-}
-
 export interface MercadoLivreTaxas {
   /** Faixas de peso (kg), na ordem usada para indexar `freteTabela`. */
   pesos: MercadoLivrePesoFaixa[];
@@ -33,8 +21,6 @@ export interface MercadoLivreTaxas {
   faixasPreco: MercadoLivreFaixaPreco[];
   /** Tabela de frete por [pesoIdx][faixaPrecoIdx]. */
   freteTabela: number[][];
-  /** Custo fixo de venda do Mercado Livre, cobrado independente do frete. */
-  custoFixo: MercadoLivreCustoFixoConfig;
 }
 
 /**
@@ -131,17 +117,6 @@ export const MERCADOLIVRE_TAXAS: MercadoLivreTaxas = {
     [  8.65,  12.85,  14.25, 127.45, 147.05, 166.55, 185.55, 200.35],
     [  8.75,  12.85,  14.45, 167.05, 193.35, 218.45, 243.45, 262.85],
   ],
-  // Custo fixo ML por faixa de preço
-  custoFixo: {
-    limiar: 12.5,
-    percentualAbaixo: 0.5, // metade do preço
-    faixas: [
-      { max: 29, valor: 6.25 },
-      { max: 50, valor: 6.5 },
-      { max: 79, valor: 6.75 },
-      // acima de R$79 não tem custo fixo (fica de fora das faixas -> retorna 0)
-    ],
-  },
 };
 
 /** Encontra o índice da faixa de peso cujo limite comporta o peso informado. */
@@ -176,12 +151,6 @@ function freteMercadoLivre(preco: number, peso: number, taxas: MercadoLivreTaxas
   return tabelado;
 }
 
-/** Custo fixo de venda cobrado pelo Mercado Livre, em função do preço. */
-export function custoFixoMercadoLivre(preco: number, cfg: MercadoLivreCustoFixoConfig): number {
-  if (preco < cfg.limiar) return preco * cfg.percentualAbaixo;
-  const faixa = cfg.faixas.find((f) => preco <= f.max);
-  return faixa ? faixa.valor : 0;
-}
 
 export interface MercadoLivreInput extends BaseInput {
   tipoAnuncio: "classico" | "premium";
@@ -219,10 +188,14 @@ export function calcularMercadoLivre(
   const comissaoPerc = tipoAnuncio === "classico" ? (produto?.classicoPerc ?? 0) : (produto?.premiumPerc ?? 0);
 
   const valorComissaoPerc = preco * comissaoPerc;
-  const valorCustoFixo = custoFixoMercadoLivre(preco, taxas.custoFixo);
   // Comissão percentual + custo fixo de venda, somados no mesmo campo (como no modelo Shopee,
   // que combina percentual + fixo em `valorComissao`).
-  const valorComissao = valorComissaoPerc + valorCustoFixo;
+  // Antes somava aqui um "custo fixo" por faixa de preço. Ele saiu: conferido
+  // num anúncio real de R$19,90 com 150 g, o Mercado Livre desconta só a
+  // comissão (R$2,29) e os Envios (R$6,85), fechando em R$10,76 líquidos.
+  // Com o custo fixo somado, a calculadora mostrava R$4,51 — R$6,25 a menos —
+  // e fazia produto lucrativo parecer prejuízo.
+  const valorComissao = valorComissaoPerc;
   const valorImposto = preco * (impostoPercent / 100);
   const valorMarketing = preco * (marketingPercent / 100);
   const valorFrete = usarFrete && pesoKg > 0 ? freteMercadoLivre(preco, pesoKg, taxas) : 0;
@@ -233,7 +206,6 @@ export function calcularMercadoLivre(
   const detalhes: LinhaDetalhe[] = [
     { label: "Preço de venda", valor: preco, credito: true },
     { label: `Comissão (${(comissaoPerc * 100).toFixed(1)}%)`, valor: valorComissaoPerc },
-    { label: "Custo fixo ML", valor: valorCustoFixo },
     { label: "Frete", valor: valorFrete },
     { label: "Imposto", valor: valorImposto },
     { label: "Marketing", valor: valorMarketing },

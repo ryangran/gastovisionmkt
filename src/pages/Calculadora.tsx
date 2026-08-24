@@ -6,7 +6,7 @@ import { calcularAmazon, freteFBA, freteFBAOnsite, freteDBA, buscarCategoriaAmaz
 import { calcularShopee, faixaShopee, SHOPEE_TAXAS } from "@/lib/pricing/shopee";
 import { calcularTikTok, faixaTiktok, TIKTOK_FRETE_GRATIS_PERCENTUAL } from "@/lib/pricing/tiktok";
 import { calcularShein, calcularFreteShein, SHEIN_TAXAS } from "@/lib/pricing/shein";
-import { calcularMercadoLivre, custoFixoMercadoLivre, pesoIdx, faixaPrecoIdx,
+import { calcularMercadoLivre, pesoIdx, faixaPrecoIdx,
          MERCADOLIVRE_TAXAS } from "@/lib/pricing/mercadolivre";
 import { calcularMagalu, calcularPesoCubadoMagalu, faixaFreteMagalu, MAGALU_TAXAS,
          type MagaluTipoProduto, type MagaluDescontoFrete } from "@/lib/pricing/magalu";
@@ -1532,8 +1532,8 @@ const MercadoLivreCalculadora = () => {
   const isLucrativo = resultado.lucrativo;
   // A UI exibe comissão e custo fixo em linhas separadas; o módulo soma os dois
   // em valorComissao, então o custo fixo é recuperado aqui para a exibição.
-  const valorCustoFixo = preco > 0 ? custoFixoMercadoLivre(preco, MERCADOLIVRE_TAXAS.custoFixo) : 0;
-  const valorComissao  = resultado.valorComissao - valorCustoFixo;
+  // O custo fixo saiu da conta do ML: hoje o desconto é comissão + Envios.
+  const valorComissao = resultado.valorComissao;
 
   const handleAddCategoria = () => {
     const nome = novaCategoriaNome.trim();
@@ -1807,11 +1807,6 @@ const MercadoLivreCalculadora = () => {
               </div>
               <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2 space-y-1">
                 <p>{formatCurrency(preco)} × {(comissaoPerc * 100).toFixed(1)}% = <span className="font-semibold text-foreground">{formatCurrency(valorComissao)}</span></p>
-                {valorCustoFixo > 0 && (
-                  <p>+ Custo fixo = <span className="font-semibold text-foreground">{formatCurrency(valorCustoFixo)}</span>
-                    {preco < 12.50 && <span className="text-muted-foreground"> (metade do preço)</span>}
-                  </p>
-                )}
                 {valorFrete > 0 && (
                   <p>+ Frete ({MERCADOLIVRE_TAXAS.pesos[pesoIdx(pesoNum, MERCADOLIVRE_TAXAS.pesos)].label}) = <span className="font-semibold text-foreground">{formatCurrency(valorFrete)}</span></p>
                 )}
@@ -1837,12 +1832,6 @@ const MercadoLivreCalculadora = () => {
                 <span className="text-muted-foreground">− Comissão ML ({(comissaoPerc * 100).toFixed(1)}%)</span>
                 <span className="text-destructive font-medium">−{formatCurrency(valorComissao)}</span>
               </div>
-              {valorCustoFixo > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">− Custo Fixo{preco < 12.50 ? " (50% do preço)" : ""}</span>
-                  <span className="text-destructive font-medium">−{formatCurrency(valorCustoFixo)}</span>
-                </div>
-              )}
               {valorFrete > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">− Frete</span>

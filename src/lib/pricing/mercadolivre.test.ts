@@ -85,11 +85,10 @@ describe("calcularMercadoLivre", () => {
 
   it("marca como não lucrativo quando o custo supera a receita líquida", () => {
     const r = calcularMercadoLivre({ ...base, precoVenda: 50, custoProduto: 45 });
-    // Comissão: 50 * 0,115 = 5,75. Preço R$50 cai na faixa de custo fixo <=50 -> R$6,50.
-    // Comissão total: 5,75 + 6,50 = 12,25.
-    // Receita líquida: 50 - 12,25 = 37,75. Lucro: 37,75 - 45 = -7,25.
-    expect(r.valorComissao).toBeCloseTo(12.25, 2);
-    expect(r.lucro).toBeCloseTo(-7.25, 2);
+    // Comissão: 50 × 0,115 = 5,75. Não há mais custo fixo somado a ela.
+    // Receita líquida: 50 − 5,75 = 44,25. Lucro: 44,25 − 45 = −0,75.
+    expect(r.valorComissao).toBeCloseTo(5.75, 2);
+    expect(r.lucro).toBeCloseTo(-0.75, 2);
     expect(r.lucrativo).toBe(false);
   });
 
@@ -157,5 +156,51 @@ describe("faixas de peso acima de 20 kg", () => {
       .toBeCloseTo(111.65, 2);
     expect(calcularMercadoLivre({ ...base, precoVenda: 250, pesoKg: 200 }).valorFrete)
       .toBeCloseTo(262.85, 2);
+  });
+});
+
+describe("confere com um anúncio real do painel do Mercado Livre", () => {
+  /**
+   * Anúncio "Jogo Cadê? 54 Cartas", Clássico, 150 g, R$19,90.
+   * O painel do vendedor mostra: comissão R$2,29, Envios R$6,85, líquido
+   * R$10,76.
+   *
+   * É o caso que provou que o custo fixo acabou: com ele somado, a calculadora
+   * devolvia R$4,51 de líquido, R$6,25 abaixo do real, e transformava produto
+   * lucrativo em prejuízo na tela.
+   */
+  it("reproduz comissão, frete e líquido do painel", () => {
+    const r = calcularMercadoLivre({
+      precoVenda: 19.9,
+      custoProduto: 0,
+      impostoPercent: 0,
+      marketingPercent: 0,
+      tipoAnuncio: "classico",
+      produto: "Padrão",
+      categorias: [{ nome: "Padrão", classicoPerc: 0.115, premiumPerc: 0.16 }],
+      pesoKg: 0.15,
+      usarFrete: true,
+    });
+
+    expect(r.valorComissao).toBeCloseTo(2.29, 2);
+    expect(r.valorFrete).toBeCloseTo(6.85, 2);
+    expect(r.receitaLiquida).toBeCloseTo(10.76, 2);
+  });
+
+  it("não desconta nenhum custo fixo além de comissão e frete", () => {
+    // Trava a remoção: se alguém reintroduzir uma tarifa fixa, a soma para de
+    // fechar com o painel e este teste quebra.
+    const r = calcularMercadoLivre({
+      precoVenda: 19.9,
+      custoProduto: 0,
+      impostoPercent: 0,
+      marketingPercent: 0,
+      tipoAnuncio: "classico",
+      produto: "Padrão",
+      categorias: [{ nome: "Padrão", classicoPerc: 0.115, premiumPerc: 0.16 }],
+      pesoKg: 0.15,
+      usarFrete: true,
+    });
+    expect(r.receitaLiquida).toBeCloseTo(19.9 - r.valorComissao - r.valorFrete, 2);
   });
 });
