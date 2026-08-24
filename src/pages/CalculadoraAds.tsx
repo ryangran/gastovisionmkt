@@ -76,7 +76,6 @@ const CalculadoraAds = () => {
   const [selecionado, setSelecionado] = usePersistedState<string>("ads_produto", MANUAL);
   const [precoManual, setPrecoManual] = usePersistedState("ads_preco", "");
   const [custoManual, setCustoManual] = usePersistedState("ads_custo", "");
-  const [outrosManual, setOutrosManual] = usePersistedState("ads_outros", "");
   const [objetivo, setObjetivo] = usePersistedState<Objetivo>("ads_objetivo", "rentabilidade");
   const [roasAtual, setRoasAtual] = usePersistedState("ads_roas", "");
 
@@ -90,7 +89,6 @@ const CalculadoraAds = () => {
   const margemManualCalculada = margemDePrecoECusto(
     parseNum(precoManual),
     parseNum(custoManual),
-    parseNum(outrosManual),
   );
   const margemPercent = produto
     ? produto.profit_margin_percent
@@ -188,16 +186,6 @@ const CalculadoraAds = () => {
                     <Input id="ads-custo" inputMode="decimal" value={custoManual}
                       onChange={(e) => setCustoManual(e.target.value)} placeholder="0,00" />
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="ads-outros">Outros custos por venda (R$)</Label>
-                  <Input id="ads-outros" inputMode="decimal" value={outrosManual}
-                    onChange={(e) => setOutrosManual(e.target.value)} placeholder="0,00" />
-                  <p className="text-xs text-muted-foreground">
-                    Comissão do marketplace, frete, imposto e embalagem. Deixar em branco faz a
-                    margem sair otimista e o ROAS de equilíbrio sair baixo demais.
-                  </p>
                 </div>
 
                 {/* Mostra a margem calculada: é ela que manda no resultado, e sem
