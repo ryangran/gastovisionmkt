@@ -344,14 +344,21 @@ const AdminPanel = () => {
     );
   };
 
-  // Group users - deduplicate by user_id, keep the most relevant purchase
+  /** Quando a compra entrou. Linha antiga pode não ter purchased_at. */
+  const quando = (u: UserWithPurchase) =>
+    new Date(u.purchased_at ?? u.created_at ?? 0).getTime();
+
+  // Uma linha por usuário, ficando com a compra MAIS RECENTE — que é a que o
+  // banco considera vigente. Antes preferia a vitalícia, então o painel podia
+  // mostrar e editar uma compra diferente da que valia de verdade.
   const groupedUsers = users.reduce((acc, user) => {
     const existing = acc.find((u) => u.user_id === user.user_id);
     if (!existing) {
       acc.push(user);
-    } else if (user.purchase_id && (!existing.purchase_id || user.plan_type === "lifetime")) {
-      const idx = acc.indexOf(existing);
-      acc[idx] = user;
+      return acc;
+    }
+    if (user.purchase_id && (!existing.purchase_id || quando(user) > quando(existing))) {
+      acc[acc.indexOf(existing)] = user;
     }
     return acc;
   }, [] as UserWithPurchase[]);

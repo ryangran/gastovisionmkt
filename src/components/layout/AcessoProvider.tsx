@@ -122,7 +122,22 @@ export const AcessoProvider = ({ children }: { children: ReactNode }) => {
       // Fora do callback, que é o que o Supabase pede para não travar.
       setTimeout(() => void recarregar(), 0);
     });
-    return () => subscription.unsubscribe();
+
+    // O plano é consultado uma vez e fica em memória. Quem estiver com a aba
+    // aberta quando o admin mudar o plano continuaria vendo o antigo até
+    // recarregar a página — e "mudei e não refletiu" é indistinguível de bug.
+    // Reconsultar ao voltar o foco resolve sem transformar isso em polling.
+    const aoVoltar = () => {
+      if (document.visibilityState === "visible") void recarregar();
+    };
+    document.addEventListener("visibilitychange", aoVoltar);
+    window.addEventListener("focus", aoVoltar);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", aoVoltar);
+      window.removeEventListener("focus", aoVoltar);
+    };
   }, [recarregar]);
 
   const consumir = useCallback(async (plataforma: string) => {

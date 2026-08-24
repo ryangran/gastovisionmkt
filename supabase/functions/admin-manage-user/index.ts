@@ -99,6 +99,12 @@ Deno.serve(async (req) => {
         if (data.status) updateData.status = data.status;
         if (data.expires_at !== undefined) updateData.expires_at = data.expires_at;
 
+        // O plano vigente é o da compra mais recente. Carimbar aqui faz a
+        // edição manual passar à frente de qualquer compra antiga que a pessoa
+        // tenha na conta — sem isso, mexer no painel não surte efeito quando
+        // existe mais de uma linha.
+        updateData.purchased_at = new Date().toISOString();
+
         const { error: updateError } = await supabaseAdmin
           .from("purchases")
           .update(updateData)
