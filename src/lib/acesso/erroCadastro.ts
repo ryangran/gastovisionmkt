@@ -9,6 +9,17 @@
 
 const GENERICA = "Não consegui criar a conta. Confira o email e tente de novo.";
 
+/**
+ * Mensagem para o caso de conta já existente.
+ *
+ * Continua sem confirmar que o email está cadastrado — diz "se você já tem",
+ * não "você já tem" —, mas para de mandar a pessoa conferir um email que está
+ * certo. Quem compra pela Cakto cai aqui sempre: o webhook cria a conta na
+ * hora do pagamento, então a primeira coisa que ela tenta, criar conta, falha.
+ */
+const TALVEZ_EXISTENTE =
+  "Não consegui criar a conta com esse email. Se você já tem conta aqui — inclusive se comprou um plano, porque a conta é criada junto — entre com 'Esqueci minha senha'.";
+
 interface ErroSupabase {
   message?: string;
   code?: string;
@@ -27,9 +38,17 @@ function ehEmailExistente(e: ErroSupabase): boolean {
   );
 }
 
+/**
+ * Verdadeiro quando o erro sugere conta já existente, para a tela poder
+ * oferecer o atalho da recuperação de senha em vez de só mostrar o texto.
+ */
+export function ehProvavelContaExistente(erro: unknown): boolean {
+  return ehEmailExistente((erro ?? {}) as ErroSupabase);
+}
+
 export function mensagemErroCadastro(erro: unknown): string {
   const e = (erro ?? {}) as ErroSupabase;
-  if (ehEmailExistente(e)) return GENERICA;
+  if (ehEmailExistente(e)) return TALVEZ_EXISTENTE;
 
   const m = (e.message ?? "").toLowerCase();
   const c = e.code ?? "";

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { mensagemErroCadastro } from "@/lib/acesso/erroCadastro";
+import { ehProvavelContaExistente, mensagemErroCadastro } from "@/lib/acesso/erroCadastro";
 import { ROTA_LEGAL, versoesAceitas } from "@/lib/legal/documentos";
 import { formatarTelefone, telefoneValido } from "@/lib/telefone";
 import { ModalAceiteLegal } from "@/components/legal/ModalAceiteLegal";
@@ -172,7 +172,21 @@ const Auth = () => {
         // pessoa fica travada sem saber o motivo. Só "email já existe" segue
         // genérico, para o formulário não virar verificador de cadastro.
         console.error("Erro no cadastro:", error);
-        toast.error(mensagemErroCadastro(error), { duration: 10000 });
+        const jaExiste = ehProvavelContaExistente(error);
+        toast.error(mensagemErroCadastro(error), {
+          duration: 12000,
+          // Botão em vez de só texto: quem já tem conta precisa de um caminho,
+          // não de uma explicação. Era aqui que a pessoa desistia.
+          action: jaExiste
+            ? {
+                label: "Recuperar acesso",
+                onClick: () => {
+                  setAceiteAberto(false);
+                  setModo("recuperar");
+                },
+              }
+            : undefined,
+        });
         return;
       }
 
