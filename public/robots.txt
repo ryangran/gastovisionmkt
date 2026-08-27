@@ -19,3 +19,5 @@ Allow: /
 Disallow: /admin
 Disallow: /admin-panel
 Disallow: /api/
+
+Sitemap: https://vetrex.online/sitemap.xml
