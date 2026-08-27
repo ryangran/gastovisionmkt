@@ -96,7 +96,7 @@ const LandingPage = () => {
           backgroundImageUrl="/hero-bg.jpg"
           navLinks={[
             { label: "Como funciona", href: "#como", isActive: true },
-            { label: "Marketplaces", href: "#como" },
+            { label: "Taxas", href: "#taxas" },
             { label: "Depoimentos", href: "#depoimentos" },
             { label: "Preço", href: "#preco" },
             { label: "Mentoria", href: "/mentoria" },
