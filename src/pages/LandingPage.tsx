@@ -17,8 +17,6 @@ import { CartaoPlano } from "@/components/acesso/CartaoPlano";
 import { TabelaComparativa } from "@/components/acesso/TabelaComparativa";
 import ResponsiveHeroBanner from "@/components/ui/responsive-hero-banner";
 import { VideoFeature } from "@/components/landing/VideoFeature";
-import { TaxasMarketplaces } from "@/components/landing/TaxasMarketplaces";
-import { PerguntasFrequentes } from "@/components/landing/PerguntasFrequentes";
 import logo from "@/assets/logo.png";
 import logoLight from "@/assets/logo-light.png";
 import avatarAna from "@/assets/avatar-ana.jpg";
@@ -96,7 +94,7 @@ const LandingPage = () => {
           backgroundImageUrl="/hero-bg.jpg"
           navLinks={[
             { label: "Como funciona", href: "#como", isActive: true },
-            { label: "Taxas", href: "#taxas" },
+            
             { label: "Depoimentos", href: "#depoimentos" },
             { label: "Preço", href: "#preco" },
             { label: "Mentoria", href: "/mentoria" },
@@ -285,7 +283,8 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <TaxasMarketplaces />
+
+
 
         {/* DEPOIMENTOS */}
         <section id="depoimentos" className="container mx-auto px-4 py-16">
@@ -369,7 +368,8 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <PerguntasFrequentes />
+
+
 
         {/* P.S. */}
         <section className="border-t border-border">
